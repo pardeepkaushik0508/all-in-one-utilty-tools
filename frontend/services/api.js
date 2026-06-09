@@ -1,9 +1,11 @@
-// Browser: same-origin proxy via next.config.js rewrites (no CORS issues).
-// Server: talk directly to the Express API.
+// Browser: use the public Railway domain (NEXT_PUBLIC_BACKEND_URL) so the
+//   browser can reach the backend directly without relying on Next.js rewrites.
+// Server: use the private Railway internal domain (BACKEND_URL) for low-latency
+//   server-side calls that never leave the Railway private network.
 const BACKEND_URL =
   typeof window !== 'undefined'
-    ? ''
-    : process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:5000';
+    ? process.env.NEXT_PUBLIC_BACKEND_URL || 'https://aio-tools-backend-production.up.railway.app'
+    : process.env.BACKEND_URL || 'http://aio-tools-backend.railway.internal:8080';
 
 async function parseResponse(res) {
   let data;
