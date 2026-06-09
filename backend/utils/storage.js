@@ -1,3 +1,4 @@
+const fs = require('fs/promises');
 const path = require('path');
 const { processedDir } = require('./upload');
 const { removeFile } = require('./fileCleanup');
@@ -20,7 +21,17 @@ async function publishProcessedFile(filename) {
   const localFilename = path.basename(filename);
   const filePath = path.join(processedDir, localFilename);
 
+  // Verify the processed file actually exists before attempting anything.
+  try {
+    await fs.access(filePath);
+  } catch {
+    const msg = `Processed file not found on disk: ${localFilename}`;
+    console.error(`[storage] ${msg} (expected path: ${filePath})`);
+    throw new Error(msg);
+  }
+
   if (!isCloudinaryEnabled()) {
+    console.log(`[storage] Cloudinary not configured — serving "${localFilename}" from local storage`);
     return {
       downloadUrl: `/downloads/${localFilename}`,
       filename: localFilename,
@@ -29,16 +40,19 @@ async function publishProcessedFile(filename) {
   }
 
   const cloudinary = getCloudinary();
+  const resourceType = getResourceType(localFilename);
+  console.log(`[storage] Uploading "${localFilename}" to Cloudinary (resource_type: ${resourceType})`);
 
   try {
     const result = await cloudinary.uploader.upload(filePath, {
       folder: PROCESSED_FOLDER,
-      resource_type: getResourceType(localFilename),
+      resource_type: resourceType,
       use_filename: true,
       unique_filename: true,
       overwrite: false
     });
 
+    console.log(`[storage] Cloudinary upload succeeded: ${result.secure_url}`);
     await removeFile(filePath);
 
     return {
@@ -48,11 +62,21 @@ async function publishProcessedFile(filename) {
       storage: 'cloudinary'
     };
   } catch (error) {
-    console.error('Cloudinary upload failed:', error.message);
+    // Log the full error so it appears in Railway's log stream.
+    console.error(
+      `[storage] Cloudinary upload failed for "${localFilename}":`,
+      error.message,
+      error.http_code ? `(HTTP ${error.http_code})` : '',
+      error.error ? JSON.stringify(error.error) : ''
+    );
+
+    // Fall back to local delivery so the user still gets their file.
+    console.warn(`[storage] Falling back to local delivery for "${localFilename}"`);
     return {
       downloadUrl: `/downloads/${localFilename}`,
       filename: localFilename,
-      storage: 'local'
+      storage: 'local',
+      cloudinaryError: error.message
     };
   }
 }
