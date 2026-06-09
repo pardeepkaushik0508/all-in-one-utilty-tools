@@ -2,8 +2,8 @@
 // Server: talk directly to the Express API.
 const BACKEND_URL =
   typeof window !== 'undefined'
-    ? ''
-    : process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:5000';
+    ? 'https://aio-tools-backend-production.up.railway.app'
+    : process.env.BACKEND_URL || 'http://aio-tools-backend.railway.internal:8080';
 
 async function parseResponse(res) {
   let data;
