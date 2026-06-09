@@ -1,9 +1,14 @@
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import Layout from '../components/Layout';
 import SearchBar from '../components/SearchBar';
 import CategoryFilter from '../components/CategoryFilter';
 import ToolCard from '../components/ToolCard';
+import BlogCard from '../components/blog/BlogCard';
+import { getAllBlogPosts } from '../utils/blogPosts';
 import { tools, toolCategories } from '../utils/tools';
+
+const featuredPosts = getAllBlogPosts().slice(0, 3);
 
 const stats = [
   { label: 'Tools', value: '29' },
@@ -60,7 +65,7 @@ export default function HomePage() {
         </dl>
       </section>
 
-      <section className="card animate-fade-up mb-8" style={{ animationDelay: '120ms' }} aria-label="Search and filter tools">
+      <section id="tools" className="card animate-fade-up mb-8 scroll-mt-28" style={{ animationDelay: '120ms' }} aria-label="Search and filter tools">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="font-display text-base font-semibold text-heading">Browse tools</h2>
           <p className="text-xs text-muted">{filteredTools.length} of {tools.length}</p>
@@ -89,6 +94,30 @@ export default function HomePage() {
           ))}
         </section>
       )}
+
+      <section className="mt-16 animate-fade-up" aria-label="Latest blog articles">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="badge">Blog</span>
+            <h2 className="section-title mt-4 text-2xl sm:text-3xl">
+              Tips & <span className="gradient-text">guides</span>
+            </h2>
+            <p className="section-subtitle mt-2 max-w-xl text-sm sm:text-base">
+              Learn how to get the most from every tool — 20 articles and counting.
+            </p>
+          </div>
+          <Link href="/blog" className="btn-secondary shrink-0">
+            View all articles
+          </Link>
+        </div>
+        <div className="grid gap-5 lg:grid-cols-3">
+          {featuredPosts.map((post, index) => (
+            <div key={post.slug} className="animate-fade-up" style={{ animationDelay: `${index * 60}ms` }}>
+              <BlogCard post={post} />
+            </div>
+          ))}
+        </div>
+      </section>
     </Layout>
   );
 }

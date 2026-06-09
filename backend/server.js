@@ -13,6 +13,7 @@ const developerRoutes = require('./api/developerRoutes');
 const socialRoutes = require('./api/socialRoutes');
 const utilityRoutes = require('./api/utilityRoutes');
 const securityRoutes = require('./api/securityRoutes');
+const fileRoutes = require('./api/fileRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +54,7 @@ app.use('/api/developer', developerRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/utility', utilityRoutes);
 app.use('/api/security', securityRoutes);
+app.use('/api/files', fileRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

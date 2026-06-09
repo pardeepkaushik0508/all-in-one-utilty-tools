@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import LoadingSpinner from '../LoadingSpinner';
 
 export function ToolPanel({ children, className = '' }) {
@@ -8,16 +9,71 @@ export function ToolActions({ children }) {
   return <div className="tool-actions">{children}</div>;
 }
 
-export function DownloadLink({ url, label = 'Download Result' }) {
+function guessFilename(url, filename) {
+  if (filename) return filename;
+  try {
+    const params = new URL(url, window.location.origin).searchParams;
+    const fromQuery = params.get('filename');
+    if (fromQuery) return fromQuery;
+    const path = new URL(url, window.location.origin).pathname;
+    return decodeURIComponent(path.split('/').pop() || 'download');
+  } catch {
+    return 'download';
+  }
+}
+
+export function DownloadLink({ url, label = 'Download Result', filename }) {
+  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState('');
+
   if (!url) return null;
+
+  const handleDownload = async () => {
+    if (downloading) return;
+
+    const fetchUrl = url.startsWith('http') ? url : url.startsWith('/') ? url : `/${url}`;
+    const saveAs = guessFilename(fetchUrl, filename);
+
+    setDownloading(true);
+    setError('');
+
+    try {
+      const response = await fetch(fetchUrl);
+      if (!response.ok) throw new Error('Download failed');
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = saveAs;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      setError('Could not download the file. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
-    <a href={url} className="btn-success download-enter" target="_blank" rel="noreferrer">
-      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-        <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
-        <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
-      </svg>
-      {label}
-    </a>
+    <div className="inline-flex flex-col items-start gap-1">
+      <button
+        type="button"
+        onClick={handleDownload}
+        disabled={downloading}
+        className="btn-success download-enter"
+      >
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+          <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+          <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+        </svg>
+        {downloading ? 'Downloading...' : label}
+      </button>
+      {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
   );
 }
 

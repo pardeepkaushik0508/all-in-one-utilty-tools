@@ -31,7 +31,7 @@ export function VideoToMp3Tool() {
         >
           Convert to MP3
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} label="Download MP3" />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} label="Download MP3" />
       </ToolActions>
       <ToolLoading loading={loading} text="Extracting audio..." />
       <ToolError message={error} />
@@ -58,7 +58,7 @@ export function VideoCompressionTool() {
         >
           Compress Video
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Compressing video..." />
       <ToolError message={error} />
@@ -89,7 +89,7 @@ export function AudioCutterTool() {
         >
           Cut Audio
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Trimming audio..." />
       <ToolError message={error} />
@@ -123,7 +123,7 @@ export function VideoDownloaderTool() {
         >
           Download Video
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Downloading video..." />
       <ToolError message={error} />

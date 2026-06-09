@@ -6,6 +6,10 @@ const { getCloudinary, isCloudinaryEnabled } = require('./cloudinary');
 
 const PROCESSED_FOLDER = 'utility-tools/processed';
 
+function isProduction() {
+  return process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT_NAME);
+}
+
 function getResourceType(filename) {
   const ext = path.extname(filename).toLowerCase();
   if (['.mp4', '.mov', '.avi', '.webm', '.mkv', '.mp3', '.wav', '.m4a', '.aac', '.ogg'].includes(ext)) {
@@ -21,7 +25,6 @@ async function publishProcessedFile(filename) {
   const localFilename = path.basename(filename);
   const filePath = path.join(processedDir, localFilename);
 
-  // Verify the processed file actually exists before attempting anything.
   try {
     await fs.access(filePath);
   } catch {
@@ -31,9 +34,16 @@ async function publishProcessedFile(filename) {
   }
 
   if (!isCloudinaryEnabled()) {
-    console.log(`[storage] Cloudinary not configured — serving "${localFilename}" from local storage`);
+    if (isProduction()) {
+      throw new Error(
+        'Cloudinary is not configured on the server. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your backend environment (Railway variables).'
+      );
+    }
+
+    console.log(`[storage] Cloudinary not configured — serving "${localFilename}" from local /downloads/`);
     return {
       downloadUrl: `/downloads/${localFilename}`,
+      downloadFilename: localFilename,
       filename: localFilename,
       storage: 'local'
     };
@@ -52,17 +62,23 @@ async function publishProcessedFile(filename) {
       overwrite: false
     });
 
-    console.log(`[storage] Cloudinary upload succeeded: ${result.secure_url}`);
+    // Use secure_url as-is (e.g. .../image/upload/v1234567/folder/file.jpg).
+    // Do not add fl_attachment — it causes HTTP 400. Frontend handles direct download via blob fetch.
+    const downloadUrl = result.secure_url;
+
+    console.log(`[storage] Cloudinary upload succeeded: ${downloadUrl}`);
     await removeFile(filePath);
 
     return {
-      downloadUrl: result.secure_url,
+      cloudinaryUrl: downloadUrl,
+      downloadFilename: localFilename,
       filename: result.public_id,
       publicId: result.public_id,
+      resourceType: result.resource_type,
+      format: result.format,
       storage: 'cloudinary'
     };
   } catch (error) {
-    // Log the full error so it appears in Railway's log stream.
     console.error(
       `[storage] Cloudinary upload failed for "${localFilename}":`,
       error.message,
@@ -70,14 +86,7 @@ async function publishProcessedFile(filename) {
       error.error ? JSON.stringify(error.error) : ''
     );
 
-    // Fall back to local delivery so the user still gets their file.
-    console.warn(`[storage] Falling back to local delivery for "${localFilename}"`);
-    return {
-      downloadUrl: `/downloads/${localFilename}`,
-      filename: localFilename,
-      storage: 'local',
-      cloudinaryError: error.message
-    };
+    throw new Error(`Failed to upload result to Cloudinary: ${error.message}`);
   }
 }
 

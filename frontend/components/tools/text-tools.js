@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import FileDropZone from '../FileDropZone';
 import useToolRequest from '../../hooks/useToolRequest';
 import * as api from '../../services/api';
 import {
@@ -119,17 +120,35 @@ export function PlagiarismCheckerTool() {
 
 export function AiContentGeneratorTool() {
   const [prompt, setPrompt] = useState('');
+  const [image, setImage] = useState(null);
   const [status, setStatus] = useState('');
   const { loading, error, result, run } = useToolRequest();
 
   return (
     <ToolPanel>
-      <TextAreaField label="Prompt" value={prompt} onChange={setPrompt} placeholder="Write a blog intro about productivity tools..." />
+      <TextAreaField
+        label="Prompt"
+        value={prompt}
+        onChange={setPrompt}
+        placeholder="Write a product description, blog post, or caption..."
+      />
+      <div className="space-y-2">
+        <span className="label-text">Reference image (optional)</span>
+        <FileDropZone accept="image/*" onFiles={(files) => setImage(files[0] || null)} />
+        <p className="text-sm text-muted">
+          {image ? `Selected: ${image.name}` : 'Upload an image for Gemini to analyze alongside your prompt.'}
+        </p>
+        {image && (
+          <button type="button" onClick={() => setImage(null)} className="text-xs text-muted underline">
+            Remove image
+          </button>
+        )}
+      </div>
       <ToolActions>
         <PrimaryButton
           onClick={() => {
             if (!prompt.trim()) return run(() => Promise.reject(new Error('Prompt is required.')));
-            return run(() => api.generateAiContent(prompt));
+            return run(() => api.generateAiContent(prompt, image));
           }}
           disabled={loading}
         >

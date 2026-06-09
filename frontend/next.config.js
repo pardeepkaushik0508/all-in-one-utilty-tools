@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:5000';
+const backendUrl =
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'http://127.0.0.1:5000';
 
 const nextConfig = {
   reactStrictMode: true,
@@ -8,7 +11,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'https://aio-tools-backend-production.up.railway.app/api/:path*'
+          destination: `${backendUrl}/api/:path*`
         }
       ],
       afterFiles: [

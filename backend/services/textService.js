@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { generateGeminiContent } = require('./geminiService');
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -108,11 +109,19 @@ function plagiarismCheck(sourceText, compareText) {
   return { similarityPercent, matchedWords: matched, totalWords: compareTokens.length };
 }
 
-async function generateAiContent(prompt) {
+async function generateAiContent(prompt, imageFile) {
+  if (process.env.GEMINI_API_KEY) {
+    return generateGeminiContent(prompt, imageFile);
+  }
+
+  if (imageFile) {
+    throw new Error('Image-based generation requires GEMINI_API_KEY. Add it to backend/.env and restart the server.');
+  }
+
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return {
-      output: `Draft based on your prompt:\n\n${prompt}\n\nConfigure OPENAI_API_KEY for full AI generation.`,
+      output: `Draft based on your prompt:\n\n${prompt}\n\nConfigure GEMINI_API_KEY (recommended) or OPENAI_API_KEY for full AI generation.`,
       provider: 'local-fallback'
     };
   }

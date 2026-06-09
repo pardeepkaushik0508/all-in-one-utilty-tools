@@ -1,4 +1,5 @@
 const express = require('express');
+const upload = require('../utils/upload');
 const {
   checkGrammar,
   paraphraseText,
@@ -44,12 +45,12 @@ router.post('/plagiarism', (req, res) => {
   return res.json({ message: 'Plagiarism check completed.', ...result });
 });
 
-router.post('/generate', async (req, res, next) => {
+router.post('/generate', upload.single('image'), async (req, res, next) => {
   try {
     const prompt = String(req.body.prompt || '').trim();
     if (!prompt) return res.status(400).json({ error: 'Prompt is required.' });
 
-    const result = await generateAiContent(prompt);
+    const result = await generateAiContent(prompt, req.file || null);
     return res.json({ message: 'Content generated successfully.', ...result });
   } catch (error) {
     return next(error);

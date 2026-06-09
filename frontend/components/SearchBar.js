@@ -1,4 +1,4 @@
-export default function SearchBar({ value, onChange }) {
+export default function SearchBar({ value, onChange, placeholder = 'Search by name or description...' }) {
   return (
     <div className="relative">
       <svg
@@ -11,7 +11,7 @@ export default function SearchBar({ value, onChange }) {
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Search by name or description..."
+        placeholder={placeholder}
         className="input-field pl-11 pr-10"
       />
       {value && (

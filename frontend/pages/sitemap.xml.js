@@ -1,8 +1,9 @@
 import { tools } from '../utils/tools';
+import { blogPosts } from '../utils/blogPosts';
 import { SITE_URL } from '../components/SEO';
 
 function generateSiteMap() {
-  const staticPages = ['', '/about', '/contact'];
+  const staticPages = ['', '/about', '/contact', '/blog'];
   const today = new Date().toISOString().split('T')[0];
 
   const staticUrls = staticPages
@@ -27,10 +28,22 @@ function generateSiteMap() {
     )
     .join('\n');
 
+  const blogUrls = blogPosts
+    .map(
+      (post) => `  <url>
+    <loc>${SITE_URL}/blog/${post.slug}</loc>
+    <lastmod>${post.date}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`
+    )
+    .join('\n');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticUrls}
 ${toolUrls}
+${blogUrls}
 </urlset>`;
 }
 

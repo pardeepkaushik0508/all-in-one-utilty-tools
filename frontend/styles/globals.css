@@ -417,6 +417,76 @@ html[data-theme='dark'] {
   .btn-secondary:active {
     transform: translateY(0) scale(0.98);
   }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:px-4 focus:py-2 focus:text-sm focus:font-semibold;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .blog-card {
+    @apply card card-hover p-6;
+  }
+
+  .blog-card-title {
+    @apply font-display text-xl font-bold leading-snug transition-colors duration-300 sm:text-2xl;
+    color: var(--text-primary);
+  }
+
+  .blog-card-excerpt {
+    @apply mt-3 line-clamp-2 text-sm leading-relaxed;
+    color: var(--text-muted);
+  }
+
+  .blog-category {
+    @apply inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider;
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+  }
+
+  .blog-sidebar {
+    @apply lg:sticky lg:top-28 lg:self-start;
+  }
+
+  .sidebar-heading {
+    @apply mb-3 text-xs font-bold uppercase tracking-wider;
+    color: var(--text-primary);
+  }
+
+  .sidebar-link {
+    @apply block rounded-lg px-3 py-2 text-sm transition-colors duration-200;
+    color: var(--text-muted);
+  }
+
+  .sidebar-link:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .sidebar-link-active {
+    background: var(--accent-subtle);
+    color: var(--text-primary);
+    font-weight: 600;
+    border: 1px solid var(--accent-border);
+  }
+
+  .blog-article {
+    @apply space-y-5 text-base leading-relaxed;
+    color: var(--text-secondary);
+  }
+
+  .prose-blog p {
+    @apply leading-7;
+  }
+
+  .prose-blog p + p {
+    @apply mt-4;
+  }
 }
 
 @keyframes fadeUp {
@@ -457,11 +527,23 @@ html[data-theme='dark'] {
   }
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tool-panel,
   .page-content,
   .animate-fade-in,
   .animate-fade-up,
+  .animate-slide-down,
   .download-enter,
   .stagger-children > * {
     animation: none !important;

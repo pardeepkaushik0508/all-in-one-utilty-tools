@@ -1,9 +1,9 @@
-// Browser: same-origin proxy via next.config.js rewrites (no CORS issues).
-// Server: talk directly to the Express API.
+// Browser: same-origin — Next.js rewrites /api/* to the backend (see next.config.js).
+// Server (SSR): call the backend directly via BACKEND_URL.
 const BACKEND_URL =
   typeof window !== 'undefined'
-    ? 'https://aio-tools-backend-production.up.railway.app'
-    : process.env.BACKEND_URL || 'http://aio-tools-backend.railway.internal:8080';
+    ? ''
+    : process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
 
 async function parseResponse(res) {
   let data;
@@ -127,7 +127,12 @@ export const checkGrammar = (text) => postJson('/api/text/grammar', { text });
 export const paraphraseText = (text) => postJson('/api/text/paraphrase', { text });
 export const checkPlagiarism = (sourceText, compareText) =>
   postJson('/api/text/plagiarism', { sourceText, compareText });
-export const generateAiContent = (prompt) => postJson('/api/text/generate', { prompt });
+export const generateAiContent = (prompt, imageFile) => {
+  const formData = new FormData();
+  formData.append('prompt', prompt);
+  if (imageFile) formData.append('image', imageFile);
+  return postForm('/api/text/generate', formData);
+};
 
 // Developer
 export const minifyCode = (code, type) => postJson('/api/developer/minify', { code, type });

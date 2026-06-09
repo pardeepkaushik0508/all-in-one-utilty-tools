@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from './Navbar';
+import Footer from './Footer';
 import SEO, { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from './SEO';
 import { useTheme } from '../context/ThemeContext';
 
@@ -61,30 +62,14 @@ export default function Layout({
         <Navbar />
 
         <main
+          id="main-content"
           key={router.pathname}
           className="page-content relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-14"
         >
           {children}
         </main>
 
-        <footer className="relative border-t border-theme">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-4 py-10 sm:flex-row sm:px-6">
-            <div>
-              <p className="font-display text-sm font-semibold text-heading">UtilityTools</p>
-              <p className="mt-1 text-xs text-muted">
-                &copy; {new Date().getFullYear()} {SITE_NAME}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted">
-              <span className="flex items-center gap-2 rounded-full border border-theme px-3 py-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                29 tools online
-              </span>
-              <span>Free forever</span>
-              <span>No sign-up</span>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

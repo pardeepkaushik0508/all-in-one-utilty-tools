@@ -28,7 +28,7 @@ export function MergePdfTool() {
       <p className="text-sm text-muted">Selected: {files.length} file(s)</p>
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Merge PDF</PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Merging PDFs..." />
       <ToolError message={error} />
@@ -59,7 +59,7 @@ export function SplitPdfTool() {
       />
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Split PDF</PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Splitting PDF..." />
       <ToolError message={error} />
@@ -83,7 +83,7 @@ export function CompressPdfTool() {
       <p className="text-sm text-muted">Selected: {file ? file.name : 'No file selected'}</p>
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Compress PDF</PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Compressing PDF..." />
       <ToolError message={error} />

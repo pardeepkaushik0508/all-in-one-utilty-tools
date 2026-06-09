@@ -36,7 +36,7 @@ export function CompressImageTool() {
       </div>
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Compress Image</PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Compressing image..." />
       <ToolError message={error} />
@@ -65,7 +65,7 @@ export function ResizeImageTool() {
       </div>
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Resize Image</PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Resizing image..." />
       <ToolError message={error} />
@@ -98,7 +98,7 @@ export function ConvertJpgPngTool() {
       />
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Convert Image</PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Converting image..." />
       <ToolError message={error} />

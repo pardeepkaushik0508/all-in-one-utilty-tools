@@ -27,7 +27,7 @@ export const tools = [
   { name: 'Grammar Checker', slug: 'grammar-checker', category: 'Text Tools', description: 'Check writing using LanguageTool API.' },
   { name: 'Paraphrasing Tool', slug: 'paraphrasing-tool', category: 'Text Tools', description: 'Rephrase content with AI APIs.' },
   { name: 'Plagiarism Checker', slug: 'plagiarism-checker', category: 'Text Tools', description: 'Basic duplicate-content detection.' },
-  { name: 'AI Content Generator', slug: 'ai-content-generator', category: 'Text Tools', description: 'Generate content from prompts.' },
+  { name: 'AI Content Generator', slug: 'ai-content-generator', category: 'Text Tools', description: 'Generate content with Gemini AI — optional image upload.' },
 
   { name: 'JSON Formatter', slug: 'json-formatter', category: 'Developer Tools', description: 'Format and validate JSON.' },
   { name: 'Code Minifier', slug: 'code-minifier', category: 'Developer Tools', description: 'Minify JS, CSS, HTML snippets.' },
