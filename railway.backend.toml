@@ -1,0 +1,8 @@
+# Backend service — in Railway, create a second service and set:
+#   Config file path: railway.backend.toml
+#   Or manually set Start Command: npm run start:backend
+[build]
+buildCommand = "npm install"
+
+[deploy]
+startCommand = "npm run start:backend"

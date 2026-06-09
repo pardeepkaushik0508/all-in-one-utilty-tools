@@ -95,8 +95,57 @@ frontend/
 - Instagram downloader resolves public Open Graph media links when available
 - Currency converter uses https://api.frankfurter.app (no API key required)
 
-## Production
+## Production build & start
 
-1. Set `FRONTEND_URL` and `NEXT_PUBLIC_API_BASE_URL` to your deployed domains.
-2. Ensure `ffmpeg` is installed on the server.
-3. Run `npm run build` and start both services with a process manager (PM2, systemd, Docker).
+You must **build before start**. `next start` only serves an existing `.next` folder.
+
+```bash
+npm install
+npm run build
+npm run start
+```
+
+Backend (separate process):
+
+```bash
+npm run start:backend
+```
+
+### Railway (two services)
+
+**Frontend service**
+
+| Setting | Value |
+|---------|--------|
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm run start` |
+| Config file | `railway.toml` (optional) |
+
+**Backend service**
+
+| Setting | Value |
+|---------|--------|
+| Build Command | `npm install` |
+| Start Command | `npm run start:backend` |
+| Config file | `railway.backend.toml` (optional) |
+
+**Frontend env vars**
+
+```
+BACKEND_URL=https://your-backend-service.up.railway.app
+NEXT_PUBLIC_BACKEND_URL=https://your-backend-service.up.railway.app
+```
+
+**Important:** Do not paste comments into Railway commands. Use only:
+
+```
+npm run start
+```
+
+not `npm run start # or from frontend folder...`
+
+### Other notes
+
+1. Set `FRONTEND_URL` on the backend to your frontend domain.
+2. Ensure `ffmpeg` is installed on the backend server (Nixpacks/Railway may need a `nixpacks.toml` for ffmpeg).
+3. `.next` is gitignored — the build step must run on the server during deploy.

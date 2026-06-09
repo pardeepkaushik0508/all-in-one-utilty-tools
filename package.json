@@ -14,6 +14,8 @@
     "dev:clean": "CLEAN_NEXT=1 bash scripts/dev-all.sh",
     "dev:reset": "CLEAN_NEXT=1 bash scripts/dev-all.sh",
     "build": "npm run build --workspace frontend",
-    "start": "npm run start --workspace frontend"
+    "start": "npm run start --workspace frontend",
+    "start:frontend": "npm run start --workspace frontend",
+    "start:backend": "npm run start --workspace backend"
   }
 }
