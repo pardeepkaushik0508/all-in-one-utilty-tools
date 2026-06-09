@@ -15,6 +15,7 @@ const utilityRoutes = require('./api/utilityRoutes');
 const securityRoutes = require('./api/securityRoutes');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 const corsOrigins = [
