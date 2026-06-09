@@ -10,7 +10,7 @@
     "dev:all": "bash scripts/dev-all.sh",
     "dev:ui": "npm run dev --workspace frontend",
     "dev:frontend": "npm run dev --workspace frontend",
-    "dev:backend": "npm run dev --workspace backend",
+    "dev:backend": "fuser -k 5000/tcp 2>/dev/null; npm run dev --workspace backend",
     "dev:clean": "CLEAN_NEXT=1 bash scripts/dev-all.sh",
     "dev:reset": "CLEAN_NEXT=1 bash scripts/dev-all.sh",
     "build": "npm run build --workspace frontend",
