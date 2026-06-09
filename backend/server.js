@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const { isCloudinaryEnabled } = require('./utils/cloudinary');
 const { apiLimiter, uploadLimiter } = require('./middleware/rateLimit');
 const pdfRoutes = require('./api/pdfRoutes');
 const imageRoutes = require('./api/imageRoutes');
@@ -67,6 +68,7 @@ app.use((err, _req, res, _next) => {
 
 const server = app.listen(PORT, () => {
   console.log(`Backend listening on http://localhost:${PORT}`);
+  console.log(`File storage: ${isCloudinaryEnabled() ? 'Cloudinary' : 'local (/downloads)'}`);
 });
 
 server.on('error', (error) => {

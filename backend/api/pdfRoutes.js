@@ -1,6 +1,6 @@
 const express = require('express');
 const upload = require('../utils/upload');
-const { sendDownload } = require('../utils/response');
+const { buildDownloadResponse, sendDownload } = require('../utils/response');
 const { mergePdfFiles, splitPdfFile, compressPdfFile } = require('../services/pdfService');
 
 const router = express.Router();
@@ -25,11 +25,9 @@ router.post('/split', upload.single('file'), async (req, res, next) => {
     }
 
     const { filename, pages } = await splitPdfFile(req.file, req.body.range);
-    return res.json({
-      message: `Extracted pages: ${pages.join(', ')}`,
-      downloadUrl: `/downloads/${filename}`,
-      pages
-    });
+    return res.json(
+      await buildDownloadResponse(filename, `Extracted pages: ${pages.join(', ')}`, { pages })
+    );
   } catch (error) {
     return next(error);
   }
@@ -42,13 +40,13 @@ router.post('/compress', upload.single('file'), async (req, res, next) => {
     }
 
     const { filename, originalSize, compressedSize } = await compressPdfFile(req.file);
-    return res.json({
-      message: 'PDF compressed successfully.',
-      downloadUrl: `/downloads/${filename}`,
-      originalSize,
-      compressedSize,
-      savedBytes: Math.max(0, originalSize - compressedSize)
-    });
+    return res.json(
+      await buildDownloadResponse(filename, 'PDF compressed successfully.', {
+        originalSize,
+        compressedSize,
+        savedBytes: Math.max(0, originalSize - compressedSize)
+      })
+    );
   } catch (error) {
     return next(error);
   }
