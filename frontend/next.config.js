@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
+const PRODUCTION_BACKEND = 'https://aio-tools-backend-production.up.railway.app';
+
 const backendUrl =
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'http://127.0.0.1:5000';
+  (process.env.NODE_ENV === 'production' ? PRODUCTION_BACKEND : 'http://127.0.0.1:5000');
 
 const nextConfig = {
   reactStrictMode: true,

@@ -1,18 +1,21 @@
 const rateLimit = require('express-rate-limit');
 
-const apiLimiter = rateLimit({
+const limiterOptions = {
   windowMs: 15 * 60 * 1000,
-  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }
+};
+
+const apiLimiter = rateLimit({
+  ...limiterOptions,
+  max: 120,
   message: { error: 'Too many requests. Please try again later.' }
 });
 
 const uploadLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  ...limiterOptions,
   max: 40,
-  standardHeaders: true,
-  legacyHeaders: false,
   message: { error: 'Upload limit reached. Please try again later.' }
 });
 

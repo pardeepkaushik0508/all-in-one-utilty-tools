@@ -1,6 +1,7 @@
-# Frontend service (set Root Directory to repo root in Railway dashboard)
+# aio-tools-frontend service — Root Directory: / (repo root)
 [build]
 buildCommand = "npm install && npm run build"
 
 [deploy]
 startCommand = "npm run start"
+restartPolicyType = "ON_FAILURE"

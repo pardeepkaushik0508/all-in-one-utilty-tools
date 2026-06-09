@@ -113,36 +113,51 @@ npm run start:backend
 
 ### Railway (two services)
 
-**Frontend service**
+| Service | URL |
+|---------|-----|
+| Frontend | https://aio-tools-frontend-production.up.railway.app |
+| Backend | https://aio-tools-backend-production.up.railway.app |
+
+**Frontend (`aio-tools-frontend`)**
 
 | Setting | Value |
 |---------|--------|
+| Root Directory | `/` (repo root) |
+| Config file | `railway.toml` |
 | Build Command | `npm install && npm run build` |
 | Start Command | `npm run start` |
-| Config file | `railway.toml` (optional) |
 
-**Backend service**
+**Backend (`aio-tools-backend`)**
 
 | Setting | Value |
 |---------|--------|
+| Root Directory | `/` (repo root) |
+| Config file | `railway.backend.toml` |
 | Build Command | `npm install` |
 | Start Command | `npm run start:backend` |
-| Config file | `railway.backend.toml` (optional) |
 
-**Frontend env vars**
-
-```
-BACKEND_URL=https://your-backend-service.up.railway.app
-NEXT_PUBLIC_BACKEND_URL=https://your-backend-service.up.railway.app
-```
-
-**Important:** Do not paste comments into Railway commands. Use only:
+**Backend env vars (Railway Variables tab)**
 
 ```
-npm run start
+FRONTEND_URL=https://aio-tools-frontend-production.up.railway.app
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+GEMINI_API_KEY=...
 ```
 
-not `npm run start # or from frontend folder...`
+Frontend production URLs are in `frontend/.env.production` (used at build time for API proxy).
+
+**Verify after deploy**
+
+```bash
+curl https://aio-tools-backend-production.up.railway.app/api/health
+curl https://aio-tools-frontend-production.up.railway.app/api/health
+```
+
+Both should return `{"status":"ok",...}`.
+
+**Important:** Railway Start Command must be exactly `npm run start` or `npm run start:backend` — no comments.
 
 ### Other notes
 
