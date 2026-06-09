@@ -1,0 +1,19 @@
+{
+  "name": "all-in-one-utility-tools",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev:all",
+    "dev:all": "fuser -k 3000/tcp 3001/tcp 5000/tcp 2>/dev/null; npm run dev --workspace backend & npm run dev --workspace frontend",
+    "dev:ui": "npm run dev --workspace frontend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:clean": "fuser -k 3000/tcp 3001/tcp 5000/tcp 2>/dev/null; rm -rf frontend/.next && npm run dev --workspace frontend",
+    "dev:reset": "fuser -k 3000/tcp 3001/tcp 5000/tcp 2>/dev/null; rm -rf frontend/.next && npm run dev:all",
+    "build": "npm run build --workspace frontend",
+    "start": "npm run start --workspace frontend"
+  }
+}

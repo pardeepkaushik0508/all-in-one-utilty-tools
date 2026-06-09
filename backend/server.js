@@ -1,0 +1,78 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
+
+const { apiLimiter, uploadLimiter } = require('./middleware/rateLimit');
+const pdfRoutes = require('./api/pdfRoutes');
+const imageRoutes = require('./api/imageRoutes');
+const mediaRoutes = require('./api/mediaRoutes');
+const textRoutes = require('./api/textRoutes');
+const developerRoutes = require('./api/developerRoutes');
+const socialRoutes = require('./api/socialRoutes');
+const utilityRoutes = require('./api/utilityRoutes');
+const securityRoutes = require('./api/securityRoutes');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+const corsOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, true);
+    },
+    credentials: true
+  })
+);
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(apiLimiter);
+
+app.use('/downloads', express.static(path.join(__dirname, 'processed')));
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', message: 'All-in-One Utility Tools API running' });
+});
+
+app.use('/api/pdf', uploadLimiter, pdfRoutes);
+app.use('/api/image', uploadLimiter, imageRoutes);
+app.use('/api/media', uploadLimiter, mediaRoutes);
+app.use('/api/text', textRoutes);
+app.use('/api/developer', developerRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/utility', utilityRoutes);
+app.use('/api/security', securityRoutes);
+
+app.use((err, _req, res, _next) => {
+  console.error(err);
+
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ error: 'File too large. Check upload limits for this tool.' });
+  }
+
+  return res.status(err.status || 500).json({
+    error: err.message || 'Something went wrong on the server.'
+  });
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`Backend listening on http://localhost:${PORT}`);
+});
+
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Stop the other process or set PORT in backend/.env`);
+    process.exit(1);
+  }
+  throw error;
+});

@@ -1,0 +1,46 @@
+import { tools } from '../utils/tools';
+import { SITE_URL } from '../components/SEO';
+
+function generateSiteMap() {
+  const staticPages = ['', '/about', '/contact'];
+  const today = new Date().toISOString().split('T')[0];
+
+  const staticUrls = staticPages
+    .map(
+      (path) => `  <url>
+    <loc>${SITE_URL}${path}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>${path === '' ? '1.0' : '0.7'}</priority>
+  </url>`
+    )
+    .join('\n');
+
+  const toolUrls = tools
+    .map(
+      (tool) => `  <url>
+    <loc>${SITE_URL}/tool/${tool.slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`
+    )
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${staticUrls}
+${toolUrls}
+</urlset>`;
+}
+
+export async function getServerSideProps({ res }) {
+  res.setHeader('Content-Type', 'text/xml');
+  res.write(generateSiteMap());
+  res.end();
+  return { props: {} };
+}
+
+export default function SiteMap() {
+  return null;
+}
