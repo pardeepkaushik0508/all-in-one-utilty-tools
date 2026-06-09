@@ -32,17 +32,38 @@ router.get('/download', async (req, res, next) => {
         type: 'upload'
       });
 
-      const remote = await axios.get(downloadApiUrl, {
-        responseType: 'stream',
-        timeout: 120000,
-        maxRedirects: 5
-      });
+      try {
+        const remote = await axios.get(downloadApiUrl, {
+          responseType: 'stream',
+          timeout: 120000,
+          maxRedirects: 5
+        });
 
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Content-Type', remote.headers['content-type'] || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', remote.headers['content-type'] || 'application/octet-stream');
 
-      remote.data.on('error', next);
-      return remote.data.pipe(res);
+        remote.data.on('error', next);
+        return remote.data.pipe(res);
+      } catch (privateError) {
+        const resource = await cloudinary.api.resource(publicId, {
+          resource_type: resourceType,
+          type: 'upload'
+        });
+        const secureUrl = resource.secure_url;
+        if (!secureUrl) throw privateError;
+
+        const remote = await axios.get(secureUrl, {
+          responseType: 'stream',
+          timeout: 120000,
+          maxRedirects: 5
+        });
+
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', remote.headers['content-type'] || 'application/octet-stream');
+
+        remote.data.on('error', next);
+        return remote.data.pipe(res);
+      }
     }
 
     const localPath = path.join(processedDir, filename);

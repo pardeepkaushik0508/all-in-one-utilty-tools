@@ -1,9 +1,4 @@
-// Browser: same-origin — Next.js rewrites /api/* to the backend (see next.config.js).
-// Server (SSR): call the backend directly via BACKEND_URL.
-const BACKEND_URL =
-  typeof window !== 'undefined'
-    ? ''
-    : process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5000';
+import { resolveApiUrl } from '../utils/apiBase';
 
 async function parseResponse(res) {
   let data;
@@ -21,7 +16,7 @@ async function parseResponse(res) {
 
 async function request(path, options) {
   try {
-    const res = await fetch(`${BACKEND_URL}${path}`, options);
+    const res = await fetch(resolveApiUrl(path), options);
     return parseResponse(res);
   } catch (error) {
     if (error.name === 'TypeError' || error.message === 'Failed to fetch') {

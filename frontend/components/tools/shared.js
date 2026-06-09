@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import LoadingSpinner from '../LoadingSpinner';
+import { resolveApiUrl } from '../../utils/apiBase';
 
 export function ToolPanel({ children, className = '' }) {
   return <div className={`card tool-panel space-y-4 ${className}`.trim()}>{children}</div>;
@@ -31,7 +32,7 @@ export function DownloadLink({ url, label = 'Download Result', filename }) {
   const handleDownload = async () => {
     if (downloading) return;
 
-    const fetchUrl = url.startsWith('http') ? url : url.startsWith('/') ? url : `/${url}`;
+    const fetchUrl = resolveApiUrl(url.startsWith('http') ? url : url.startsWith('/') ? url : `/${url}`);
     const saveAs = guessFilename(fetchUrl, filename);
 
     setDownloading(true);
