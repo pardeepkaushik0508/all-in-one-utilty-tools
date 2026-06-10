@@ -85,11 +85,11 @@ export async function renderPdfPageToCanvas(file, pageNumber = 1, scale = 1.25) 
   canvas.width = Math.floor(viewport.width);
   canvas.height = Math.floor(viewport.height);
 
-  await page.render({
+  const renderTask = page.render({
     canvasContext: context,
-    viewport,
-    canvas
-  }).promise;
+    viewport
+  });
+  await renderTask.promise;
 
   return {
     canvas,

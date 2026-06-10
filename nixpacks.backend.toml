@@ -1,6 +1,6 @@
 # Attach to backend Railway service (Settings → Config file path)
 [phases.setup]
-nixPkgs = ["nodejs_20", "ffmpeg"]
+nixPkgs = ["nodejs_20", "ffmpeg", "python3"]
 
 [phases.install]
 cmds = ["npm install"]

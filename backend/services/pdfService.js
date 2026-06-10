@@ -85,34 +85,45 @@ async function writeOutputPdf(pdfDoc, prefix) {
   return { filename: outputName };
 }
 
-async function embedImageFromFile(pdf, filePath) {
+async function embedImageFromFile(pdf, filePath, options = {}) {
   const bytes = await fs.readFile(filePath);
   const ext = path.extname(filePath).toLowerCase();
+  const quality = getCompressionQuality(options.compression);
 
   if (ext === '.png' || ext === '.webp') {
-    const pngBytes = ext === '.webp' ? await sharp(bytes).png().toBuffer() : bytes;
+    const pngBytes =
+      ext === '.webp'
+        ? await sharp(bytes).png({ compressionLevel: 9 }).toBuffer()
+        : await sharp(bytes).png({ compressionLevel: 9 }).toBuffer();
     return pdf.embedPng(pngBytes);
   }
 
-  const jpgBytes = ['.jpg', '.jpeg'].includes(ext)
-    ? bytes
-    : await sharp(bytes).jpeg({ quality: 92 }).toBuffer();
+  const jpgBytes = await sharp(bytes).jpeg({ quality, mozjpeg: true }).toBuffer();
   return pdf.embedJpg(jpgBytes);
+}
+
+function getCompressionQuality(compression) {
+  const key = String(compression || 'medium').toLowerCase();
+  if (key === 'high') return 92;
+  if (key === 'low') return 65;
+  return 80;
 }
 
 async function preprocessScanImage(filePath, options = {}) {
   let pipeline = sharp(filePath).rotate();
 
-  if (options.grayscale) pipeline = pipeline.grayscale();
+  if (options.grayscale === '1' || options.grayscale === true) pipeline = pipeline.grayscale();
   if (options.brightness) pipeline = pipeline.modulate({ brightness: Number(options.brightness) });
   if (options.contrast) {
     const contrast = Number(options.contrast);
     pipeline = pipeline.linear(contrast, -(128 * contrast) + 128);
   }
+  if (options.sharpen === '1' || options.sharpen === true) pipeline = pipeline.sharpen();
 
+  const quality = getCompressionQuality(options.compression);
   const ext = path.extname(filePath).toLowerCase();
-  if (ext === '.png') return pipeline.png().toBuffer();
-  return pipeline.jpeg({ quality: 90, mozjpeg: true }).toBuffer();
+  if (ext === '.png') return pipeline.png({ compressionLevel: 9 }).toBuffer();
+  return pipeline.jpeg({ quality, mozjpeg: true }).toBuffer();
 }
 
 async function addImagePage(pdf, file, options = {}) {
@@ -132,7 +143,7 @@ async function addImagePage(pdf, file, options = {}) {
     return;
   }
 
-  const embedded = await embedImageFromFile(pdf, file.path);
+  const embedded = await embedImageFromFile(pdf, file.path, { compression: options.compression });
   const page = pdf.addPage([pageWidth, pageHeight]);
   const fit = fitImageInPage(embedded.width, embedded.height, pageWidth, pageHeight);
   page.drawImage(embedded, fit);
@@ -193,14 +204,29 @@ async function createPdfFromText({ text, pageSize, orientation, fontSize }) {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const { width, height } = getPageDimensions(pageSize, orientation);
-  const page = pdf.addPage([width, height]);
   const size = Math.min(24, Math.max(8, Number(fontSize) || 12));
   const margin = 48;
   const maxWidth = width - margin * 2;
+  const lineHeight = size + 6;
   const lines = String(text || '').split('\n');
+
+  let page = pdf.addPage([width, height]);
   let y = height - margin;
 
+  const ensureSpace = () => {
+    if (y < margin) {
+      page = pdf.addPage([width, height]);
+      y = height - margin;
+    }
+  };
+
   lines.forEach((line) => {
+    if (!line.trim()) {
+      y -= lineHeight;
+      ensureSpace();
+      return;
+    }
+
     const words = line.split(' ');
     let current = '';
 
@@ -208,8 +234,10 @@ async function createPdfFromText({ text, pageSize, orientation, fontSize }) {
       const test = current ? `${current} ${word}` : word;
       const testWidth = font.widthOfTextAtSize(test, size);
       if (testWidth > maxWidth && current) {
+        ensureSpace();
         page.drawText(current, { x: margin, y, size, font, color: rgb(0, 0, 0) });
-        y -= size + 6;
+        y -= lineHeight;
+        ensureSpace();
         current = word;
       } else {
         current = test;
@@ -217,8 +245,9 @@ async function createPdfFromText({ text, pageSize, orientation, fontSize }) {
     });
 
     if (current) {
+      ensureSpace();
       page.drawText(current, { x: margin, y, size, font, color: rgb(0, 0, 0) });
-      y -= size + 6;
+      y -= lineHeight;
     }
   });
 
@@ -247,7 +276,12 @@ async function createPdfFromImages(files, options = {}) {
       pageSize: options.pageSize,
       orientation: options.orientation,
       rotation: rotations[i] || 0,
-      scanMode: options.scanMode === '1' || options.scanMode === true
+      scanMode: options.scanMode === '1' || options.scanMode === true,
+      compression: options.compression,
+      grayscale: options.grayscale,
+      brightness: options.brightness,
+      contrast: options.contrast,
+      sharpen: options.sharpen
     });
   }
 
@@ -262,15 +296,36 @@ async function createPdfFromMixed(files, options = {}) {
   const pdf = await PDFDocument.create();
   const { pageSize, orientation } = options;
 
-  for (const file of files) {
+  const order = String(options.order || '')
+    .split(',')
+    .map((n) => Number(n.trim()))
+    .filter((n) => !Number.isNaN(n));
+
+  const rotations = String(options.rotations || '')
+    .split(',')
+    .map((n) => Number(n.trim()));
+
+  const orderedFiles = order.length ? order.map((index) => files[index]).filter(Boolean) : files;
+
+  for (let i = 0; i < orderedFiles.length; i += 1) {
+    const file = orderedFiles[i];
     const ext = path.extname(file.originalname || file.path).toLowerCase();
     if (ext === '.pdf') {
       const bytes = await fs.readFile(file.path);
       const source = await PDFDocument.load(bytes);
       const copied = await pdf.copyPages(source, source.getPageIndices());
-      copied.forEach((page) => pdf.addPage(page));
+      copied.forEach((page) => {
+        const rotation = rotations[i] || 0;
+        if (rotation) page.setRotation(degrees(rotation));
+        pdf.addPage(page);
+      });
     } else {
-      await addImagePage(pdf, file, { pageSize, orientation });
+      await addImagePage(pdf, file, {
+        pageSize,
+        orientation,
+        rotation: rotations[i] || 0,
+        compression: options.compression
+      });
     }
   }
 
@@ -448,7 +503,7 @@ async function editPdfFile(file, annotationsJson, overlayFiles = []) {
       });
     }
 
-    if (item.type === 'drawing' && item.dataUrl) {
+    if ((item.type === 'drawing' || item.type === 'signature') && item.dataUrl) {
       const base64 = String(item.dataUrl).split(',')[1];
       if (base64) {
         const pngBytes = Buffer.from(base64, 'base64');

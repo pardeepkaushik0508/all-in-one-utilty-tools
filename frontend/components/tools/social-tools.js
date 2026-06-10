@@ -35,17 +35,24 @@ export function InstagramDownloaderTool() {
       <ToolLoading loading={loading} text="Resolving media..." />
       <ToolError message={error} />
       {result && (
-        <div className="animate-fade-in flex flex-wrap gap-3">
+        <div className="animate-fade-in space-y-3">
+          {result.title && <p className="text-sm font-medium text-heading">{result.title}</p>}
           {result.imageUrl && (
-            <a href={result.imageUrl} className="tool-card-link" target="_blank" rel="noreferrer">
-              Open image
-            </a>
+            <img src={result.imageUrl} alt="Instagram preview" className="max-h-80 rounded-xl border border-theme" />
           )}
-          {result.videoUrl && (
-            <a href={result.videoUrl} className="tool-card-link" target="_blank" rel="noreferrer">
-              Open video
-            </a>
-          )}
+          <div className="flex flex-wrap gap-3">
+            {result.imageUrl && (
+              <a href={result.imageUrl} className="tool-card-link" target="_blank" rel="noreferrer">
+                Open image
+              </a>
+            )}
+            {result.videoUrl && (
+              <a href={result.videoUrl} className="tool-card-link" target="_blank" rel="noreferrer" download>
+                Download video
+              </a>
+            )}
+          </div>
+          {result.provider && <p className="text-xs text-muted">Provider: {result.provider}</p>}
         </div>
       )}
     </ToolPanel>

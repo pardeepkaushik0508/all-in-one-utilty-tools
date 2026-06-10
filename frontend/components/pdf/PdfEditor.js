@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import useUndoRedo from '../../hooks/useUndoRedo';
+import CameraCapture from '../CameraCapture';
+import PdfTextEditModal from './PdfTextEditModal';
+import ProgressBar from './ProgressBar';
+import SignaturePad from './SignaturePad';
 import {
   clearPdfDocumentCache,
   extractPdfTextItems,
@@ -17,7 +21,8 @@ const TOOLS = [
   { id: 'ellipse', label: 'Circle' },
   { id: 'line', label: 'Line' },
   { id: 'draw', label: 'Draw' },
-  { id: 'image', label: 'Image' }
+  { id: 'image', label: 'Image' },
+  { id: 'signature', label: 'Signature' }
 ];
 
 const FONT_OPTIONS = [
@@ -57,12 +62,18 @@ export default function PdfEditor({ file, onSave, saving = false }) {
   const [color, setColor] = useState('#111827');
   const [overlayImage, setOverlayImage] = useState(null);
   const [imageMap, setImageMap] = useState({});
+  const [textEditState, setTextEditState] = useState(null);
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [pendingSignature, setPendingSignature] = useState('');
+  const [showImageCamera, setShowImageCamera] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   const { value: annotations, setValue: setAnnotations, undo, redo, canUndo, canRedo, reset } = useUndoRedo([]);
+  const safeAnnotations = Array.isArray(annotations) ? annotations : [];
 
   const pageAnnotations = useMemo(
-    () => annotations.filter((item) => Number(item.page) === currentPage),
-    [annotations, currentPage]
+    () => safeAnnotations.filter((item) => Number(item.page) === currentPage),
+    [safeAnnotations, currentPage]
   );
 
   const redrawOverlay = useCallback(() => {
@@ -144,6 +155,7 @@ export default function PdfEditor({ file, onSave, saving = false }) {
     if (!file) return;
     setLoadingPage(true);
     setLoadError('');
+    setLoadProgress(15);
 
     try {
       const rendered = await renderPdfPageToCanvas(file, currentPage, scale);
@@ -166,12 +178,14 @@ export default function PdfEditor({ file, onSave, saving = false }) {
       setCanvasSize({ width: rendered.width, height: rendered.height });
       setPageCount(rendered.pageCount);
       setPdfTextItems(textItems);
+      setLoadProgress(100);
     } catch (error) {
       console.error(error);
       setLoadError(error.message || 'Could not render PDF page.');
       toast.error('Could not render PDF page. Try another file.');
     } finally {
       setLoadingPage(false);
+      setTimeout(() => setLoadProgress(0), 400);
     }
   }, [file, currentPage, scale]);
 
@@ -192,6 +206,7 @@ export default function PdfEditor({ file, onSave, saving = false }) {
 
   const getPoint = (event) => {
     const canvas = overlayCanvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * canvas.width;
     const y = ((event.clientY - rect.top) / rect.height) * canvas.height;
@@ -212,11 +227,11 @@ export default function PdfEditor({ file, onSave, saving = false }) {
   };
 
   const updateAnnotation = (id, patch) => {
-    setAnnotations((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    setAnnotations((prev = []) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
   const addAnnotation = (item) => {
-    setAnnotations((prev) => [...prev, item]);
+    setAnnotations((prev = []) => [...prev, item]);
   };
 
   const replaceExistingText = (textItem, newText) => {
@@ -266,9 +281,27 @@ export default function PdfEditor({ file, onSave, saving = false }) {
           point.y <= item.y + item.height
       );
       if (textHit) {
-        const newText = window.prompt('Edit text', textHit.str);
-        if (newText !== null) replaceExistingText(textHit, newText);
+        setTextEditState({ item: textHit, value: textHit.str });
       }
+      return;
+    }
+
+    if (tool === 'signature') {
+      if (!pendingSignature) {
+        setShowSignaturePad(true);
+        return toast.error('Draw your signature first.');
+      }
+      addAnnotation({
+        id: createId('signature'),
+        type: 'signature',
+        page: currentPage,
+        x: point.x,
+        y: point.y,
+        width: 180,
+        height: 70,
+        dataUrl: pendingSignature
+      });
+      toast.success('Signature placed');
       return;
     }
 
@@ -405,7 +438,7 @@ export default function PdfEditor({ file, onSave, saving = false }) {
     const fileIndexMap = {};
     const payload = [];
 
-    annotations
+    safeAnnotations
       .filter((item) => item.id !== 'preview-shape')
       .forEach((item) => {
         if (item.type === 'image') {
@@ -419,8 +452,13 @@ export default function PdfEditor({ file, onSave, saving = false }) {
           return;
         }
 
+        if (item.type === 'signature' && item.dataUrl) {
+          payload.push(item);
+          return;
+        }
+
         if (item.type === 'draw') {
-          const pageDrawings = annotations.filter((a) => a.type === 'draw' && a.page === item.page);
+          const pageDrawings = safeAnnotations.filter((a) => a.type === 'draw' && a.page === item.page);
           if (pageDrawings[0]?.id !== item.id) return;
 
           const canvas = document.createElement('canvas');
@@ -531,7 +569,34 @@ export default function PdfEditor({ file, onSave, saving = false }) {
       )}
 
       {tool === 'image' && (
-        <input type="file" accept="image/*" onChange={(e) => setOverlayImage(e.target.files?.[0] || null)} className="input-field" />
+        <div className="space-y-3">
+          <input type="file" accept="image/*" onChange={(e) => setOverlayImage(e.target.files?.[0] || null)} className="input-field" />
+          <button type="button" className="btn-secondary !text-xs" onClick={() => setShowImageCamera((v) => !v)}>
+            {showImageCamera ? 'Hide Camera' : 'Use Camera'}
+          </button>
+          {showImageCamera && (
+            <CameraCapture
+              onCapture={(captured) => {
+                setOverlayImage(captured);
+                setShowImageCamera(false);
+                toast.success('Image captured — click on the PDF to place it');
+              }}
+            />
+          )}
+          {overlayImage && <p className="text-xs text-muted">Selected: {overlayImage.name}</p>}
+        </div>
+      )}
+
+      {tool === 'signature' && (
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" className="btn-secondary" onClick={() => setShowSignaturePad(true)}>
+            {pendingSignature ? 'Redraw Signature' : 'Draw Signature'}
+          </button>
+          {pendingSignature && (
+            <img src={pendingSignature} alt="Signature preview" className="h-10 rounded border border-theme bg-white px-2" />
+          )}
+          <p className="text-xs text-muted">Draw a signature, then click on the PDF to place it.</p>
+        </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -562,7 +627,7 @@ export default function PdfEditor({ file, onSave, saving = false }) {
         </div>
       </div>
 
-      {loadingPage && <p className="text-sm text-muted animate-pulse">Rendering PDF page...</p>}
+      {loadingPage && <ProgressBar value={loadProgress || 35} label="Rendering PDF page..." />}
       {loadError && <p className="alert-error">{loadError}</p>}
 
       <div ref={containerRef} className="overflow-auto rounded-2xl border border-theme bg-white p-3">
@@ -594,15 +659,31 @@ export default function PdfEditor({ file, onSave, saving = false }) {
                   width: Math.max(item.width * scale, 8),
                   height: Math.max(item.height * scale, 8)
                 }}
-                onClick={() => {
-                  const newText = window.prompt('Edit text', item.str);
-                  if (newText !== null) replaceExistingText(item, newText);
-                }}
+                onClick={() => setTextEditState({ item, value: item.str })}
                 title={`Edit: ${item.str}`}
               >
                 {item.str}
               </button>
             ))}
+
+          {pageSize.width > 0 &&
+            pageAnnotations
+              .filter((item) => item.type === 'signature' && item.dataUrl)
+              .map((item) => (
+                <img
+                  key={item.id}
+                  src={item.dataUrl}
+                  alt="Signature"
+                  className={`absolute ${item.id === selectedId ? 'outline outline-2 outline-violet-500' : ''}`}
+                  style={{
+                    left: item.x * scale,
+                    top: item.y * scale,
+                    width: item.width * scale,
+                    height: item.height * scale,
+                    pointerEvents: 'none'
+                  }}
+                />
+              ))}
 
           {pageSize.width > 0 &&
             pageAnnotations
@@ -633,6 +714,28 @@ export default function PdfEditor({ file, onSave, saving = false }) {
           {saving ? 'Saving...' : 'Save Edited PDF'}
         </button>
       </div>
+
+      <PdfTextEditModal
+        open={!!textEditState}
+        initialText={textEditState?.value || ''}
+        title="Edit PDF text"
+        onClose={() => setTextEditState(null)}
+        onSave={(value) => {
+          if (textEditState?.item) replaceExistingText(textEditState.item, value);
+          setTextEditState(null);
+        }}
+      />
+
+      {showSignaturePad && (
+        <SignaturePad
+          onClose={() => setShowSignaturePad(false)}
+          onSave={(dataUrl) => {
+            setPendingSignature(dataUrl);
+            setShowSignaturePad(false);
+            toast.success('Signature ready — click on the PDF to place it');
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -139,15 +139,15 @@ export function AiContentGeneratorTool() {
 
       <div className="space-y-2">
         <span className="label-text">Reference image (optional)</span>
-        <FileDropZone accept="image/*" onFiles={(files) => setImage(files[0] || null)} />
+        <FileDropZone
+          accept="image/*"
+          onFiles={(files) => setImage(files[0] || null)}
+          selectedFiles={image ? [image] : []}
+          onRemoveFile={() => setImage(null)}
+        />
         <p className="text-sm text-muted">
-          {image ? `Selected: ${image.name}` : 'Upload an image for Gemini to analyze alongside your prompt.'}
+          {image ? 'Reference image attached.' : 'Upload an image for Gemini to analyze alongside your prompt.'}
         </p>
-        {image && (
-          <button type="button" onClick={() => setImage(null)} className="text-xs text-muted underline">
-            Remove image
-          </button>
-        )}
       </div>
       <ToolActions>
         <PrimaryButton

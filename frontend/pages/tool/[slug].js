@@ -1,9 +1,17 @@
 import Link from 'next/link';
 import Layout from '../../components/Layout';
+import ToolSeoContent from '../../components/seo/ToolSeoContent';
 import { rendererBySlug } from '../../components/tools';
+import { SITE_URL } from '../../components/SEO';
+import { fetchRemoteToolSeoOverride, getToolSeoContent } from '../../utils/seo/getToolSeo';
+import {
+  buildBreadcrumbSchema,
+  buildFaqSchema,
+  buildHowToSchema,
+  buildSoftwareApplicationSchema
+} from '../../utils/seo/schema';
 import { findToolBySlug, tools } from '../../utils/tools';
 import { getCategoryMeta } from '../../utils/categoryMeta';
-import { SITE_URL } from '../../components/SEO';
 
 function PlaceholderTool() {
   return (
@@ -13,7 +21,7 @@ function PlaceholderTool() {
   );
 }
 
-export default function ToolPage({ tool }) {
+export default function ToolPage({ tool, seo }) {
   if (!tool) {
     return (
       <Layout title="Tool Not Found" noindex canonical="/tool/not-found">
@@ -29,50 +37,45 @@ export default function ToolPage({ tool }) {
   const ToolRenderer = rendererBySlug[tool.slug] || PlaceholderTool;
   const meta = getCategoryMeta(tool.category);
 
-  const toolJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: tool.name,
-    description: tool.description,
-    applicationCategory: tool.category,
-    operatingSystem: 'Web',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    url: `${SITE_URL}/tool/${tool.slug}`
-  };
+  const breadcrumbJsonLd = buildBreadcrumbSchema([
+    { name: 'Home', url: SITE_URL },
+    { name: tool.category, url: `${SITE_URL}/#tools` },
+    { name: tool.name, url: `${SITE_URL}/tool/${tool.slug}` }
+  ]);
 
-  const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: tool.name, item: `${SITE_URL}/tool/${tool.slug}` }
-    ]
-  };
+  const jsonLd = [
+    buildSoftwareApplicationSchema(tool, seo),
+    breadcrumbJsonLd,
+    buildFaqSchema(seo.faqs),
+    buildHowToSchema(tool, seo.howItWorks)
+  ].filter(Boolean);
 
   return (
     <Layout
-      title={tool.name}
-      description={`${tool.description} Use our free online ${tool.name} tool — fast, secure, and easy.`}
+      title={seo.metaTitle || tool.name}
+      description={seo.metaDescription}
+      keywords={seo.keywords}
       canonical={`/tool/${tool.slug}`}
       ogType="website"
-      jsonLd={[toolJsonLd, breadcrumbJsonLd]}
+      ogImage={`${SITE_URL}/og-default.svg`}
+      jsonLd={jsonLd}
     >
-      <nav aria-label="Breadcrumb" className="animate-fade-up">
-        <Link href="/" className="back-link mb-8">
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08l-4.158 3.96H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-          </svg>
-          All tools
-        </Link>
+      <nav aria-label="Breadcrumb" className="breadcrumb-modern animate-fade-up">
+        <Link href="/">Home</Link>
+        <span className="breadcrumb-sep" aria-hidden>/</span>
+        <Link href="/#tools">{tool.category}</Link>
+        <span className="breadcrumb-sep" aria-hidden>/</span>
+        <span className="text-heading">{tool.name}</span>
       </nav>
 
-      <header className="card animate-fade-up mb-8" style={{ animationDelay: '80ms' }}>
-        <div className="flex items-start gap-4">
-          <span className={`icon-box h-14 w-14 ${meta.iconColor}`}>{meta.icon}</span>
+      <header className="tool-hero animate-fade-up mb-8" style={{ animationDelay: '80ms' }}>
+        <div className={`tool-hero-glow bg-gradient-to-br ${meta.gradient}`} />
+        <div className="tool-hero-inner">
+          <span className={`tool-hero-icon ${meta.iconBg} ${meta.iconColor}`}>{meta.icon}</span>
           <div className="min-w-0 flex-1">
             <span className="badge">{tool.category}</span>
-            <h1 className="mt-3 font-display text-2xl font-bold text-heading sm:text-3xl">{tool.name}</h1>
-            <p className="mt-2 max-w-2xl text-body">{tool.description}</p>
+            <h1 className="tool-hero-title">{tool.name}</h1>
+            <p className="tool-hero-desc">{tool.description}</p>
           </div>
         </div>
       </header>
@@ -80,6 +83,8 @@ export default function ToolPage({ tool }) {
       <section aria-label={`${tool.name} tool`}>
         <ToolRenderer />
       </section>
+
+      <ToolSeoContent tool={tool} seo={seo} />
     </Layout>
   );
 }
@@ -93,5 +98,10 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const tool = findToolBySlug(params.slug) || null;
-  return { props: { tool }, revalidate: 60 };
+  if (!tool) return { props: { tool: null, seo: null }, revalidate: 60 };
+
+  const remoteOverride = await fetchRemoteToolSeoOverride(tool.slug);
+  const seo = getToolSeoContent(tool, remoteOverride);
+
+  return { props: { tool, seo }, revalidate: 60 };
 }

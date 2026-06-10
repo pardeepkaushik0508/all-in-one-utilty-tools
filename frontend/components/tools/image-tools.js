@@ -30,8 +30,12 @@ export function CompressImageTool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="image/*" onFiles={(files) => setFile(files[0])} />
-      <p className="text-sm text-muted">Selected: {file ? file.name : 'No file selected'}</p>
+      <FileDropZone
+        accept="image/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField label="Quality (1-100)" value={quality} onChange={setQuality} min={1} max={100} />
         <NumberField label="Width (optional)" value={width} onChange={setWidth} />
@@ -60,7 +64,12 @@ export function ResizeImageTool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="image/*" onFiles={(files) => setFile(files[0])} />
+      <FileDropZone
+        accept="image/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField label="Width" value={width} onChange={setWidth} />
         <NumberField label="Height (optional)" value={height} onChange={setHeight} />
@@ -87,7 +96,12 @@ export function ConvertJpgPngTool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="image/*" onFiles={(files) => setFile(files[0])} />
+      <FileDropZone
+        accept="image/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <SelectField
         label="Target format"
         value={format}
@@ -158,17 +172,17 @@ export function AiImageGeneratorTool() {
 
       <div className="space-y-2">
         <span className="label-text">Reference image (optional)</span>
-        <FileDropZone accept="image/*" onFiles={(files) => setReferenceImage(files[0] || null)} />
+        <FileDropZone
+          accept="image/*"
+          onFiles={(files) => setReferenceImage(files[0] || null)}
+          selectedFiles={referenceImage ? [referenceImage] : []}
+          onRemoveFile={() => setReferenceImage(null)}
+        />
         <p className="text-sm text-muted">
           {referenceImage
-            ? `Selected: ${referenceImage.name} — Gemini will use it for style or editing guidance.`
+            ? 'Reference image attached — Gemini will use it for style or editing guidance.'
             : 'Upload a reference image to guide style, composition, or edits.'}
         </p>
-        {referenceImage && (
-          <button type="button" onClick={() => setReferenceImage(null)} className="text-xs text-muted underline">
-            Remove reference image
-          </button>
-        )}
       </div>
 
       <div className="rounded-2xl border border-theme bg-[var(--bg-elevated)] p-3 text-sm text-muted">

@@ -82,8 +82,8 @@ export const compressPdf = (file) => {
   return postForm('/api/pdf/compress', formData);
 };
 
-export const createPdfFromText = ({ text, pageSize, orientation, fontSize }) =>
-  postJson('/api/pdf/create/text', { text, pageSize, orientation, fontSize });
+export const createPdfFromText = ({ text, pageSize, orientation, fontSize, compression }) =>
+  postJson('/api/pdf/create/text', { text, pageSize, orientation, fontSize, compression });
 
 export const createPdfFromImages = (files, options = {}) => {
   const formData = new FormData();

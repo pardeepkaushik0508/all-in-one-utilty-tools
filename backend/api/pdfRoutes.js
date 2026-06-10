@@ -72,7 +72,8 @@ router.post('/create/text', async (req, res, next) => {
       text,
       pageSize: req.body.pageSize,
       orientation: req.body.orientation,
-      fontSize: req.body.fontSize
+      fontSize: req.body.fontSize,
+      compression: req.body.compression
     });
 
     return res.json(await buildDownloadResponse(filename, 'PDF created from text.'));

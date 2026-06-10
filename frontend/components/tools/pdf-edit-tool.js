@@ -2,6 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import FileDropZone from '../FileDropZone';
 import PdfEditor from '../pdf/PdfEditor';
+import ToolErrorBoundary from '../ToolErrorBoundary';
 import useToolRequest from '../../hooks/useToolRequest';
 import * as api from '../../services/api';
 import {
@@ -33,15 +34,23 @@ export function EditPdfTool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="application/pdf" onFiles={(items) => setFile(items[0] || null)} />
-      <p className="text-sm text-muted">Selected: {file ? file.name : 'No file selected'}</p>
-
-      <div className="rounded-2xl border border-theme bg-[var(--bg-elevated)] p-3 text-sm text-muted">
-        <strong className="text-heading">How to edit:</strong> Use <em>Edit Text</em> to click existing PDF text and replace it.
-        Use <em>Add Text</em> to place new text. Drag elements with <em>Select</em>. Draw, highlight, add images, then save.
+      <div className="rounded-2xl border border-theme bg-[var(--bg-elevated)] p-4">
+        <h3 className="font-display text-base font-semibold text-heading">Edit PDF</h3>
+        <p className="mt-1 text-sm text-muted">
+          Add text, signatures, images, highlights, shapes, and drawings. Use undo/redo and export when done.
+        </p>
       </div>
 
-      <PdfEditor file={file} onSave={handleSaveWrapper} saving={loading} />
+      <FileDropZone
+        accept="application/pdf"
+        onFiles={(items) => setFile(items[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
+
+      <ToolErrorBoundary>
+        <PdfEditor file={file} onSave={handleSaveWrapper} saving={loading} />
+      </ToolErrorBoundary>
 
       <ToolActions>
         <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />

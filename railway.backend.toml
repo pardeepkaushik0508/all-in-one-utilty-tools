@@ -2,6 +2,7 @@
 # Settings → Config file path: railway.backend.toml
 [build]
 buildCommand = "npm install"
+nixpacksConfigPath = "nixpacks.backend.toml"
 
 [deploy]
 startCommand = "bash scripts/start-railway.sh"

@@ -4,8 +4,8 @@ const { spawn } = require('child_process');
 const axios = require('axios');
 const { processedDir } = require('../utils/upload');
 const { removeFiles } = require('../utils/fileCleanup');
-
-const YT_DLP_PATH = path.join(__dirname, '../../node_modules/youtube-dl-exec/bin/yt-dlp');
+const { resolveFfmpegPath } = require('../utils/binaries');
+const { runYtDlp } = require('../utils/ytDlp');
 
 function isYouTubeUrl(videoUrl) {
   try {
@@ -16,52 +16,19 @@ function isYouTubeUrl(videoUrl) {
       host === 'youtube.com' ||
       host === 'm.youtube.com' ||
       host === 'music.youtube.com' ||
-      (host.endsWith('youtube.com') && (pathname.startsWith('/watch') || pathname.startsWith('/shorts') || pathname.startsWith('/embed')))
+      (host.endsWith('youtube.com') &&
+        (pathname.startsWith('/watch') || pathname.startsWith('/shorts') || pathname.startsWith('/embed')))
     );
   } catch {
     return false;
   }
 }
 
-function runCommand(binaryPath, args, timeoutMs = 120000) {
-  return new Promise((resolve, reject) => {
-    const processRef = spawn(binaryPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
-    let stdout = '';
-    let stderr = '';
-
-    const timer = setTimeout(() => {
-      processRef.kill('SIGKILL');
-      reject(new Error('Video download timed out. Try again or use a shorter video.'));
-    }, timeoutMs);
-
-    processRef.stdout.on('data', (chunk) => {
-      stdout += chunk.toString();
-    });
-
-    processRef.stderr.on('data', (chunk) => {
-      stderr += chunk.toString();
-    });
-
-    processRef.on('error', (error) => {
-      clearTimeout(timer);
-      if (error.code === 'ENOENT') {
-        reject(new Error('yt-dlp is not available. Run npm install in the project root and try again.'));
-        return;
-      }
-      reject(error);
-    });
-
-    processRef.on('close', (code) => {
-      clearTimeout(timer);
-      if (code === 0) resolve({ stdout, stderr });
-      else reject(new Error(stderr.trim() || stdout.trim() || 'Video download failed.'));
-    });
-  });
-}
-
 function runFfmpeg(args) {
+  const ffmpegPath = resolveFfmpegPath();
+
   return new Promise((resolve, reject) => {
-    const processRef = spawn('ffmpeg', ['-y', ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const processRef = spawn(ffmpegPath, ['-y', ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
     let stderr = '';
 
     processRef.stderr.on('data', (chunk) => {
@@ -140,16 +107,10 @@ async function cutAudio(file, options = {}) {
 }
 
 async function downloadYouTubeVideo(videoUrl) {
-  try {
-    await fs.access(YT_DLP_PATH);
-  } catch {
-    throw new Error('YouTube downloads require yt-dlp. Run: npm install (from project root), then restart the backend.');
-  }
-
   const outputStem = `youtube-${Date.now()}`;
   const outputTemplate = path.join(processedDir, `${outputStem}.%(ext)s`);
 
-  await runCommand(YT_DLP_PATH, [
+  await runYtDlp([
     '--no-playlist',
     '--no-warnings',
     '-f',
@@ -162,9 +123,7 @@ async function downloadYouTubeVideo(videoUrl) {
   ]);
 
   const files = await fs.readdir(processedDir);
-  const downloaded = files
-    .filter((name) => name.startsWith(outputStem))
-    .sort((a, b) => b.localeCompare(a));
+  const downloaded = files.filter((name) => name.startsWith(outputStem)).sort((a, b) => b.localeCompare(a));
 
   if (!downloaded.length) {
     throw new Error('YouTube video could not be saved. The video may be private, age-restricted, or unavailable.');

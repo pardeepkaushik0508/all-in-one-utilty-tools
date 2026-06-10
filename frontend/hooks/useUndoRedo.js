@@ -9,7 +9,8 @@ export default function useUndoRedo(initialValue = []) {
   const setValue = useCallback(
     (next) => {
       setHistory((prev) => {
-        const current = typeof next === 'function' ? next(prev[index]) : next;
+        const currentValue = prev[index] ?? [];
+        const current = typeof next === 'function' ? next(currentValue) : next;
         const trimmed = prev.slice(0, index + 1);
         return [...trimmed, current];
       });

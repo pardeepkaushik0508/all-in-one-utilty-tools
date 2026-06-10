@@ -20,7 +20,12 @@ export function VideoToMp3Tool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="video/*" onFiles={(files) => setFile(files[0])} />
+      <FileDropZone
+        accept="video/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <ToolActions>
         <PrimaryButton
           onClick={() => {
@@ -46,7 +51,12 @@ export function VideoCompressionTool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="video/*" onFiles={(files) => setFile(files[0])} />
+      <FileDropZone
+        accept="video/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <NumberField label="CRF (18 best quality, 35 smallest)" value={crf} onChange={setCrf} min={18} max={35} />
       <ToolActions>
         <PrimaryButton
@@ -74,7 +84,12 @@ export function AudioCutterTool() {
 
   return (
     <ToolPanel>
-      <FileDropZone accept="audio/*" onFiles={(files) => setFile(files[0])} />
+      <FileDropZone
+        accept="audio/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField label="Start (seconds)" value={start} onChange={setStart} min={0} />
         <NumberField label="Duration (seconds)" value={duration} onChange={setDuration} min={1} />

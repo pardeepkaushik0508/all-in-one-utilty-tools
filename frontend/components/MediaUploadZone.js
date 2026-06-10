@@ -41,7 +41,16 @@ export default function MediaUploadZone({
       {mode === 'camera' && enableCamera ? (
         <CameraCapture onCapture={(file) => addFiles([file])} />
       ) : (
-        <FileDropZone multiple={multiple} accept={accept} onFiles={addFiles} />
+        <FileDropZone
+          multiple={multiple}
+          accept={accept}
+          onFiles={addFiles}
+          selectedFiles={files}
+          onRemoveFile={(index) => {
+            const next = files.filter((_, fileIndex) => fileIndex !== index);
+            onFilesChange(next);
+          }}
+        />
       )}
     </div>
   );

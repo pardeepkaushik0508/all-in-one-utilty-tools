@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { isCloudinaryEnabled } = require('./utils/cloudinary');
 const { apiLimiter, uploadLimiter } = require('./middleware/rateLimit');
@@ -14,6 +14,8 @@ const socialRoutes = require('./api/socialRoutes');
 const utilityRoutes = require('./api/utilityRoutes');
 const securityRoutes = require('./api/securityRoutes');
 const fileRoutes = require('./api/fileRoutes');
+const contentRoutes = require('./api/contentRoutes');
+const adminRoutes = require('./api/adminRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -56,7 +58,12 @@ app.use(apiLimiter);
 app.use('/downloads', express.static(path.join(__dirname, 'processed')));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', message: 'All-in-One Utility Tools API running' });
+  res.json({
+    status: 'ok',
+    message: 'All-in-One Utility Tools API running',
+    gemini: Boolean(process.env.GEMINI_API_KEY),
+    ffmpeg: require('./utils/binaries').resolveFfmpegPath()
+  });
 });
 
 app.get('/', (_req, res) => {
@@ -76,6 +83,8 @@ app.use('/api/social', socialRoutes);
 app.use('/api/utility', utilityRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

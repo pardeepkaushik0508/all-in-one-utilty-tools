@@ -22,14 +22,20 @@ export default function BlogIndexPage() {
       description="Guides, tips, and tutorials for PDF, image, video, AI, developer, and security tools. Learn how to use UtilityTools for free."
       canonical="/blog"
     >
-      <header className="animate-fade-up mb-10">
-        <span className="badge">Blog</span>
-        <h1 className="section-title mt-4">
-          Guides & <span className="gradient-text">insights</span>
-        </h1>
-        <p className="section-subtitle mt-4 max-w-2xl">
-          Practical articles about every tool on UtilityTools — written to help you work faster.
-        </p>
+      <header className="seo-divider animate-fade-up mb-10 text-left sm:text-center">
+        <div className="seo-divider-glow" />
+        <div className="seo-divider-inner !max-w-3xl sm:!text-center">
+          <span className="badge">
+            <span className="badge-dot" />
+            Blog
+          </span>
+          <h1 className="seo-divider-title mt-4">
+            Guides & <span className="gradient-text">insights</span>
+          </h1>
+          <p className="seo-divider-text">
+            Practical articles about every tool on UtilityTools — written to help you work faster.
+          </p>
+        </div>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-3">

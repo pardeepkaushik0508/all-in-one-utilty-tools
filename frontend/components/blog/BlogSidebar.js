@@ -101,7 +101,7 @@ export default function BlogSidebar({
 
       <div className="card p-5">
         <h3 className="sidebar-heading">Explore tools</h3>
-        <p className="text-sm text-muted">29 free utilities — PDF, image, video, AI, and more.</p>
+        <p className="text-sm text-muted">34 free utilities — PDF, image, video, AI, and more.</p>
         <Link href="/#tools" className="btn-secondary mt-4 w-full !justify-center">
           Browse all tools
         </Link>
