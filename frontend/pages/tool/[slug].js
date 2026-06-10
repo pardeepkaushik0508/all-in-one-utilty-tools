@@ -1,7 +1,12 @@
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
+import ShareButton from '../../components/ShareButton';
 import ToolSeoContent from '../../components/seo/ToolSeoContent';
+import RelatedTools from '../../components/tools/RelatedTools';
 import { rendererBySlug } from '../../components/tools';
+import { addRecentTool } from '../../hooks/useRecentTools';
+import { trackToolUsage } from '../../hooks/useToolAnalytics';
 import { SITE_URL } from '../../components/SEO';
 import { fetchRemoteToolSeoOverride, getToolSeoContent } from '../../utils/seo/getToolSeo';
 import {
@@ -36,6 +41,11 @@ export default function ToolPage({ tool, seo }) {
 
   const ToolRenderer = rendererBySlug[tool.slug] || PlaceholderTool;
   const meta = getCategoryMeta(tool.category);
+
+  useEffect(() => {
+    trackToolUsage(tool.slug);
+    addRecentTool(tool);
+  }, [tool]);
 
   const breadcrumbJsonLd = buildBreadcrumbSchema([
     { name: 'Home', url: SITE_URL },
@@ -76,6 +86,9 @@ export default function ToolPage({ tool, seo }) {
             <span className="badge">{tool.category}</span>
             <h1 className="tool-hero-title">{tool.name}</h1>
             <p className="tool-hero-desc">{tool.description}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <ShareButton title={tool.name} />
+            </div>
           </div>
         </div>
       </header>
@@ -83,6 +96,8 @@ export default function ToolPage({ tool, seo }) {
       <section aria-label={`${tool.name} tool`}>
         <ToolRenderer />
       </section>
+
+      <RelatedTools tool={tool} />
 
       <ToolSeoContent tool={tool} seo={seo} />
     </Layout>

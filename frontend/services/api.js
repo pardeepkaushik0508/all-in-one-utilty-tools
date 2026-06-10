@@ -224,6 +224,8 @@ export const generateAiContent = (prompt, imageFile) => {
 export const minifyCode = (code, type) => postJson('/api/developer/minify', { code, type });
 export const htmlToText = (html) => postJson('/api/developer/html-to-text', { html });
 export const beautifyCss = (css) => postJson('/api/developer/css-beautify', { css });
+export const apiRequestTest = (url, method, body) => postJson('/api/developer/api-test', { url, method, body });
+export const httpHeaderCheck = (url) => postJson('/api/developer/http-headers', { url });
 
 // Social
 export const downloadInstagram = (url) => postJson('/api/social/instagram', { url });
@@ -235,6 +237,15 @@ export const generatePassword = (length, useSymbols) =>
   postJson('/api/security/password-generator', { length, useSymbols });
 export const checkPasswordStrength = (password) => postJson('/api/security/password-strength', { password });
 export const generateHash = (text) => postJson('/api/security/hash', { text });
+export const hashVerify = (text, hash, algorithm) =>
+  postJson('/api/security/hash-verify', { text, hash, algorithm });
+export const dnsLookup = (domain) => postJson('/api/security/dns-lookup', { domain });
+export const sslCertificateCheck = (domain) => postJson('/api/security/ssl-check', { domain });
+export const securityHeadersCheck = (url) => postJson('/api/security/security-headers', { url });
+export const robotsTxtCheck = (url) => postJson('/api/security/robots-txt', { url });
+export const portScan = (domain) => postJson('/api/security/port-scan', { domain });
+export const ipLookup = (domain) => postJson('/api/security/ip-lookup', { domain });
+export const urlSafetyCheck = (url) => postJson('/api/security/url-safety', { url });
 
 // Utility
 export const convertUnit = (payload) => postJson('/api/utility/unit-convert', payload);

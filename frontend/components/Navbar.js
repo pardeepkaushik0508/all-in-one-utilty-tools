@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import NavMegaMenu from './NavMegaMenu';
 import ThemeToggle from './ThemeToggle';
 
 const navLinks = [
   { href: '/', label: 'Home', match: (path) => path === '/' },
-  { href: '/#tools', label: 'Tools', match: (path) => path === '/' || path.startsWith('/tool') },
   { href: '/blog', label: 'Blog', match: (path) => path.startsWith('/blog') },
   { href: '/about', label: 'About', match: (path) => path === '/about' },
   { href: '/contact', label: 'Contact', match: (path) => path === '/contact' }
 ];
+
+const toolsMatch = (path) => path.startsWith('/tool') || path.startsWith('/category');
 
 function isActive(link, pathname) {
   return link.match(pathname);
@@ -18,10 +20,22 @@ function isActive(link, pathname) {
 export default function Navbar() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [megaOpen, setMegaOpen] = useState(false);
+  const megaRef = useRef(null);
+  const closeTimer = useRef(null);
 
   useEffect(() => {
     setMenuOpen(false);
+    setMegaOpen(false);
   }, [router.pathname]);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (megaRef.current && !megaRef.current.contains(e.target)) setMegaOpen(false);
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
@@ -29,6 +43,19 @@ export default function Navbar() {
       document.body.style.overflow = '';
     };
   }, [menuOpen]);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  const openMega = () => {
+    clearTimeout(closeTimer.current);
+    setMegaOpen(true);
+  };
+
+  const scheduleCloseMega = () => {
+    closeTimer.current = setTimeout(() => setMegaOpen(false), 120);
+  };
+
+  const toolsActive = toolsMatch(router.pathname);
 
   return (
     <header className="sticky top-0 z-50 px-4 pt-3 sm:px-6 sm:pt-4">
@@ -52,7 +79,7 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden items-center gap-0.5 md:flex">
-            {navLinks.map((link) => (
+            {navLinks.slice(0, 1).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -61,8 +88,45 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            <div
+              className="relative"
+              ref={megaRef}
+              onMouseEnter={openMega}
+              onMouseLeave={scheduleCloseMega}
+            >
+              <button
+                type="button"
+                className={`nav-pill inline-flex items-center gap-1 ${megaOpen || toolsActive ? 'nav-pill-active' : ''}`}
+                onClick={() => setMegaOpen((open) => !open)}
+                aria-expanded={megaOpen}
+                aria-haspopup="true"
+              >
+                Tools
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className={`h-4 w-4 transition-transform duration-200 ${megaOpen ? 'rotate-180' : ''}`}
+                  aria-hidden
+                >
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {megaOpen && <NavMegaMenu onClose={() => setMegaOpen(false)} />}
+            </div>
+
+            {navLinks.slice(1).map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`nav-pill ${isActive(link, router.pathname) ? 'nav-pill-active' : ''}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
             <ThemeToggle className="ml-1" />
-            <Link href="/#tools" className="btn-primary ml-2 !px-4 !py-2 !text-xs">
+            <Link href="/#tools" className="btn-primary btn-nav-cta ml-2">
               Explore Tools
             </Link>
           </div>
@@ -95,7 +159,7 @@ export default function Navbar() {
               aria-hidden="true"
             />
             <div
-              className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-theme p-2 animate-slide-down md:hidden"
+              className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[80vh] overflow-y-auto rounded-2xl border border-theme p-2 animate-slide-down md:hidden"
               style={{ background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-nav)' }}
             >
               {navLinks.map((link) => (
@@ -108,12 +172,19 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                href="/#tools"
+                className={`mobile-nav-link ${toolsActive ? 'mobile-nav-link-active' : ''}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                All Tools
+              </Link>
               <div className="grid grid-cols-2 gap-2 px-2 pt-2">
                 <Link href="/blog" className="btn-secondary w-full !justify-center !text-xs" onClick={() => setMenuOpen(false)}>
                   Blog
                 </Link>
                 <Link href="/#tools" className="btn-primary w-full !text-xs" onClick={() => setMenuOpen(false)}>
-                  All Tools
+                  Explore Tools
                 </Link>
               </div>
             </div>

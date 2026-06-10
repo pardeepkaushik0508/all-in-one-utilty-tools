@@ -1,5 +1,13 @@
 const express = require('express');
 const crypto = require('crypto');
+const {
+  dnsLookup,
+  securityHeadersCheck,
+  sslCertificateCheck,
+  robotsTxtCheck,
+  safePortScan,
+  ipLookup
+} = require('../services/securityNetworkService');
 
 const router = express.Router();
 
@@ -44,8 +52,65 @@ router.post('/hash', (req, res) => {
 
   res.json({
     md5: crypto.createHash('md5').update(text).digest('hex'),
-    sha256: crypto.createHash('sha256').update(text).digest('hex')
+    sha1: crypto.createHash('sha1').update(text).digest('hex'),
+    sha256: crypto.createHash('sha256').update(text).digest('hex'),
+    sha512: crypto.createHash('sha512').update(text).digest('hex')
   });
+});
+
+router.post('/hash-verify', (req, res) => {
+  const { text, hash, algorithm = 'sha256' } = req.body;
+  if (!text || !hash) return res.status(400).json({ error: 'Text and hash are required.' });
+  const computed = crypto.createHash(algorithm).update(text).digest('hex');
+  res.json({ match: computed.toLowerCase() === String(hash).toLowerCase(), computed });
+});
+
+router.post('/dns-lookup', async (req, res, next) => {
+  try {
+    const result = await dnsLookup(req.body.domain);
+    res.json({ result });
+  } catch (e) { next(e); }
+});
+
+router.post('/ssl-check', async (req, res, next) => {
+  try {
+    const result = await sslCertificateCheck(req.body.domain);
+    res.json({ result });
+  } catch (e) { next(e); }
+});
+
+router.post('/security-headers', async (req, res, next) => {
+  try {
+    const result = await securityHeadersCheck(req.body.url);
+    res.json({ result });
+  } catch (e) { next(e); }
+});
+
+router.post('/robots-txt', async (req, res, next) => {
+  try {
+    const result = await robotsTxtCheck(req.body.url);
+    res.json({ result });
+  } catch (e) { next(e); }
+});
+
+router.post('/port-scan', async (req, res, next) => {
+  try {
+    const result = await safePortScan(req.body.domain);
+    res.json({ result, disclaimer: 'Safe scan limited to ports 80 and 443 only.' });
+  } catch (e) { next(e); }
+});
+
+router.post('/ip-lookup', async (req, res, next) => {
+  try {
+    const result = await ipLookup(req.body.domain);
+    res.json({ result });
+  } catch (e) { next(e); }
+});
+
+router.post('/url-safety', (req, res) => {
+  const url = String(req.body.url || '');
+  const suspicious = /(login|verify|free|win|click|bit\.ly)/i.test(url);
+  res.json({ url, risk: suspicious ? 'medium' : 'low', message: suspicious ? 'URL contains suspicious patterns. Proceed with caution.' : 'No obvious suspicious patterns detected.' });
 });
 
 module.exports = router;

@@ -7,6 +7,8 @@ import FeaturesStrip from '../components/home/FeaturesStrip';
 import ToolsSection from '../components/home/ToolsSection';
 import BlogSection from '../components/home/BlogSection';
 import CtaBanner from '../components/home/CtaBanner';
+import { FeaturedToolsSection, RecentToolsSection, TrendingToolsSection } from '../components/home/ToolHighlights';
+import { trackSearchQuery } from '../hooks/useToolAnalytics';
 import { getAllBlogPosts } from '../utils/blogPosts';
 import { tools } from '../utils/tools';
 
@@ -22,6 +24,7 @@ export default function HomePage() {
 
   const filteredTools = useMemo(() => {
     const query = debouncedSearch.toLowerCase();
+    if (query) trackSearchQuery(query);
     return tools.filter((tool) => {
       const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
       const matchesSearch = !query || `${tool.name} ${tool.description}`.toLowerCase().includes(query);
@@ -41,6 +44,12 @@ export default function HomePage() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
+
+      <FeaturedToolsSection />
+
+      <TrendingToolsSection />
+
+      <RecentToolsSection />
 
       <FeaturesStrip />
 

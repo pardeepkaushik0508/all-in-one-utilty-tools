@@ -1,11 +1,7 @@
 import Link from 'next/link';
 import { getCategoryMeta } from '../../utils/categoryMeta';
+import { CATEGORY_SLUGS } from '../../utils/suiteToolsRegistry';
 import { tools, toolCategories } from '../../utils/tools';
-
-const CATEGORY_PAGE_SLUGS = {
-  'Text Tools': '/category/text-tools',
-  'Image Tools': '/category/image-tools'
-};
 
 const SHORT_LABELS = {
   'PDF Tools': 'PDF',
@@ -38,7 +34,7 @@ export default function CategoryShowcase({ selectedCategory, onSelectCategory })
           </h2>
           <p className="home-section-desc">8 categories covering every file, text, and code task.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="home-pill-row">
           <button
             type="button"
             onClick={() => handleSelect('All')}
@@ -46,8 +42,9 @@ export default function CategoryShowcase({ selectedCategory, onSelectCategory })
           >
             View all
           </button>
-          <Link href="/category/text-tools" className="home-view-all">Text suite</Link>
-          <Link href="/category/image-tools" className="home-view-all">Image suite</Link>
+          {Object.entries(CATEGORY_SLUGS).slice(0, 4).map(([name, slug]) => (
+            <Link key={slug} href={`/category/${slug}`} className="home-view-all">{name.replace(' Tools', '')}</Link>
+          ))}
         </div>
       </div>
 

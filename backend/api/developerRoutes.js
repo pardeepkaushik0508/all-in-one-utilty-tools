@@ -1,5 +1,6 @@
 const express = require('express');
 const { minifyCode, htmlToPlainText, beautifyCss } = require('../services/developerService');
+const { apiRequestTest, httpHeaderCheck } = require('../services/developerNetworkService');
 
 const router = express.Router();
 
@@ -30,6 +31,20 @@ router.post('/css-beautify', (req, res) => {
 
   const { output } = beautifyCss(css);
   return res.json({ message: 'CSS beautified successfully.', output });
+});
+
+router.post('/api-test', async (req, res, next) => {
+  try {
+    const result = await apiRequestTest(req.body.url, req.body.method, req.body.body);
+    res.json({ result });
+  } catch (e) { next(e); }
+});
+
+router.post('/http-headers', async (req, res, next) => {
+  try {
+    const result = await httpHeaderCheck(req.body.url);
+    res.json({ result });
+  } catch (e) { next(e); }
 });
 
 module.exports = router;

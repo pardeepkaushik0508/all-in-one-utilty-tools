@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import MobileBottomNav from './MobileBottomNav';
 import SEO, { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from './SEO';
 import { useTheme } from '../context/ThemeContext';
 
@@ -70,6 +71,7 @@ export default function Layout({
         </main>
 
         <Footer />
+        <MobileBottomNav />
       </div>
     </>
   );

@@ -137,11 +137,23 @@ export default function TextToolShell({ config }) {
 
       {output && (
         <div className="animate-fade-in space-y-3">
-          <TextAreaField label="Result" value={output} onChange={setOutput} rows={10} readOnly />
-          <ToolActions>
-            <CopyButton text={output} onCopied={setStatus} />
-            <DownloadTextButton text={output} filename={config.downloadFilename || 'result.txt'} />
-          </ToolActions>
+          {config.mode === 'qr' ? (
+            <div className="flex flex-col items-center gap-4">
+              <img src={output} alt="Generated QR code" className="h-64 w-64 rounded-xl border border-theme" />
+              <ToolActions>
+                <a href={output} download="qrcode.png" className="btn-secondary">Download QR</a>
+                <CopyButton text={output} onCopied={setStatus} />
+              </ToolActions>
+            </div>
+          ) : (
+            <>
+              <TextAreaField label="Result" value={output} onChange={setOutput} rows={10} readOnly />
+              <ToolActions>
+                <CopyButton text={output} onCopied={setStatus} />
+                <DownloadTextButton text={output} filename={config.downloadFilename || 'result.txt'} />
+              </ToolActions>
+            </>
+          )}
         </div>
       )}
 

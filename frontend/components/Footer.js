@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { SITE_NAME } from './SEO';
+import { CATEGORY_COUNT, getToolCountLabel, TOOL_COUNT } from '../utils/siteStats';
+import { getAllBlogPosts } from '../utils/blogPosts';
 
 const footerLinks = {
   Tools: [
@@ -17,6 +19,8 @@ const footerLinks = {
 };
 
 export default function Footer() {
+  const articleCount = getAllBlogPosts().length;
+
   return (
     <footer className="relative border-t border-theme">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -26,7 +30,7 @@ export default function Footer() {
               Utility<span className="gradient-text">Tools</span>
             </p>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
-              33 free online tools for PDF, image, video, text, and developers. Simple, fast, and private.
+              {getToolCountLabel()} free online tools for PDF, image, video, text, developers, security, and more. Simple, fast, and private.
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs text-muted">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -63,9 +67,9 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} {SITE_NAME}. Free forever. No sign-up required.
           </p>
           <div className="flex flex-wrap gap-4 text-xs text-muted">
-            <span>34 tools</span>
-            <span>8 categories</span>
-            <span>20+ articles</span>
+            <span>{TOOL_COUNT} tools</span>
+            <span>{CATEGORY_COUNT} categories</span>
+            <span>{articleCount}+ articles</span>
           </div>
         </div>
       </div>

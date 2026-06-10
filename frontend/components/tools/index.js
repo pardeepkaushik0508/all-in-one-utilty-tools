@@ -1,7 +1,11 @@
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../LoadingSpinner';
+import { developerSuiteRendererMap } from './developer-suite';
 import { imageSuiteRendererMap } from './image-suite';
+import { securitySuiteRendererMap } from './security-suite';
+import { socialSuiteRendererMap } from './social-suite';
 import { textSuiteRendererMap } from './text-suite';
+import { utilitySuiteRendererMap } from './utility-suite';
 
 function ToolLoading() {
   return (
@@ -55,10 +59,14 @@ const coreRenderers = {
 };
 
 const suiteRenderers = Object.fromEntries(
-  [...Object.entries(textSuiteRendererMap), ...Object.entries(imageSuiteRendererMap)].map(([slug, Component]) => [
-    slug,
-    Component
-  ])
+  [
+    ...Object.entries(textSuiteRendererMap),
+    ...Object.entries(imageSuiteRendererMap),
+    ...Object.entries(developerSuiteRendererMap),
+    ...Object.entries(securitySuiteRendererMap),
+    ...Object.entries(utilitySuiteRendererMap),
+    ...Object.entries(socialSuiteRendererMap)
+  ].map(([slug, Component]) => [slug, Component])
 );
 
 export const rendererBySlug = {

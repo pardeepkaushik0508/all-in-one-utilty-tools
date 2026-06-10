@@ -3,7 +3,18 @@ import { blogPosts } from '../utils/blogPosts';
 import { SITE_URL } from '../components/SEO';
 
 function generateSiteMap() {
-  const staticPages = ['', '/about', '/contact', '/blog', '/category/text-tools', '/category/image-tools'];
+  const staticPages = [
+    '',
+    '/about',
+    '/contact',
+    '/blog',
+    '/category/text-tools',
+    '/category/image-tools',
+    '/category/developer-tools',
+    '/category/security-tools',
+    '/category/utility-tools',
+    '/category/social-media-tools'
+  ];
   const today = new Date().toISOString().split('T')[0];
 
   const staticUrls = staticPages

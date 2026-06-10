@@ -20,6 +20,30 @@ const CATEGORY_PAGES = {
     category: 'Image Tools',
     description: 'Free online image utilities — compress, resize, crop, convert, edit, and create social media graphics. Upload, preview, and download in seconds.',
     eyebrow: '40+ image utilities'
+  },
+  'developer-tools': {
+    title: 'Developer Tools',
+    category: 'Developer Tools',
+    description: 'JSON, XML, JWT, regex, hash, encoding, formatting, and API testing tools for developers. Fast, browser-based utilities with optional server-side network checks.',
+    eyebrow: '35+ developer utilities'
+  },
+  'security-tools': {
+    title: 'Security Tools',
+    category: 'Security Tools',
+    description: 'Password generators, hash tools, JWT inspectors, SSL checks, DNS lookup, security headers, and safe network scanners for security professionals.',
+    eyebrow: '25+ security utilities'
+  },
+  'utility-tools': {
+    title: 'Utility Tools',
+    category: 'Utility Tools',
+    description: 'Calculators, converters, timers, QR codes, random generators, and everyday productivity utilities — free and instant.',
+    eyebrow: '30+ utility tools'
+  },
+  'social-media-tools': {
+    title: 'Social Media Tools',
+    category: 'Social Media Tools',
+    description: 'Caption generators, hashtag tools, bio writers, YouTube helpers, engagement calculators, and social share previews.',
+    eyebrow: '20+ social utilities'
   }
 };
 
