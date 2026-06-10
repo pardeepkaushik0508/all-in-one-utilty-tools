@@ -177,7 +177,7 @@ async function downloadDirectVideo(videoUrl) {
   const response = await axios.get(videoUrl, {
     responseType: 'arraybuffer',
     timeout: 45000,
-    maxContentLength: 50 * 1024 * 1024,
+    maxContentLength: 100 * 1024 * 1024,
     headers: { 'User-Agent': 'All-in-One-Utility-Tools/1.0' },
     maxRedirects: 5,
     validateStatus: (status) => status >= 200 && status < 400

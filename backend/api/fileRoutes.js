@@ -42,7 +42,11 @@ router.get('/download', async (req, res, next) => {
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', remote.headers['content-type'] || 'application/octet-stream');
 
-        remote.data.on('error', next);
+        remote.data.on('error', (streamError) => {
+          if (!res.headersSent) return next(streamError);
+          console.error('[files/download] stream error:', streamError.message);
+          res.destroy();
+        });
         return remote.data.pipe(res);
       } catch (privateError) {
         const resource = await cloudinary.api.resource(publicId, {
@@ -61,7 +65,11 @@ router.get('/download', async (req, res, next) => {
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', remote.headers['content-type'] || 'application/octet-stream');
 
-        remote.data.on('error', next);
+        remote.data.on('error', (streamError) => {
+          if (!res.headersSent) return next(streamError);
+          console.error('[files/download] stream error:', streamError.message);
+          res.destroy();
+        });
         return remote.data.pipe(res);
       }
     }

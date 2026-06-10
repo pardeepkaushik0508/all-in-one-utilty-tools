@@ -13,7 +13,7 @@ const featuredPosts = getAllBlogPosts().slice(0, 3);
 const stats = [
   { label: 'Tools', value: '29' },
   { label: 'Categories', value: '8' },
-  { label: 'Max upload', value: '50MB' },
+  { label: 'Max upload', value: '100MB' },
   { label: 'Price', value: 'Free' }
 ];
 

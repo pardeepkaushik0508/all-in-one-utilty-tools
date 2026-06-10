@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "fuser -k 5000/tcp 2>/dev/null || true; sleep 0.3; nodemon server.js",
     "start": "node server.js",
     "postinstall": "node ../node_modules/youtube-dl-exec/scripts/postinstall.js || true"
   },

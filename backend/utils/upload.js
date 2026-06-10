@@ -27,10 +27,13 @@ function createUploader(maxFileSize) {
   });
 }
 
-const defaultUpload = createUploader(10 * 1024 * 1024);
-const mediaUpload = createUploader(50 * 1024 * 1024);
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
+
+const defaultUpload = createUploader(MAX_UPLOAD_BYTES);
+const mediaUpload = createUploader(MAX_UPLOAD_BYTES);
 
 module.exports = defaultUpload;
 module.exports.mediaUpload = mediaUpload;
 module.exports.uploadDir = uploadDir;
 module.exports.processedDir = processedDir;
+module.exports.MAX_UPLOAD_BYTES = MAX_UPLOAD_BYTES;

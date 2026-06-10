@@ -44,7 +44,7 @@ export default function FileDropZone({ multiple = false, accept, onFiles }) {
       <p className="text-sm font-medium text-heading">
         {isDragging ? 'Release to upload' : 'Drag & drop or click to browse'}
       </p>
-      <p className="mt-1 text-xs text-muted">Max 10MB · 50MB for media</p>
+      <p className="mt-1 text-xs text-muted">Max 100MB per file</p>
     </div>
   );
 }

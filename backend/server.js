@@ -18,6 +18,14 @@ const fileRoutes = require('./api/fileRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled promise rejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+});
+
 // Railway / reverse-proxy — required for rate limiting and correct client IP
 app.set('trust proxy', 1);
 
@@ -64,7 +72,7 @@ app.use((err, _req, res, _next) => {
   console.error(err);
 
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({ error: 'File too large. Check upload limits for this tool.' });
+    return res.status(400).json({ error: 'File too large. Maximum upload size is 100MB.' });
   }
 
   return res.status(err.status || 500).json({
@@ -79,7 +87,11 @@ const server = app.listen(PORT, () => {
 
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Stop the other process or set PORT in backend/.env`);
+    console.error(
+      `Port ${PORT} is already in use. Another backend instance is running.\n` +
+        'Fix: run only one dev server — use "npm run dev" from the project root, or stop the other process:\n' +
+        '  fuser -k 5000/tcp'
+    );
     process.exit(1);
   }
   throw error;
