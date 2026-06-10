@@ -3,6 +3,6 @@
 buildCommand = "npm install && NEXT_PUBLIC_BACKEND_URL=https://aio-tools-backend-production.up.railway.app NEXT_PUBLIC_SITE_URL=https://aio-tools-frontend-production.up.railway.app BACKEND_URL=https://aio-tools-backend-production.up.railway.app npm run build"
 
 [deploy]
-startCommand = "bash scripts/start-frontend.sh"
+startCommand = "bash scripts/start-railway.sh"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

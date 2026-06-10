@@ -59,6 +59,14 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'All-in-One Utility Tools API running' });
 });
 
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'aio-tools-backend',
+    status: 'ok',
+    health: '/api/health'
+  });
+});
+
 app.use('/api/pdf', uploadLimiter, pdfRoutes);
 app.use('/api/image', uploadLimiter, imageRoutes);
 app.use('/api/media', uploadLimiter, mediaRoutes);
@@ -82,7 +90,7 @@ app.use((err, _req, res, _next) => {
 });
 
 const server = app.listen(PORT, HOST, () => {
-  console.log(`Backend listening on http://${HOST}:${PORT}`);
+  console.log(`[aio-tools-backend] Express API listening on http://${HOST}:${PORT}`);
   console.log(`File storage: ${isCloudinaryEnabled() ? 'Cloudinary' : 'local (/downloads)'}`);
 });
 

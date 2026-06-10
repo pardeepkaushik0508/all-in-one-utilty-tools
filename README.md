@@ -151,11 +151,24 @@ Frontend production URLs are in `frontend/.env.production` (used at build time f
 **Verify after deploy**
 
 ```bash
-curl https://aio-tools-backend-production.up.railway.app/api/health
-curl https://aio-tools-frontend-production.up.railway.app/api/health
+bash scripts/verify-deploy.sh
 ```
 
-Both should return `{"status":"ok",...}`.
+Backend root must return `{"service":"aio-tools-backend",...}` — NOT a Next.js HTML page.
+
+If backend URL shows "Page Not Found | All-in-One Utility Tools", the backend Railway service is running the **frontend** by mistake. Fix:
+
+1. Backend service → Settings → Config file path: `railway.backend.toml`
+2. Backend service → Variables: `APP_ROLE=backend`
+3. Frontend service → Variables: `APP_ROLE=frontend`
+4. Redeploy both services
+
+```bash
+curl https://aio-tools-backend-production.up.railway.app/api/health
+curl https://aio-tools-backend-production.up.railway.app/
+```
+
+Both should return JSON, not HTML.
 
 **Important:** Railway Start Command must be exactly `npm run start` or `npm run start:backend` — no comments.
 

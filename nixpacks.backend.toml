@@ -6,4 +6,4 @@ nixPkgs = ["nodejs_20", "ffmpeg"]
 cmds = ["npm install"]
 
 [start]
-cmd = "npm run start:backend"
+cmd = "bash scripts/start-railway.sh"
