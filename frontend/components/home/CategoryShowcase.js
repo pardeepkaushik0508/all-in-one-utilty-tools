@@ -1,5 +1,11 @@
+import Link from 'next/link';
 import { getCategoryMeta } from '../../utils/categoryMeta';
 import { tools, toolCategories } from '../../utils/tools';
+
+const CATEGORY_PAGE_SLUGS = {
+  'Text Tools': '/category/text-tools',
+  'Image Tools': '/category/image-tools'
+};
 
 const SHORT_LABELS = {
   'PDF Tools': 'PDF',
@@ -32,13 +38,17 @@ export default function CategoryShowcase({ selectedCategory, onSelectCategory })
           </h2>
           <p className="home-section-desc">8 categories covering every file, text, and code task.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => handleSelect('All')}
-          className={`home-view-all ${selectedCategory === 'All' ? 'home-view-all--active' : ''}`}
-        >
-          View all
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => handleSelect('All')}
+            className={`home-view-all ${selectedCategory === 'All' ? 'home-view-all--active' : ''}`}
+          >
+            View all
+          </button>
+          <Link href="/category/text-tools" className="home-view-all">Text suite</Link>
+          <Link href="/category/image-tools" className="home-view-all">Image suite</Link>
+        </div>
       </div>
 
       <div className="home-category-grid">

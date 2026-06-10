@@ -159,6 +159,17 @@ export const convertImage = (file, format) => {
   return postForm('/api/image/convert', formData);
 };
 
+export const processImage = (file, options = {}) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      formData.append(key, String(value));
+    }
+  });
+  return postForm('/api/image/process', formData);
+};
+
 export const imageToText = (file) => {
   const formData = new FormData();
   formData.append('file', file);

@@ -3,7 +3,7 @@ import { blogPosts } from '../utils/blogPosts';
 import { SITE_URL } from '../components/SEO';
 
 function generateSiteMap() {
-  const staticPages = ['', '/about', '/contact', '/blog'];
+  const staticPages = ['', '/about', '/contact', '/blog', '/category/text-tools', '/category/image-tools'];
   const today = new Date().toISOString().split('T')[0];
 
   const staticUrls = staticPages

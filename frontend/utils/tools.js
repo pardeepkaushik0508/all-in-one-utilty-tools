@@ -1,3 +1,5 @@
+import { buildSuiteToolEntries } from './suiteToolsRegistry';
+
 export const toolCategories = [
   'PDF Tools',
   'Image Tools',
@@ -9,7 +11,7 @@ export const toolCategories = [
   'Utility Tools'
 ];
 
-export const tools = [
+const baseTools = [
   { name: 'Merge PDF', slug: 'merge-pdf', category: 'PDF Tools', description: 'Combine multiple PDF files into one.' },
   { name: 'Split PDF', slug: 'split-pdf', category: 'PDF Tools', description: 'Extract selected pages from PDF.' },
   { name: 'Compress PDF', slug: 'compress-pdf', category: 'PDF Tools', description: 'Reduce PDF file size.' },
@@ -52,5 +54,10 @@ export const tools = [
   { name: 'EMI Calculator', slug: 'emi-calculator', category: 'Utility Tools', description: 'Compute loan installments.' },
   { name: 'Currency Converter', slug: 'currency-converter', category: 'Utility Tools', description: 'Live rates via external API.' }
 ];
+
+const existingSlugs = new Set(baseTools.map((tool) => tool.slug));
+const suiteToolEntries = buildSuiteToolEntries(existingSlugs);
+
+export const tools = [...baseTools, ...suiteToolEntries];
 
 export const findToolBySlug = (slug) => tools.find((tool) => tool.slug === slug);

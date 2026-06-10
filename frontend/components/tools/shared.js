@@ -93,6 +93,45 @@ export function ToolLoading({ loading, text }) {
   return <div className="animate-fade-in"><LoadingSpinner text={text} /></div>;
 }
 
+export function DownloadTextButton({ text, filename = 'result.txt' }) {
+  if (!text) return null;
+
+  const handleDownload = () => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <button type="button" onClick={handleDownload} className="btn-secondary">
+      Download
+    </button>
+  );
+}
+
+export function DownloadBlobButton({ blob, filename = 'download.png', label = 'Download' }) {
+  if (!blob) return null;
+
+  const handleDownload = () => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <button type="button" onClick={handleDownload} className="btn-success">
+      {label}
+    </button>
+  );
+}
+
 export function CopyButton({ text, onCopied }) {
   if (!text) return null;
 
@@ -112,7 +151,7 @@ export function CopyButton({ text, onCopied }) {
   );
 }
 
-export function TextAreaField({ label, value, onChange, placeholder, rows = 8 }) {
+export function TextAreaField({ label, value, onChange, placeholder, rows = 8, readOnly = false }) {
   return (
     <label className="block">
       <span className="label-text">{label}</span>
@@ -121,6 +160,7 @@ export function TextAreaField({ label, value, onChange, placeholder, rows = 8 })
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
+        readOnly={readOnly}
         className="input-field font-mono"
       />
     </label>

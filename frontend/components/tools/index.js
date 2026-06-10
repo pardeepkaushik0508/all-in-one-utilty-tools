@@ -1,5 +1,7 @@
 import dynamic from 'next/dynamic';
 import LoadingSpinner from '../LoadingSpinner';
+import { imageSuiteRendererMap } from './image-suite';
+import { textSuiteRendererMap } from './text-suite';
 
 function ToolLoading() {
   return (
@@ -15,8 +17,7 @@ const load = (factory) =>
     ssr: false
   });
 
-// Load each tool on demand — avoids webpack/HMR crashes from bundling all 29 tools together.
-export const rendererBySlug = {
+const coreRenderers = {
   'merge-pdf': load(() => import('./pdf-tools').then((m) => m.MergePdfTool)),
   'split-pdf': load(() => import('./pdf-tools').then((m) => m.SplitPdfTool)),
   'compress-pdf': load(() => import('./pdf-tools').then((m) => m.CompressPdfTool)),
@@ -51,4 +52,16 @@ export const rendererBySlug = {
   'age-calculator': load(() => import('./utility-tools').then((m) => m.AgeCalculatorTool)),
   'emi-calculator': load(() => import('./utility-tools').then((m) => m.EmiCalculatorTool)),
   'currency-converter': load(() => import('./utility-tools').then((m) => m.CurrencyConverterTool))
+};
+
+const suiteRenderers = Object.fromEntries(
+  [...Object.entries(textSuiteRendererMap), ...Object.entries(imageSuiteRendererMap)].map(([slug, Component]) => [
+    slug,
+    Component
+  ])
+);
+
+export const rendererBySlug = {
+  ...coreRenderers,
+  ...suiteRenderers
 };

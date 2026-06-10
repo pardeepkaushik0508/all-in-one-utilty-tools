@@ -6,7 +6,8 @@ const {
   resizeImage,
   convertImage,
   extractTextFromImage,
-  generateAiImage
+  generateAiImage,
+  processImage
 } = require('../services/imageService');
 
 const router = express.Router();
@@ -88,6 +89,19 @@ router.post('/ai-generate', upload.single('referenceImage'), async (req, res, ne
       message: 'Image generated successfully.',
       ...result
     });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/process', upload.single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Please upload an image file.' });
+    }
+
+    const { filename } = await processImage(req.file, req.body);
+    return sendDownload(req, res, { filename, message: 'Image processed successfully.' });
   } catch (error) {
     return next(error);
   }
