@@ -51,17 +51,18 @@ function configureCloudinary() {
 
   const cloudinaryUrl = process.env.CLOUDINARY_URL;
   if (cloudinaryUrl) {
-    if (!cloudinaryUrl.startsWith('cloudinary://')) {
+    if (isPlaceholder(cloudinaryUrl)) {
       console.error(
-        '[Cloudinary] CLOUDINARY_URL is set but does not start with "cloudinary://" — ' +
-          'expected format: cloudinary://<api_key>:<api_secret>@<cloud_name>'
+        '[Cloudinary] CLOUDINARY_URL contains placeholder values — delete it from Railway Variables ' +
+          'and set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET instead.'
       );
       return false;
     }
 
-    if (isPlaceholder(cloudinaryUrl)) {
+    if (!cloudinaryUrl.startsWith('cloudinary://')) {
       console.error(
-        '[Cloudinary] CLOUDINARY_URL contains placeholder values. Set real credentials in Railway Variables.'
+        '[Cloudinary] CLOUDINARY_URL is set but does not start with "cloudinary://" — ' +
+          'expected format: cloudinary://<api_key>:<api_secret>@<cloud_name>'
       );
       return false;
     }
