@@ -8,14 +8,11 @@ const backendUrl =
 
 const nextConfig = {
   reactStrictMode: true,
+  // Do NOT proxy /api/* — multipart uploads fail through the Next.js dev/prod proxy (ECONNRESET).
+  // The browser calls the backend directly via resolveApiUrl() in utils/apiBase.js.
   async rewrites() {
     return {
-      beforeFiles: [
-        {
-          source: '/api/:path*',
-          destination: `${backendUrl}/api/:path*`
-        }
-      ],
+      beforeFiles: [],
       afterFiles: [
         {
           source: '/downloads/:path*',

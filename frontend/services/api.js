@@ -1,11 +1,28 @@
 import { resolveApiUrl } from '../utils/apiBase';
 
 async function parseResponse(res) {
+  const contentType = res.headers.get('content-type') || '';
   let data;
+
   try {
-    data = await res.json();
-  } catch (_error) {
-    throw new Error('Invalid response from server. Is the backend running?');
+    if (contentType.includes('application/json')) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(text.slice(0, 200) || `Request failed (${res.status})`);
+      }
+      throw new Error('Unexpected response from server. Please try again.');
+    }
+  } catch (error) {
+    if (error.message && !error.message.includes('Unexpected response')) {
+      throw error;
+    }
+    throw new Error(
+      res.ok
+        ? 'Unexpected response from server. Please try again.'
+        : `API request failed (${res.status}). Check that the backend service is running.`
+    );
   }
 
   if (!res.ok) {
@@ -21,7 +38,9 @@ async function request(path, options) {
   } catch (error) {
     if (error.name === 'TypeError' || error.message === 'Failed to fetch') {
       throw new Error(
-        'Cannot reach the API server. Start the backend with: npm run dev:backend (or npm run dev:all)'
+        process.env.NODE_ENV === 'production'
+          ? 'Cannot reach the API server. The backend may be down or still deploying.'
+          : 'Cannot reach the API server. Start the backend with: npm run dev:backend (or npm run dev:all)'
       );
     }
     throw error;

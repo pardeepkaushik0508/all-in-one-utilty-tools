@@ -17,6 +17,7 @@ const fileRoutes = require('./api/fileRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled promise rejection:', reason);
@@ -80,10 +81,15 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Backend listening on http://${HOST}:${PORT}`);
   console.log(`File storage: ${isCloudinaryEnabled() ? 'Cloudinary' : 'local (/downloads)'}`);
 });
+
+// Allow time for image/video processing on Railway (default ~2 min proxy timeout).
+server.timeout = 300000;
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 125000;
 
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
