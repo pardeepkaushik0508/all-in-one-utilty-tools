@@ -132,6 +132,11 @@ export function AiContentGeneratorTool() {
         onChange={setPrompt}
         placeholder="Write a product description, blog post, or caption..."
       />
+      <div className="rounded-2xl border border-theme bg-[var(--bg-elevated)] p-3 text-sm text-muted">
+        Powered by <strong className="text-heading">Google Gemini 2.5 Flash</strong> for text generation. Optional
+        image upload lets Gemini analyze visuals in your prompt.
+      </div>
+
       <div className="space-y-2">
         <span className="label-text">Reference image (optional)</span>
         <FileDropZone accept="image/*" onFiles={(files) => setImage(files[0] || null)} />

@@ -538,6 +538,14 @@ html[data-theme='dark'] {
   }
 }
 
+.toast-message {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-card) !important;
+  font-size: 0.875rem !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tool-panel,
   .page-content,

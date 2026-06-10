@@ -11,7 +11,7 @@ import { tools, toolCategories } from '../utils/tools';
 const featuredPosts = getAllBlogPosts().slice(0, 3);
 
 const stats = [
-  { label: 'Tools', value: '29' },
+  { label: 'Tools', value: '33' },
   { label: 'Categories', value: '8' },
   { label: 'Max upload', value: '100MB' },
   { label: 'Price', value: 'Free' }
@@ -41,7 +41,7 @@ export default function HomePage() {
       <section className="mb-10 animate-fade-up lg:mb-14">
         <div className="badge mb-5">
           <span className="badge-dot" />
-          29 tools · Free · No sign-up
+          34 tools · Free · No sign-up
         </div>
 
         <h1 className="section-title max-w-3xl">

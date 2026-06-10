@@ -5,7 +5,8 @@ const {
   compressImage,
   resizeImage,
   convertImage,
-  extractTextFromImage
+  extractTextFromImage,
+  generateAiImage
 } = require('../services/imageService');
 
 const router = express.Router();
@@ -65,6 +66,28 @@ router.post('/ocr', upload.single('file'), async (req, res, next) => {
 
     const { text } = await extractTextFromImage(req.file);
     return res.json({ message: 'Text extracted successfully.', text });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/ai-generate', upload.single('referenceImage'), async (req, res, next) => {
+  try {
+    const prompt = String(req.body.prompt || '').trim();
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required.' });
+    }
+
+    const aspectRatio = String(req.body.aspectRatio || '1:1');
+    const result = await generateAiImage(prompt, {
+      aspectRatio,
+      referenceImage: req.file || null
+    });
+
+    return res.json({
+      message: 'Image generated successfully.',
+      ...result
+    });
   } catch (error) {
     return next(error);
   }

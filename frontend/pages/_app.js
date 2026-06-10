@@ -1,4 +1,5 @@
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '../context/ThemeContext';
 import '../styles/globals.css';
 
@@ -24,6 +25,13 @@ export default function App({ Component, pageProps }) {
   return (
     <ThemeProvider>
       <div className={`${plusJakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: 'toast-message',
+            duration: 3500
+          }}
+        />
         <Component {...pageProps} />
       </div>
     </ThemeProvider>

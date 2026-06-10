@@ -3,6 +3,7 @@ const sharp = require('sharp');
 const Tesseract = require('tesseract.js');
 const { processedDir } = require('../utils/upload');
 const { removeFiles } = require('../utils/fileCleanup');
+const { generateGeminiImage } = require('./geminiService');
 
 async function compressImage(file, options = {}) {
   const quality = Math.min(100, Math.max(1, Number(options.quality || 70)));
@@ -74,9 +75,18 @@ async function extractTextFromImage(file) {
   return { text: (data.text || '').trim() };
 }
 
+async function generateAiImage(prompt, options = {}) {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not configured. Add it to backend/.env and restart the server.');
+  }
+
+  return generateGeminiImage(prompt, options);
+}
+
 module.exports = {
   compressImage,
   resizeImage,
   convertImage,
-  extractTextFromImage
+  extractTextFromImage,
+  generateAiImage
 };

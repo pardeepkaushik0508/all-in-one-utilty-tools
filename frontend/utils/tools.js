@@ -13,11 +13,16 @@ export const tools = [
   { name: 'Merge PDF', slug: 'merge-pdf', category: 'PDF Tools', description: 'Combine multiple PDF files into one.' },
   { name: 'Split PDF', slug: 'split-pdf', category: 'PDF Tools', description: 'Extract selected pages from PDF.' },
   { name: 'Compress PDF', slug: 'compress-pdf', category: 'PDF Tools', description: 'Reduce PDF file size.' },
+  { name: 'Create PDF', slug: 'create-pdf', category: 'PDF Tools', description: 'Create PDF from images, text, or mixed files with page controls.' },
+  { name: 'Edit PDF', slug: 'edit-pdf', category: 'PDF Tools', description: 'Add text, highlights, shapes, images, and drawings to PDF pages.' },
+  { name: 'Delete PDF Pages', slug: 'delete-pdf-pages', category: 'PDF Tools', description: 'Remove pages, preview thumbnails, and download updated PDF.' },
+  { name: 'Scan to PDF', slug: 'scan-to-pdf', category: 'PDF Tools', description: 'Scan documents with camera or uploads and convert to PDF.' },
 
   { name: 'Compress Image', slug: 'compress-image', category: 'Image Tools', description: 'Optimize image size while retaining quality.' },
   { name: 'Resize Image', slug: 'resize-image', category: 'Image Tools', description: 'Resize images by width and height.' },
   { name: 'Convert JPG PNG', slug: 'convert-jpg-png', category: 'Image Tools', description: 'Convert JPG to PNG and vice versa.' },
   { name: 'Image To Text OCR', slug: 'image-to-text', category: 'Image Tools', description: 'Extract text from image using OCR.' },
+  { name: 'AI Image Generator', slug: 'ai-image-generator', category: 'Image Tools', description: 'Create images from text prompts using Google Gemini AI.' },
 
   { name: 'Video To MP3', slug: 'video-to-mp3', category: 'Video/Audio Tools', description: 'Extract mp3 audio from video.' },
   { name: 'Video Compression', slug: 'video-compression', category: 'Video/Audio Tools', description: 'Compress large video files.' },

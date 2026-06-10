@@ -82,6 +82,59 @@ export const compressPdf = (file) => {
   return postForm('/api/pdf/compress', formData);
 };
 
+export const createPdfFromText = ({ text, pageSize, orientation, fontSize }) =>
+  postJson('/api/pdf/create/text', { text, pageSize, orientation, fontSize });
+
+export const createPdfFromImages = (files, options = {}) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) formData.append(key, String(value));
+  });
+  return postForm('/api/pdf/create/images', formData);
+};
+
+export const createPdfFromMixed = (files, options = {}) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) formData.append(key, String(value));
+  });
+  return postForm('/api/pdf/create/mixed', formData);
+};
+
+export const deletePdfPages = (file, range) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('range', range);
+  return postForm('/api/pdf/delete-pages', formData);
+};
+
+export const reorderPdfPages = (file, order, rotations) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('order', order);
+  formData.append('rotations', rotations);
+  return postForm('/api/pdf/reorder', formData);
+};
+
+export const editPdf = (file, annotations, overlayFiles = []) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('annotations', JSON.stringify(annotations));
+  overlayFiles.forEach((overlay) => formData.append('overlays', overlay));
+  return postForm('/api/pdf/edit', formData);
+};
+
+export const scanToPdf = (files, options = {}) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) formData.append(key, String(value));
+  });
+  return postForm('/api/pdf/scan', formData);
+};
+
 // Image
 export const compressImage = (file, quality, width) => {
   const formData = new FormData();
@@ -110,6 +163,14 @@ export const imageToText = (file) => {
   const formData = new FormData();
   formData.append('file', file);
   return postForm('/api/image/ocr', formData);
+};
+
+export const generateAiImage = (prompt, options = {}) => {
+  const formData = new FormData();
+  formData.append('prompt', prompt);
+  if (options.aspectRatio) formData.append('aspectRatio', options.aspectRatio);
+  if (options.referenceImage) formData.append('referenceImage', options.referenceImage);
+  return postForm('/api/image/ai-generate', formData);
 };
 
 // Media

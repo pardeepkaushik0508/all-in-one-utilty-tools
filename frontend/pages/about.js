@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 const features = [
   { title: 'Lightning fast', description: 'Optimized pipelines for PDF, image, and media processing.' },
   { title: 'Privacy first', description: 'Files are processed securely and removed after download.' },
-  { title: 'All-in-one', description: '29 tools across 8 categories in one refined dashboard.' },
+  { title: 'All-in-one', description: '34 tools across 8 categories in one refined dashboard.' },
   { title: 'Free to use', description: 'No account required. Open a tool and start instantly.' }
 ];
 
@@ -11,7 +11,7 @@ export default function AboutPage() {
   return (
     <Layout
       title="About"
-      description="Learn about All-in-One Utility Tools — a free collection of 29 online utilities for PDF, image, video, text, developer, and security tasks."
+      description="Learn about All-in-One Utility Tools — a free collection of 33 online utilities for PDF, image, video, text, developer, and security tasks."
       canonical="/about"
     >
       <header className="animate-fade-up mb-10">
