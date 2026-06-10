@@ -8,16 +8,7 @@ const nextConfig = {
     NEXT_PUBLIC_BACKEND_URL: PRODUCTION_BACKEND,
     NEXT_PUBLIC_SITE_URL: PRODUCTION_FRONTEND
   },
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'aio-tools-backend-production.up.railway.app' }],
-        destination: `${PRODUCTION_FRONTEND}/:path*`,
-        permanent: false
-      }
-    ];
-  },
+  // Browser calls Express directly (see utils/apiBase.js). Only /downloads is proxied here.
   async rewrites() {
     return {
       beforeFiles: [],
