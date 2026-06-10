@@ -38,29 +38,30 @@ export default function ToolsSection({
         />
       </div>
 
-      {filteredTools.length === 0 ? (
-        <div className="home-empty-state">
-          <div className="home-empty-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8">
-              <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <p className="home-empty-title">No tools found</p>
-          <p className="home-empty-desc">Try a different search term or category filter.</p>
-        </div>
-      ) : (
-        <div className="home-tools-grid">
-          {filteredTools.map((tool, index) => (
-            <div
-              key={tool.slug}
-              className="animate-fade-up"
-              style={{ animationDelay: `${Math.min(index, 11) * 40}ms` }}
-            >
-              <ToolCard tool={tool} />
+      <div
+        className="home-tools-results"
+        style={{ '--tool-rows': Math.max(1, Math.ceil(filteredTools.length / 3)) }}
+      >
+        {filteredTools.length === 0 ? (
+          <div className="home-empty-state">
+            <div className="home-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8">
+                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-          ))}
-        </div>
-      )}
+            <p className="home-empty-title">No tools found</p>
+            <p className="home-empty-desc">Try a different search term or category filter.</p>
+          </div>
+        ) : (
+          <div className="home-tools-grid">
+            {filteredTools.map((tool) => (
+              <div key={tool.slug}>
+                <ToolCard tool={tool} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

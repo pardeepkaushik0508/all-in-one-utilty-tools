@@ -382,6 +382,7 @@ html[data-theme='dark'] {
 
   .page-content {
     animation: pageIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    overflow-anchor: none;
   }
 
   .animate-fade-in {
@@ -1463,8 +1464,24 @@ html[data-theme='dark'] {
     box-shadow: var(--shadow-card);
   }
 
+  .home-tools-results {
+    min-height: calc(var(--tool-rows, 4) * 11.5rem);
+    overflow-anchor: none;
+  }
+
+  @media (min-width: 640px) {
+    .home-tools-results {
+      min-height: calc(var(--tool-rows, 4) * 12rem);
+    }
+  }
+
   .home-tools-grid {
     @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5;
+    overflow-anchor: none;
+  }
+
+  .search-bar {
+    overflow-anchor: none;
   }
 
   .home-empty-state {

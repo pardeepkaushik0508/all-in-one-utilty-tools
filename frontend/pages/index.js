@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import useDebouncedValue from '../hooks/useDebouncedValue';
 import Layout from '../components/Layout';
 import HeroSection from '../components/home/HeroSection';
 import CategoryShowcase from '../components/home/CategoryShowcase';
@@ -16,15 +17,17 @@ const HOME_DESCRIPTION =
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 250);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const filteredTools = useMemo(() => {
+    const query = debouncedSearch.toLowerCase();
     return tools.filter((tool) => {
       const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
-      const matchesSearch = `${tool.name} ${tool.description}`.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = !query || `${tool.name} ${tool.description}`.toLowerCase().includes(query);
       return matchesCategory && matchesSearch;
     });
-  }, [search, selectedCategory]);
+  }, [debouncedSearch, selectedCategory]);
 
   return (
     <Layout

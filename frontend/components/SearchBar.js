@@ -1,6 +1,12 @@
 export default function SearchBar({ value, onChange, placeholder = 'Search by name or description...' }) {
+  const preserveScroll = () => {
+    if (typeof window === 'undefined') return;
+    const scrollY = window.scrollY;
+    requestAnimationFrame(() => window.scrollTo(0, scrollY));
+  };
+
   return (
-    <div className="relative">
+    <div className="relative search-bar">
       <svg
         viewBox="0 0 20 20"
         fill="currentColor"
@@ -11,8 +17,11 @@ export default function SearchBar({ value, onChange, placeholder = 'Search by na
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onFocus={preserveScroll}
         placeholder={placeholder}
         className="input-field pl-11 pr-10"
+        autoComplete="off"
+        enterKeyHint="search"
       />
       {value && (
         <button

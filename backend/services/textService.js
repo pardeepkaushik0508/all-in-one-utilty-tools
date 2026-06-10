@@ -115,15 +115,16 @@ async function generateAiContent(prompt, imageFile) {
   }
 
   if (imageFile) {
-    throw new Error('Image-based generation requires GEMINI_API_KEY. Add it to backend/.env and restart the server.');
+    throw new Error(
+      'GEMINI_API_KEY is not configured. Add it to backend/.env (local) or Railway backend Variables (production), then restart the server.'
+    );
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return {
-      output: `Draft based on your prompt:\n\n${prompt}\n\nConfigure GEMINI_API_KEY (recommended) or OPENAI_API_KEY for full AI generation.`,
-      provider: 'local-fallback'
-    };
+    throw new Error(
+      'GEMINI_API_KEY is not configured. Add it to backend/.env (local) or Railway backend Variables (production), then restart the server.'
+    );
   }
 
   const response = await axios.post(

@@ -101,6 +101,14 @@ app.use((err, _req, res, _next) => {
 const server = app.listen(PORT, HOST, () => {
   console.log(`[aio-tools-backend] Express API listening on http://${HOST}:${PORT}`);
   console.log(`File storage: ${isCloudinaryEnabled() ? 'Cloudinary' : 'local (/downloads)'}`);
+  if (!process.env.GEMINI_API_KEY) {
+    console.warn(
+      '[aio-tools-backend] GEMINI_API_KEY is not set — AI content/image tools will fail. ' +
+        'Add it to backend/.env (local) or Railway backend Variables (production).'
+    );
+  } else {
+    console.log(`Gemini: enabled (${process.env.GEMINI_MODEL || 'gemini-2.5-flash'})`);
+  }
 });
 
 // Allow time for image/video processing on Railway (default ~2 min proxy timeout).

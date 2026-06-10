@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
+import useDebouncedValue from '../../hooks/useDebouncedValue';
 import Layout from '../../components/Layout';
 import BlogCard from '../../components/blog/BlogCard';
 import BlogSidebar from '../../components/blog/BlogSidebar';
@@ -8,13 +9,14 @@ import { getAllBlogPosts, searchBlogPosts } from '../../utils/blogPosts';
 export default function BlogIndexPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 250);
   const category = typeof router.query.category === 'string' ? router.query.category : '';
 
   const posts = useMemo(() => {
-    let list = search ? searchBlogPosts(search) : getAllBlogPosts();
+    let list = debouncedSearch ? searchBlogPosts(debouncedSearch) : getAllBlogPosts();
     if (category) list = list.filter((p) => p.category === category);
     return list;
-  }, [search, category]);
+  }, [debouncedSearch, category]);
 
   return (
     <Layout
