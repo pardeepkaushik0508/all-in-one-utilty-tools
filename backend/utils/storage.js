@@ -6,10 +6,6 @@ const { getCloudinary, isCloudinaryEnabled } = require('./cloudinary');
 
 const PROCESSED_FOLDER = 'utility-tools/processed';
 
-function isProduction() {
-  return process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT_NAME);
-}
-
 function getResourceType(filename) {
   const ext = path.extname(filename).toLowerCase();
   if (['.mp4', '.mov', '.avi', '.webm', '.mkv', '.mp3', '.wav', '.m4a', '.aac', '.ogg'].includes(ext)) {
@@ -34,12 +30,6 @@ async function publishProcessedFile(filename) {
   }
 
   if (!isCloudinaryEnabled()) {
-    if (isProduction()) {
-      throw new Error(
-        'Cloudinary is not configured on the server. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your backend environment (Railway variables).'
-      );
-    }
-
     console.log(`[storage] Cloudinary not configured — serving "${localFilename}" from local /downloads/`);
     return {
       downloadUrl: `/downloads/${localFilename}`,
@@ -86,7 +76,14 @@ async function publishProcessedFile(filename) {
       error.error ? JSON.stringify(error.error) : ''
     );
 
-    throw new Error(`Failed to upload result to Cloudinary: ${error.message}`);
+    console.warn(`[storage] Falling back to local download for "${localFilename}"`);
+    return {
+      downloadUrl: `/downloads/${localFilename}`,
+      downloadFilename: localFilename,
+      filename: localFilename,
+      storage: 'local',
+      warning: 'Cloudinary upload failed. File is served locally — set valid Cloudinary credentials on the backend service.'
+    };
   }
 }
 
