@@ -20,7 +20,6 @@ export default function Document() {
             `
           }}
         />
-        <meta name="google-adsense-account" content="ca-pub-5397189085296638"></meta>
       </Head>
       <body>
         <script
