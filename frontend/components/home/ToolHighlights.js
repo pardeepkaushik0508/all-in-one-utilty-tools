@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import useRecentTools from '../../hooks/useRecentTools';
 import { getPopularTools } from '../../hooks/useToolAnalytics';
 import { tools } from '../../utils/tools';
@@ -66,8 +66,14 @@ export function FeaturedToolsSection() {
 }
 
 export function TrendingToolsSection() {
-  const popular = useMemo(() => getPopularTools(6), []);
-  const slugs = popular.length ? popular.map((p) => p.slug) : TRENDING_SLUGS;
+  const [slugs, setSlugs] = useState(TRENDING_SLUGS);
+
+  useEffect(() => {
+    const popular = getPopularTools(6);
+    if (popular.length) {
+      setSlugs(popular.map((p) => p.slug));
+    }
+  }, []);
 
   return (
     <section className="home-highlights animate-fade-up" aria-label="Trending tools">

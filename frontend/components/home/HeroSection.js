@@ -44,7 +44,9 @@ export default function HeroSection({ search, onSearchChange }) {
           <h1 className="home-hero-title">
             Every tool you need.
             <br />
-            <span className="gradient-text">One beautiful workspace.</span>
+            <span className="gradient-text">
+              One beautiful<br className="sm:hidden" /> workspace.
+            </span>
           </h1>
 
           <p className="home-hero-subtitle">
@@ -56,7 +58,7 @@ export default function HeroSection({ search, onSearchChange }) {
             <SearchBar
               value={search}
               onChange={onSearchChange}
-              placeholder={`Search ${getToolCountLabel()} tools — merge PDF, JWT decoder, QR generator...`}
+              placeholder={`Search ${getToolCountLabel()} tools...`}
             />
             <div className="home-hero-quick">
               <span className="home-hero-quick-label">Popular:</span>
