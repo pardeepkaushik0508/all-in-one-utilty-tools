@@ -1,7 +1,19 @@
 import Link from 'next/link';
 import { getCategoryMeta } from '../utils/categoryMeta';
+import { highlightSearchText } from '../utils/smartSearch';
 
-export default function ToolCard({ tool }) {
+function HighlightedText({ text, query }) {
+  const parts = highlightSearchText(text, query);
+  return parts.map((part, index) =>
+    part.match ? (
+      <mark key={index} className="search-highlight">{part.text}</mark>
+    ) : (
+      <span key={index}>{part.text}</span>
+    )
+  );
+}
+
+export default function ToolCard({ tool, searchQuery = '' }) {
   const meta = getCategoryMeta(tool.category);
   const shortCategory = tool.category.replace(' Tools', '').replace('/Audio', '');
 
@@ -17,7 +29,9 @@ export default function ToolCard({ tool }) {
         </div>
 
         <h2 className="tool-card-modern-title">
-          <Link href={`/tool/${tool.slug}`}>{tool.name}</Link>
+          <Link href={`/tool/${tool.slug}`}>
+            {searchQuery.trim() ? <HighlightedText text={tool.name} query={searchQuery} /> : tool.name}
+          </Link>
         </h2>
         <p className="tool-card-modern-desc">{tool.description}</p>
 

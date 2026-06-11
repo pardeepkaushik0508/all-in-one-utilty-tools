@@ -40,16 +40,18 @@ export const IMAGE_SUITE_CONFIGS = [
   {
     slug: 'background-remover',
     name: 'Background Remover',
-    description: 'Remove solid backgrounds from images (client-side).',
+    description: 'Remove backgrounds from portraits, products, logos, and more with smart edge detection.',
     clientOp: 'bg-remove',
-    fields: [{ key: 'tolerance', label: 'Tolerance', type: 'number', default: 40, min: 10, max: 120 }],
+    buttonLabel: 'Remove Background',
+    fields: [{ key: 'tolerance', label: 'Edge sensitivity', type: 'number', default: 40, min: 10, max: 120 }],
     downloadFilename: 'no-bg.png'
   },
   {
     slug: 'ai-background-remover',
     name: 'AI Background Remover',
-    description: 'Remove backgrounds using enhanced processing.',
+    description: 'High-quality AI background removal with transparent PNG output.',
     serverOp: 'bg-remove',
+    buttonLabel: 'Remove Background',
     mode: 'server',
     downloadFilename: 'ai-no-bg.png'
   },

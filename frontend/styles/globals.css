@@ -1751,6 +1751,13 @@ html[data-theme='dark'] {
     color: var(--text-primary);
   }
 
+  .search-highlight {
+    background: var(--accent-subtle);
+    color: var(--accent);
+    border-radius: 0.2rem;
+    padding: 0 0.1rem;
+  }
+
   .home-empty-desc {
     @apply mt-1 text-sm;
     color: var(--text-muted);

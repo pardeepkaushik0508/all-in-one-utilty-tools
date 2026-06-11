@@ -9,6 +9,7 @@ import { getCategoryMeta } from '../../utils/categoryMeta';
 import { buildBreadcrumbSchema, buildCategorySchema } from '../../utils/seo/schema';
 import { getCategoryTools } from '../../utils/suiteToolsRegistry';
 import { tools } from '../../utils/tools';
+import { searchTools } from '../../utils/smartSearch';
 
 const CATEGORY_PAGES = {
   'pdf-tools': {
@@ -68,11 +69,9 @@ export default function CategoryPage({ slug, page }) {
   const categoryTools = useMemo(() => getCategoryTools(page.category, tools), [page.category]);
 
   const filtered = useMemo(() => {
-    const query = debouncedSearch.toLowerCase();
-    return categoryTools.filter((tool) => {
-      if (!query) return true;
-      return `${tool.name} ${tool.description}`.toLowerCase().includes(query);
-    });
+    if (!debouncedSearch.trim()) return categoryTools;
+    const { results } = searchTools(categoryTools, debouncedSearch);
+    return results;
   }, [categoryTools, debouncedSearch]);
 
   const meta = getCategoryMeta(page.category);

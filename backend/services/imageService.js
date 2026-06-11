@@ -1,6 +1,8 @@
+const fs = require('fs').promises;
 const path = require('path');
 const sharp = require('sharp');
 const Tesseract = require('tesseract.js');
+const { removeBackground } = require('@imgly/background-removal-node');
 const { processedDir } = require('../utils/upload');
 const { removeFiles } = require('../utils/fileCleanup');
 const { generateGeminiImage } = require('./geminiService');
@@ -75,6 +77,35 @@ async function extractTextFromImage(file) {
   return { text: (data.text || '').trim() };
 }
 
+const MAX_BG_REMOVAL_BYTES = 25 * 1024 * 1024;
+const BG_REMOVAL_TIMEOUT_MS = 120000;
+
+async function removeImageBackground(file) {
+  const inputBuffer = await fs.readFile(file.path);
+
+  if (!file.mimetype?.startsWith('image/')) {
+    throw new Error('Invalid image format. Please upload JPG, PNG, or WebP.');
+  }
+  if (inputBuffer.length > MAX_BG_REMOVAL_BYTES) {
+    throw new Error(`Image is too large. Maximum is ${MAX_BG_REMOVAL_BYTES / 1024 / 1024}MB for background removal.`);
+  }
+
+  const timeout = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Background removal timed out. Try a smaller image.')), BG_REMOVAL_TIMEOUT_MS);
+  });
+
+  const blob = await Promise.race([
+    removeBackground(inputBuffer, { output: { format: 'image/png', quality: 1 } }),
+    timeout
+  ]);
+
+  const outputName = `bg-removed-${Date.now()}.png`;
+  const outputPath = path.join(processedDir, outputName);
+  await fs.writeFile(outputPath, Buffer.from(await blob.arrayBuffer()));
+  await removeFiles([file]);
+  return { filename: outputName };
+}
+
 async function generateAiImage(prompt, options = {}) {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY is not configured. Add it to backend/.env and restart the server.');
@@ -131,7 +162,7 @@ async function processImage(file, options = {}) {
   }
 
   if (operation === 'bg-remove') {
-    pipeline = pipeline.flatten({ background: { r: 255, g: 255, b: 255 } }).png();
+    return removeImageBackground(file);
   }
 
   if (ext === 'jpg') pipeline = pipeline.jpeg({ quality: 90 });

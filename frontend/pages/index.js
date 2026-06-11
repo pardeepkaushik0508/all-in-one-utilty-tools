@@ -12,6 +12,7 @@ import { FeaturedToolsSection, RecentToolsSection, TrendingToolsSection } from '
 import { trackSearchQuery } from '../hooks/useToolAnalytics';
 import { getAllBlogPosts } from '../utils/blogPosts';
 import { tools } from '../utils/tools';
+import { searchTools } from '../utils/smartSearch';
 
 const featuredPosts = getAllBlogPosts().slice(0, 3);
 
@@ -33,14 +34,12 @@ export default function HomePage() {
     if (debouncedSearch) trackSearchQuery(debouncedSearch);
   }, [debouncedSearch]);
 
+  const searchMeta = useMemo(() => searchTools(tools, debouncedSearch), [debouncedSearch]);
+
   const filteredTools = useMemo(() => {
-    const query = debouncedSearch.toLowerCase();
-    return tools.filter((tool) => {
-      const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
-      const matchesSearch = !query || `${tool.name} ${tool.description}`.toLowerCase().includes(query);
-      return matchesCategory && matchesSearch;
-    });
-  }, [debouncedSearch, selectedCategory]);
+    const pool = debouncedSearch.trim() ? searchMeta.results : tools;
+    return pool.filter((tool) => selectedCategory === 'All' || tool.category === selectedCategory);
+  }, [debouncedSearch, selectedCategory, searchMeta.results]);
 
   return (
     <Layout
@@ -69,6 +68,8 @@ export default function HomePage() {
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
         filteredTools={filteredTools}
+        searchSuggestions={searchMeta.suggestions}
+        didYouMean={searchMeta.didYouMean}
       />
 
       <BlogSection posts={featuredPosts} />

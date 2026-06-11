@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FileDropZone from '../../FileDropZone';
 import MediaUploadZone from '../../MediaUploadZone';
 import useToolRequest from '../../../hooks/useToolRequest';
@@ -29,12 +29,12 @@ import {
   getImageMetadata,
   loadImageFromFile,
   pickColorFromImage,
-  removeBackgroundSimple,
   resizeCanvas,
   rotateImage,
   sharpenImage,
   upscaleImage
 } from '../../../lib/imageProcessors';
+import { removeBackgroundFromFile } from '../../../lib/backgroundRemoval';
 
 const CLIENT_OPS = {
   rotate: async (img, { degrees }) => rotateImage(img, Number(degrees) || 90),
@@ -50,7 +50,6 @@ const CLIENT_OPS = {
   blackwhite: async (img) => adjustImage(img, { grayscale: true, contrast: 140 }),
   watermark: async (img, { text }) => addWatermark(img, text || 'Watermark'),
   upscale: async (img, { scale }) => upscaleImage(img, Number(scale) || 2),
-  'bg-remove': async (img, { tolerance }) => removeBackgroundSimple(img, Number(tolerance) || 40),
   meme: async (img, { topText, bottomText }) => createMemeImage(img, topText, bottomText),
   social: async (img, { preset }) => {
     const p = SOCIAL_PRESETS[preset] || SOCIAL_PRESETS['instagram-post'];
@@ -76,9 +75,14 @@ export default function ImageToolShell({ config }) {
   const [metadata, setMetadata] = useState(null);
   const [color, setColor] = useState(null);
   const [options, setOptions] = useState(() => buildInitialOptions(config));
+  const [clientLoading, setClientLoading] = useState(false);
+  const [clientError, setClientError] = useState('');
+  const [progressPct, setProgressPct] = useState(0);
+  const abortRef = useRef(null);
   const { loading, error, result, run } = useToolRequest();
 
   const file = files[0] || null;
+  const isProcessing = loading || clientLoading;
 
   useEffect(() => {
     if (!file) {
@@ -117,9 +121,20 @@ export default function ImageToolShell({ config }) {
     }
 
     const img = await loadImageFromFile(file);
-    const handler = CLIENT_OPS[config.clientOp];
-    if (!handler) throw new Error('Unsupported client operation.');
-    const canvas = await handler(img, options);
+    let canvas;
+
+    // ML segmentation for background removal — uses uploaded file directly for best quality.
+    if (config.clientOp === 'bg-remove') {
+      canvas = await removeBackgroundFromFile(file, {
+        tolerance: Number(options.tolerance) || 40,
+        onProgress: setProgressPct,
+        signal: abortRef.current?.signal
+      });
+    } else {
+      const handler = CLIENT_OPS[config.clientOp];
+      if (!handler) throw new Error('Unsupported client operation.');
+      canvas = await handler(img, options);
+    }
     const format = options.format || config.defaultFormat || 'png';
     const mime = formatToMime(format);
     const blob = await canvasToBlob(canvas, mime, 0.92);
@@ -151,11 +166,24 @@ export default function ImageToolShell({ config }) {
     setDownloadMeta(null);
     setMetadata(null);
     setColor(null);
+    setClientError('');
+    setProgressPct(0);
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
 
     if (config.serverOp) {
       await processServer();
-    } else {
+      return;
+    }
+
+    setClientLoading(true);
+    try {
       await processClient();
+    } catch (err) {
+      setClientError(err.message || 'Image processing failed.');
+    } finally {
+      setClientLoading(false);
+      setProgressPct(0);
     }
   };
 
@@ -251,7 +279,7 @@ export default function ImageToolShell({ config }) {
       )}
 
       <ToolActions>
-        <PrimaryButton onClick={handleProcess} disabled={loading}>
+        <PrimaryButton onClick={handleProcess} disabled={isProcessing}>
           {config.buttonLabel || 'Process Image'}
         </PrimaryButton>
         {resultBlob && (
@@ -262,8 +290,15 @@ export default function ImageToolShell({ config }) {
         )}
       </ToolActions>
 
-      <ToolLoading loading={loading} text="Processing image..." />
-      <ToolError message={error} />
+      <ToolLoading
+        loading={isProcessing}
+        text={
+          progressPct > 0 && (config.clientOp === 'bg-remove' || config.serverOp === 'bg-remove')
+            ? `Removing background… ${progressPct}%`
+            : 'Processing image...'
+        }
+      />
+      <ToolError message={error || clientError} />
 
       {resultUrl && config.mode !== 'metadata' && (
         <div className="animate-fade-in space-y-2">

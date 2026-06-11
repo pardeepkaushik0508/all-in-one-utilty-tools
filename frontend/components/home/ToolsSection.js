@@ -8,7 +8,9 @@ export default function ToolsSection({
   onSearchChange,
   selectedCategory,
   onCategoryChange,
-  filteredTools
+  filteredTools,
+  searchSuggestions = [],
+  didYouMean = null
 }) {
   return (
     <section id="tools" className="home-tools scroll-mt-28" aria-label="Browse tools">
@@ -50,13 +52,23 @@ export default function ToolsSection({
               </svg>
             </div>
             <p className="home-empty-title">No tools found</p>
-            <p className="home-empty-desc">Try a different search term or category filter.</p>
+            <p className="home-empty-desc">
+              {didYouMean ? (
+                <>
+                  Did you mean <strong className="text-heading">{didYouMean}</strong>?
+                </>
+              ) : searchSuggestions.length > 0 ? (
+                <>Try: {searchSuggestions.join(', ')}</>
+              ) : (
+                'Try a different search term or category filter.'
+              )}
+            </p>
           </div>
         ) : (
           <div className="home-tools-grid">
             {filteredTools.map((tool) => (
               <div key={tool.slug}>
-                <ToolCard tool={tool} />
+                <ToolCard tool={tool} searchQuery={search} />
               </div>
             ))}
           </div>
