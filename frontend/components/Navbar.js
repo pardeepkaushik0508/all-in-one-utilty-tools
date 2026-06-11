@@ -63,7 +63,11 @@ export default function Navbar() {
         Skip to content
       </a>
 
-      <div className="relative mx-auto max-w-7xl">
+      <div
+        className="relative mx-auto max-w-7xl"
+        ref={megaRef}
+        onMouseLeave={scheduleCloseMega}
+      >
         <nav className="nav-bar" aria-label="Main navigation">
           <Link href="/" className="group flex min-w-0 items-center gap-2.5" onClick={() => setMenuOpen(false)}>
             <span className="icon-box h-9 w-9 shrink-0 transition-transform duration-300 group-hover:scale-105">
@@ -89,12 +93,7 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <div
-              className="relative"
-              ref={megaRef}
-              onMouseEnter={openMega}
-              onMouseLeave={scheduleCloseMega}
-            >
+            <div className="relative" onMouseEnter={openMega}>
               <button
                 type="button"
                 className={`nav-pill inline-flex items-center gap-1 ${megaOpen || toolsActive ? 'nav-pill-active' : ''}`}
@@ -112,7 +111,6 @@ export default function Navbar() {
                   <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                 </svg>
               </button>
-              {megaOpen && <NavMegaMenu onClose={() => setMegaOpen(false)} />}
             </div>
 
             {navLinks.slice(1).map((link) => (
@@ -150,6 +148,12 @@ export default function Navbar() {
             </button>
           </div>
         </nav>
+
+        {megaOpen && (
+          <div className="nav-mega-anchor hidden md:block" onMouseEnter={openMega}>
+            <NavMegaMenu onClose={() => setMegaOpen(false)} />
+          </div>
+        )}
 
         {menuOpen && (
           <>

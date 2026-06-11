@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const PRODUCTION_BACKEND = 'https://aio-tools-backend-production.up.railway.app';
-const PRODUCTION_FRONTEND = 'https://aio-tools-frontend-production.up.railway.app';
+const PRODUCTION_FRONTEND = 'https://utilitytools.in';
 
 const nextConfig = {
   reactStrictMode: true,

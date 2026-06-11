@@ -1,8 +1,8 @@
 import { tools } from '../utils/tools';
 import { blogPosts } from '../utils/blogPosts';
-import { SITE_URL } from '../components/SEO';
+import { getSiteUrl } from '../utils/siteUrl';
 
-function generateSiteMap() {
+function generateSiteMap(siteUrl) {
   const staticPages = [
     '',
     '/about',
@@ -20,7 +20,7 @@ function generateSiteMap() {
   const staticUrls = staticPages
     .map(
       (path) => `  <url>
-    <loc>${SITE_URL}${path}</loc>
+    <loc>${siteUrl}${path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>${path === '' ? '1.0' : '0.7'}</priority>
@@ -31,7 +31,7 @@ function generateSiteMap() {
   const toolUrls = tools
     .map(
       (tool) => `  <url>
-    <loc>${SITE_URL}/tool/${tool.slug}</loc>
+    <loc>${siteUrl}/tool/${tool.slug}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -42,7 +42,7 @@ function generateSiteMap() {
   const blogUrls = blogPosts
     .map(
       (post) => `  <url>
-    <loc>${SITE_URL}/blog/${post.slug}</loc>
+    <loc>${siteUrl}/blog/${post.slug}</loc>
     <lastmod>${post.date}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -58,9 +58,11 @@ ${blogUrls}
 </urlset>`;
 }
 
-export async function getServerSideProps({ res }) {
-  res.setHeader('Content-Type', 'text/xml');
-  res.write(generateSiteMap());
+export async function getServerSideProps({ req, res }) {
+  const siteUrl = getSiteUrl(req);
+  res.setHeader('Content-Type', 'text/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+  res.write(generateSiteMap(siteUrl));
   res.end();
   return { props: {} };
 }

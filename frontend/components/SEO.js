@@ -1,7 +1,9 @@
 import Head from 'next/head';
 
 const SITE_NAME = 'All-in-One Utility Tools';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://utilitytools.app';
+import { CANONICAL_SITE_URL } from '../utils/siteUrl';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || CANONICAL_SITE_URL;
 const DEFAULT_DESCRIPTION =
   'Free online utility tools for PDF, image, video, text, developer, security, and converters. Fast, private, and easy to use.';
 

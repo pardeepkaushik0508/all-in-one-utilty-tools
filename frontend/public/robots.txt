@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://utilitytools.app/sitemap.xml
+Sitemap: https://utilitytools.in/sitemap.xml
