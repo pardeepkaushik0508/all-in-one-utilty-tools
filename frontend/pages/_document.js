@@ -20,13 +20,7 @@ export default function Document() {
             `
           }}
         />
-        {/* Google AdSense — loads in <head> on every page */}
-        <meta name="google-adsense-account" content="ca-pub-5397189085296638" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5397189085296638"
-          crossOrigin="anonymous"
-        />
+        <meta name="google-adsense-account" content="ca-pub-5397189085296638"></meta>
       </Head>
       <body>
         <script
