@@ -1,4 +1,12 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
 
-Sitemap: https://utilitytools.app/sitemap.xml
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://utilitytools.in/sitemap.xml
