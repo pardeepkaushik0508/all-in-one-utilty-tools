@@ -1,12 +1,9 @@
 import { Html, Head, Main, NextScript } from 'next/document';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://utilitytools.in';
-
 export default function Document() {
   return (
     <Html lang="en" data-theme="light">
       <Head>
-        <link rel="sitemap" type="application/xml" title="Sitemap" href={`${SITE_URL}/sitemap.xml`} />
         <style
           dangerouslySetInnerHTML={{
             __html: `

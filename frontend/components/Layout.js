@@ -6,29 +6,18 @@ import MobileBottomNav from './MobileBottomNav';
 import SEO, { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from './SEO';
 import { useTheme } from '../context/ThemeContext';
 
-const organizationJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: SITE_NAME,
-  url: SITE_URL,
-  logo: `${SITE_URL}/og-default.svg`
-};
-
 const websiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: SITE_NAME,
   url: SITE_URL,
   description: DEFAULT_DESCRIPTION,
-  publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
   potentialAction: {
     '@type': 'SearchAction',
     target: `${SITE_URL}/?search={search_term_string}`,
     'query-input': 'required name=search_term_string'
   }
 };
-
-const defaultJsonLd = [organizationJsonLd, websiteJsonLd];
 
 export default function Layout({
   children,
@@ -51,9 +40,9 @@ export default function Layout({
 
   const structuredData = jsonLd
     ? Array.isArray(jsonLd)
-      ? [...defaultJsonLd, ...jsonLd]
-      : [...defaultJsonLd, jsonLd]
-    : defaultJsonLd;
+      ? [websiteJsonLd, ...jsonLd]
+      : [websiteJsonLd, jsonLd]
+    : websiteJsonLd;
 
   return (
     <>

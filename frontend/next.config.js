@@ -1,22 +1,12 @@
 /** @type {import('next').NextConfig} */
 const PRODUCTION_BACKEND = 'https://aio-tools-backend-production.up.railway.app';
-const PRODUCTION_FRONTEND = 'https://utilitytools.in';
+const PRODUCTION_FRONTEND = 'https://aio-tools-frontend-production.up.railway.app';
 
 const nextConfig = {
   reactStrictMode: true,
   env: {
     NEXT_PUBLIC_BACKEND_URL: PRODUCTION_BACKEND,
     NEXT_PUBLIC_SITE_URL: PRODUCTION_FRONTEND
-  },
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.utilitytools.in' }],
-        destination: 'https://utilitytools.in/:path*',
-        permanent: true
-      }
-    ];
   },
   // Browser calls Express directly (see utils/apiBase.js). Only /downloads is proxied here.
   async rewrites() {

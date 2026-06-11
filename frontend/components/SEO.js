@@ -1,7 +1,7 @@
 import Head from 'next/head';
 
 const SITE_NAME = 'All-in-One Utility Tools';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://utilitytools.in';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://utilitytools.app';
 const DEFAULT_DESCRIPTION =
   'Free online utility tools for PDF, image, video, text, developer, security, and converters. Fast, private, and easy to use.';
 
@@ -26,21 +26,9 @@ export default function SEO({
       <meta name="description" content={description} />
       {keywordText && <meta name="keywords" content={keywordText} />}
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta
-        name="robots"
-        content={
-          noindex
-            ? 'noindex,nofollow'
-            : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'
-        }
-      />
-      <meta name="googlebot" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
+      <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
       <meta name="author" content={SITE_NAME} />
       <link rel="canonical" href={url} />
-      <link rel="sitemap" type="application/xml" title="Sitemap" href={`${SITE_URL}/sitemap.xml`} />
-      {process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && (
-        <meta name="google-site-verification" content={process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION} />
-      )}
 
       <meta property="og:type" content={ogType} />
       <meta property="og:site_name" content={SITE_NAME} />

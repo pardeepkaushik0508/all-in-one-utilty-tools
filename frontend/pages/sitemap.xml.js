@@ -1,11 +1,20 @@
 import { tools } from '../utils/tools';
 import { blogPosts } from '../utils/blogPosts';
 import { SITE_URL } from '../components/SEO';
-import { CATEGORY_SLUGS } from '../utils/suiteToolsRegistry';
 
 function generateSiteMap() {
-  const categoryPaths = Object.values(CATEGORY_SLUGS).map((slug) => `/category/${slug}`);
-  const staticPages = ['', '/about', '/contact', '/blog', ...categoryPaths];
+  const staticPages = [
+    '',
+    '/about',
+    '/contact',
+    '/blog',
+    '/category/text-tools',
+    '/category/image-tools',
+    '/category/developer-tools',
+    '/category/security-tools',
+    '/category/utility-tools',
+    '/category/social-media-tools'
+  ];
   const today = new Date().toISOString().split('T')[0];
 
   const staticUrls = staticPages
@@ -50,8 +59,7 @@ ${blogUrls}
 }
 
 export async function getServerSideProps({ res }) {
-  res.setHeader('Content-Type', 'text/xml; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+  res.setHeader('Content-Type', 'text/xml');
   res.write(generateSiteMap());
   res.end();
   return { props: {} };
