@@ -64,6 +64,9 @@ export const UTILITY_TEXT_CONFIGS = [
     slug: 'util-uuid-generator',
     name: 'UUID Generator',
     description: 'Generate random UUID v4 identifiers.',
+    hideInput: true,
+    autoRun: true,
+    buttonLabel: 'Generate another',
     process: async () => dp.generateUuid()
   },
   {
@@ -159,6 +162,8 @@ export const UTILITY_TEXT_CONFIGS = [
     slug: 'util-random-password',
     name: 'Random Password Generator',
     description: 'Generate secure random passwords.',
+    hideInput: true,
+    buttonLabel: 'Generate password',
     numberField: true,
     defaultNumber: 14,
     process: async ({ numberOpt }) => {

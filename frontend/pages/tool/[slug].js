@@ -17,6 +17,7 @@ import {
 } from '../../utils/seo/schema';
 import { findToolBySlug, tools } from '../../utils/tools';
 import { getCategoryMeta } from '../../utils/categoryMeta';
+import { getCategoryHref } from '../../utils/siteStats';
 
 function PlaceholderTool() {
   return (
@@ -47,9 +48,12 @@ export default function ToolPage({ tool, seo }) {
     addRecentTool(tool);
   }, [tool]);
 
+  const categoryHref = getCategoryHref(tool.category);
+  const categoryUrl = categoryHref.startsWith('/') ? `${SITE_URL}${categoryHref}` : categoryHref;
+
   const breadcrumbJsonLd = buildBreadcrumbSchema([
     { name: 'Home', url: SITE_URL },
-    { name: tool.category, url: `${SITE_URL}/#tools` },
+    { name: tool.category, url: categoryUrl },
     { name: tool.name, url: `${SITE_URL}/tool/${tool.slug}` }
   ]);
 
@@ -73,7 +77,7 @@ export default function ToolPage({ tool, seo }) {
       <nav aria-label="Breadcrumb" className="breadcrumb-modern animate-fade-up">
         <Link href="/">Home</Link>
         <span className="breadcrumb-sep" aria-hidden>/</span>
-        <Link href="/#tools">{tool.category}</Link>
+        <Link href={categoryHref}>{tool.category}</Link>
         <span className="breadcrumb-sep" aria-hidden>/</span>
         <span className="text-heading">{tool.name}</span>
       </nav>

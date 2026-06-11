@@ -1,20 +1,11 @@
 import { tools } from '../utils/tools';
 import { blogPosts } from '../utils/blogPosts';
+import { CATEGORY_SLUGS } from '../utils/suiteToolsRegistry';
 import { getSiteUrl } from '../utils/siteUrl';
 
 function generateSiteMap(siteUrl) {
-  const staticPages = [
-    '',
-    '/about',
-    '/contact',
-    '/blog',
-    '/category/text-tools',
-    '/category/image-tools',
-    '/category/developer-tools',
-    '/category/security-tools',
-    '/category/utility-tools',
-    '/category/social-media-tools'
-  ];
+  const categoryPaths = Object.values(CATEGORY_SLUGS).map((slug) => `/category/${slug}`);
+  const staticPages = ['', '/about', '/contact', '/blog', ...categoryPaths];
   const today = new Date().toISOString().split('T')[0];
 
   const staticUrls = staticPages

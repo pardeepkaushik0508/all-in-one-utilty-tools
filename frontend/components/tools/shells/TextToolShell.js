@@ -69,15 +69,23 @@ export default function TextToolShell({ config }) {
     }
   };
 
+  useEffect(() => {
+    if (!config.autoRun) return;
+    runTool();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <ToolPanel>
-      <TextAreaField
-        label={config.inputLabel || 'Input text'}
-        value={input}
-        onChange={setInput}
-        placeholder={config.placeholder}
-        rows={config.inputRows || 8}
-      />
+      {!config.hideInput && (
+        <TextAreaField
+          label={config.inputLabel || 'Input text'}
+          value={input}
+          onChange={setInput}
+          placeholder={config.placeholder}
+          rows={config.inputRows || 8}
+        />
+      )}
 
       {config.dualInput && (
         <TextAreaField

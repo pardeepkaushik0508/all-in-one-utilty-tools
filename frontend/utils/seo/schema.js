@@ -60,6 +60,26 @@ export function buildHowToSchema(tool, steps = []) {
   };
 }
 
+export function buildCategorySchema(page, categoryTools, categoryUrl) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: page.title,
+    description: page.description,
+    url: categoryUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: categoryTools.length,
+      itemListElement: categoryTools.slice(0, 20).map((tool, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: tool.name,
+        url: `${SITE_URL}/tool/${tool.slug}`
+      }))
+    }
+  };
+}
+
 export function buildBlogPostingSchema(post, seo = {}) {
   return {
     '@context': 'https://schema.org',

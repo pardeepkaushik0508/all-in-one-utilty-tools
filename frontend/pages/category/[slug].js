@@ -4,11 +4,25 @@ import useDebouncedValue from '../../hooks/useDebouncedValue';
 import Layout from '../../components/Layout';
 import SearchBar from '../../components/SearchBar';
 import ToolCard from '../../components/ToolCard';
+import { SITE_URL } from '../../components/SEO';
 import { getCategoryMeta } from '../../utils/categoryMeta';
+import { buildBreadcrumbSchema, buildCategorySchema } from '../../utils/seo/schema';
 import { getCategoryTools } from '../../utils/suiteToolsRegistry';
 import { tools } from '../../utils/tools';
 
 const CATEGORY_PAGES = {
+  'pdf-tools': {
+    title: 'PDF Tools',
+    category: 'PDF Tools',
+    description: 'Free online PDF utilities — merge, split, compress, create, edit, delete pages, and scan to PDF. Fast, private, browser-based document tools.',
+    eyebrow: '7 PDF utilities'
+  },
+  'video-audio-tools': {
+    title: 'Video & Audio Tools',
+    category: 'Video/Audio Tools',
+    description: 'Free video and audio utilities — convert video to MP3, compress video, trim audio, and download media. Simple uploads with quick downloads.',
+    eyebrow: '4 video & audio utilities'
+  },
   'text-tools': {
     title: 'Text Tools',
     category: 'Text Tools',
@@ -62,9 +76,23 @@ export default function CategoryPage({ slug, page }) {
   }, [categoryTools, debouncedSearch]);
 
   const meta = getCategoryMeta(page.category);
+  const categoryUrl = `${SITE_URL}/category/${slug}`;
+  const jsonLd = [
+    buildBreadcrumbSchema([
+      { name: 'Home', url: SITE_URL },
+      { name: 'Tools', url: `${SITE_URL}/#tools` },
+      { name: page.title, url: categoryUrl }
+    ]),
+    buildCategorySchema(page, categoryTools, categoryUrl)
+  ];
 
   return (
-    <Layout title={`${page.title} — Free Online Utilities`} description={page.description} canonical={`/category/${slug}`}>
+    <Layout
+      title={`${page.title} — Free Online Utilities`}
+      description={page.description}
+      canonical={`/category/${slug}`}
+      jsonLd={jsonLd}
+    >
       <nav className="breadcrumb-modern animate-fade-up">
         <Link href="/">Home</Link>
         <span className="breadcrumb-sep">/</span>

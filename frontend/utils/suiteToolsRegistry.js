@@ -74,10 +74,12 @@ export function getCategoryTools(category, allTools) {
 }
 
 export const CATEGORY_SLUGS = {
-  'Text Tools': 'text-tools',
+  'PDF Tools': 'pdf-tools',
   'Image Tools': 'image-tools',
+  'Video/Audio Tools': 'video-audio-tools',
+  'Text Tools': 'text-tools',
   'Developer Tools': 'developer-tools',
+  'Social Media Tools': 'social-media-tools',
   'Security Tools': 'security-tools',
-  'Utility Tools': 'utility-tools',
-  'Social Media Tools': 'social-media-tools'
+  'Utility Tools': 'utility-tools'
 };

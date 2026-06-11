@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import Layout from '../components/Layout';
 import HeroSection from '../components/home/HeroSection';
@@ -18,13 +19,22 @@ const HOME_DESCRIPTION =
   'Free all-in-one online utility tools — merge PDF, compress images, convert video to MP3, grammar checker, JSON formatter, password generator, and more. Fast, private, no sign-up.';
 
 export default function HomePage() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 250);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
+  useEffect(() => {
+    const query = typeof router.query.search === 'string' ? router.query.search : '';
+    if (query) setSearch(query);
+  }, [router.query.search]);
+
+  useEffect(() => {
+    if (debouncedSearch) trackSearchQuery(debouncedSearch);
+  }, [debouncedSearch]);
+
   const filteredTools = useMemo(() => {
     const query = debouncedSearch.toLowerCase();
-    if (query) trackSearchQuery(query);
     return tools.filter((tool) => {
       const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
       const matchesSearch = !query || `${tool.name} ${tool.description}`.toLowerCase().includes(query);

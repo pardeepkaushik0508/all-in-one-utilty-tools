@@ -42,6 +42,8 @@ export const SECURITY_TEXT_CONFIGS = [
     slug: 'sec-password-generator',
     name: 'Random Password Generator',
     description: 'Generate cryptographically strong passwords.',
+    hideInput: true,
+    buttonLabel: 'Generate password',
     numberField: true,
     defaultNumber: 16,
     process: async ({ numberOpt }) => {
