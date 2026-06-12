@@ -9,6 +9,7 @@ import { addRecentTool } from '../../hooks/useRecentTools';
 import { trackToolUsage } from '../../hooks/useToolAnalytics';
 import { SITE_URL } from '../../components/SEO';
 import { fetchRemoteToolSeoOverride, getToolSeoContent } from '../../utils/seo/getToolSeo';
+import { fetchRemoteToolSetting } from '../../utils/cms/siteConfig';
 import {
   buildBreadcrumbSchema,
   buildFaqSchema,
@@ -27,7 +28,7 @@ function PlaceholderTool() {
   );
 }
 
-export default function ToolPage({ tool, seo }) {
+export default function ToolPage({ tool, seo, toolSetting = null }) {
   if (!tool) {
     return (
       <Layout title="Tool Not Found" noindex canonical="/tool/not-found">
@@ -35,6 +36,21 @@ export default function ToolPage({ tool, seo }) {
           <h1 className="font-display text-2xl font-bold text-heading">Tool not found</h1>
           <p className="text-muted">The tool you are looking for does not exist.</p>
           <Link href="/" className="btn-primary inline-flex">Return home</Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  const isDisabled = toolSetting?.enabled === false;
+  const isMaintenance = toolSetting?.maintenanceMode === true;
+
+  if (isDisabled) {
+    return (
+      <Layout title={`${tool.name} — Unavailable`} noindex canonical={`/tool/${tool.slug}`}>
+        <div className="card space-y-4 py-16 text-center">
+          <h1 className="font-display text-2xl font-bold text-heading">{tool.name}</h1>
+          <p className="text-muted">This tool is currently unavailable.</p>
+          <Link href="/#tools" className="btn-primary inline-flex">Browse other tools</Link>
         </div>
       </Layout>
     );
@@ -98,7 +114,16 @@ export default function ToolPage({ tool, seo }) {
       </header>
 
       <section aria-label={`${tool.name} tool`}>
-        <ToolRenderer />
+        {isMaintenance ? (
+          <div className="card space-y-3 py-10 text-center">
+            <h2 className="font-display text-xl font-semibold text-heading">Under maintenance</h2>
+            <p className="text-muted">
+              {toolSetting?.maintenanceMessage || 'This tool is temporarily unavailable for maintenance.'}
+            </p>
+          </div>
+        ) : (
+          <ToolRenderer />
+        )}
       </section>
 
       <RelatedTools tool={tool} />
@@ -121,6 +146,7 @@ export async function getStaticProps({ params }) {
 
   const remoteOverride = await fetchRemoteToolSeoOverride(tool.slug);
   const seo = getToolSeoContent(tool, remoteOverride);
+  const toolSetting = await fetchRemoteToolSetting(tool.slug);
 
-  return { props: { tool, seo }, revalidate: 60 };
+  return { props: { tool, seo, toolSetting }, revalidate: 60 };
 }

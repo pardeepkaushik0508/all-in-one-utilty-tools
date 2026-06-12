@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { useMemo } from 'react';
+import { useSiteConfig } from '../context/SiteConfigContext';
 import { SITE_NAME } from './SEO';
 import { CATEGORY_COUNT, getToolCountLabel, TOOL_COUNT } from '../utils/siteStats';
 import { getAllBlogPosts } from '../utils/blogPosts';
 
-const footerLinks = {
+const DEFAULT_FOOTER_LINKS = {
   Tools: [
     { href: '/#tools', label: 'All tools' },
     { href: '/tool/merge-pdf', label: 'Merge PDF' },
@@ -18,8 +20,28 @@ const footerLinks = {
   ]
 };
 
-export default function Footer() {
+function groupFooterLinks(footerLinks) {
+  const links = footerLinks || [];
+  const groups = {};
+  links
+    .filter((link) => link.enabled !== false)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .forEach((link) => {
+      const group = link.group || 'Resources';
+      groups[group] = groups[group] || [];
+      groups[group].push({ href: link.href, label: link.label, external: link.external, openInNewTab: link.openInNewTab });
+    });
+  return Object.keys(groups).length ? groups : DEFAULT_FOOTER_LINKS;
+}
+
+export default function Footer({ pageContent = null }) {
+  const { navigation } = useSiteConfig();
   const articleCount = getAllBlogPosts().length;
+  const brand = pageContent?.sections?.find((s) => s.id === 'brand')?.content || navigation?.footerBrand || {};
+  const footerGroups = useMemo(
+    () => groupFooterLinks(navigation?.footer?.length ? navigation.footer : null),
+    [navigation]
+  );
 
   return (
     <footer className="relative border-t border-theme">
@@ -27,26 +49,41 @@ export default function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
             <p className="font-display text-lg font-bold text-heading">
-              Utility<span className="gradient-text">Tools</span>
+              {brand.title || (
+                <>
+                  Utility<span className="gradient-text">Tools</span>
+                </>
+              )}
             </p>
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
-              {getToolCountLabel()} free online tools for PDF, image, video, text, developers, security, and more. Simple, fast, and private.
+              {brand.description || `${getToolCountLabel()} free online tools for PDF, image, video, text, developers, security, and more. Simple, fast, and private.`}
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs text-muted">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              All systems online
+              {brand.statusText || 'All systems online'}
             </div>
           </div>
 
-          {Object.entries(footerLinks).map(([title, links]) => (
+          {Object.entries(footerGroups).map(([title, links]) => (
             <div key={title}>
               <h3 className="text-xs font-bold uppercase tracking-wider text-heading">{title}</h3>
               <ul className="mt-4 space-y-2">
                 {links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-muted transition-colors hover:text-heading">
-                      {link.label}
-                    </Link>
+                  <li key={link.href + link.label}>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        className="text-sm text-muted transition-colors hover:text-heading"
+                        target={link.openInNewTab ? '_blank' : undefined}
+                        rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href} className="text-sm text-muted transition-colors hover:text-heading">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

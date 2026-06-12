@@ -1,9 +1,12 @@
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import PageLoader from '../components/PageLoader';
+import { SiteConfigProvider } from '../context/SiteConfigContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import usePageLoader from '../hooks/usePageLoader';
+import { fetchRemoteSiteConfig } from '../utils/cms/siteConfig';
 import '../styles/globals.css';
+import '../styles/admin.css';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -37,16 +40,28 @@ function AppContent({ Component, pageProps }) {
 export default function App({ Component, pageProps }) {
   return (
     <ThemeProvider>
-      <div className={`${plusJakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            className: 'toast-message',
-            duration: 3500
-          }}
-        />
-        <AppContent Component={Component} pageProps={pageProps} />
-      </div>
+      <SiteConfigProvider siteConfig={pageProps.siteConfig}>
+        <div className={`${plusJakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              className: 'toast-message',
+              duration: 3500
+            }}
+          />
+          <AppContent Component={Component} pageProps={pageProps} />
+        </div>
+      </SiteConfigProvider>
     </ThemeProvider>
   );
 }
+
+App.getInitialProps = async (appContext) => {
+  let pageProps = {};
+  if (appContext.Component.getInitialProps) {
+    pageProps = await appContext.Component.getInitialProps(appContext.ctx);
+  }
+
+  const siteConfig = await fetchRemoteSiteConfig();
+  return { pageProps: { ...pageProps, siteConfig } };
+};

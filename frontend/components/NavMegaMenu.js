@@ -1,5 +1,8 @@
 import Link from 'next/link';
+import { useMemo } from 'react';
+import { useSiteConfig } from '../context/SiteConfigContext';
 import { getCategoryMeta } from '../utils/categoryMeta';
+import { filterToolsForListing } from '../utils/cms/siteConfig';
 import {
   getCategoryHref,
   getToolCountLabel,
@@ -7,24 +10,33 @@ import {
   getTopToolsByCategory,
   TOOL_COUNT
 } from '../utils/siteStats';
-import { toolCategories } from '../utils/tools';
-
-const POPULAR_TOOLS = [
-  { slug: 'merge-pdf', name: 'Merge PDF' },
-  { slug: 'json-formatter', name: 'JSON Formatter' },
-  { slug: 'compress-image', name: 'Compress Image' },
-  { slug: 'password-generator', name: 'Password Generator' }
-];
+import { toolCategories, tools } from '../utils/tools';
 
 export default function NavMegaMenu({ onClose }) {
-  const counts = getToolsCountByCategory();
+  const { toolSettingsMap } = useSiteConfig();
+  const visibleTools = useMemo(
+    () => filterToolsForListing(tools, toolSettingsMap),
+    [toolSettingsMap]
+  );
+  const counts = getToolsCountByCategory(visibleTools);
+
+  const popularTools = useMemo(() => {
+    const featured = visibleTools.filter((tool) => toolSettingsMap[tool.slug]?.featured).slice(0, 4);
+    if (featured.length) return featured;
+    return [
+      visibleTools.find((t) => t.slug === 'merge-pdf'),
+      visibleTools.find((t) => t.slug === 'json-formatter'),
+      visibleTools.find((t) => t.slug === 'compress-image'),
+      visibleTools.find((t) => t.slug === 'password-generator')
+    ].filter(Boolean);
+  }, [visibleTools, toolSettingsMap]);
 
   return (
     <div className="nav-mega-panel animate-slide-down" role="menu" aria-label="Tool categories">
       <div className="nav-mega-categories">
         {toolCategories.map((category) => {
           const meta = getCategoryMeta(category);
-          const topTools = getTopToolsByCategory(category, 3);
+          const topTools = getTopToolsByCategory(category, 3, visibleTools);
           const href = getCategoryHref(category);
 
           return (
@@ -63,7 +75,7 @@ export default function NavMegaMenu({ onClose }) {
         </div>
         <div className="nav-mega-footer-actions">
           <div className="nav-mega-popular">
-            {POPULAR_TOOLS.map((tool) => (
+            {popularTools.map((tool) => (
               <Link key={tool.slug} href={`/tool/${tool.slug}`} className="nav-mega-popular-link" onClick={onClose}>
                 {tool.name}
               </Link>

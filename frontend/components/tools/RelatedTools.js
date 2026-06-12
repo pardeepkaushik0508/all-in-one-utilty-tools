@@ -1,10 +1,14 @@
 import Link from 'next/link';
+import { useMemo } from 'react';
+import { useSiteConfig } from '../../context/SiteConfigContext';
+import { filterToolsForListing } from '../../utils/cms/siteConfig';
 import { tools } from '../../utils/tools';
 
 export default function RelatedTools({ tool, limit = 4 }) {
+  const { toolSettingsMap } = useSiteConfig();
   if (!tool) return null;
 
-  const related = tools
+  const related = filterToolsForListing(tools, toolSettingsMap)
     .filter((t) => t.category === tool.category && t.slug !== tool.slug)
     .slice(0, limit);
 

@@ -1,26 +1,35 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import SearchBar from '../SearchBar';
-import { blogCategories, getAllBlogPosts, searchBlogPosts } from '../../utils/blogPosts';
+import { blogCategories } from '../../utils/blogPosts';
 import { getToolCountLabel } from '../../utils/siteStats';
 import { tools } from '../../utils/tools';
 
+function searchInPosts(posts, query) {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return posts;
+  return posts.filter((post) =>
+    `${post.title} ${post.excerpt} ${post.category} ${(post.content || []).join(' ')}`.toLowerCase().includes(q)
+  );
+}
+
 export default function BlogSidebar({
+  posts = [],
   search = '',
   onSearchChange,
   currentSlug,
   currentCategory,
   showSearch = true
 }) {
-  const filteredPosts = useMemo(() => searchBlogPosts(search), [search]);
+  const filteredPosts = useMemo(() => searchInPosts(posts, search), [posts, search]);
 
   const recentPosts = useMemo(() => {
-    const list = search ? filteredPosts : getAllBlogPosts();
+    const list = search ? filteredPosts : posts;
     return list.filter((p) => p.slug !== currentSlug).slice(0, 6);
-  }, [search, filteredPosts, currentSlug]);
+  }, [search, filteredPosts, posts, currentSlug]);
 
   const currentPost = currentSlug
-    ? getAllBlogPosts().find((p) => p.slug === currentSlug)
+    ? posts.find((p) => p.slug === currentSlug)
     : null;
 
   const relatedTool = currentPost?.relatedToolSlug

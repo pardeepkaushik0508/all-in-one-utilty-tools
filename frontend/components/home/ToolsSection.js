@@ -1,6 +1,7 @@
 import SearchBar from '../SearchBar';
 import CategoryFilter from '../CategoryFilter';
 import ToolCard from '../ToolCard';
+import { getSectionContent } from '../../utils/cms/siteConfig';
 import { toolCategories, tools } from '../../utils/tools';
 
 export default function ToolsSection({
@@ -10,20 +11,37 @@ export default function ToolsSection({
   onCategoryChange,
   filteredTools,
   searchSuggestions = [],
-  didYouMean = null
+  didYouMean = null,
+  pageContent = null,
+  totalTools = tools.length
 }) {
+  const section = getSectionContent(pageContent, 'toolsSection', {
+    eyebrow: 'All tools',
+    title: 'Find the right utility'
+  });
+
   return (
     <section id="tools" className="home-tools scroll-mt-28" aria-label="Browse tools">
       <div className="home-tools-header animate-fade-up">
         <div>
-          <p className="home-section-eyebrow">All tools</p>
+          <p className="home-section-eyebrow">{section.eyebrow || 'All tools'}</p>
           <h2 className="home-section-title">
-            Find the right <span className="gradient-text">utility</span>
+            {section.title?.includes('utility') ? (
+              <>
+                Find the right <span className="gradient-text">utility</span>
+              </>
+            ) : (
+              section.title || (
+                <>
+                  Find the right <span className="gradient-text">utility</span>
+                </>
+              )
+            )}
           </h2>
         </div>
         <div className="home-tools-count">
           <span className="home-tools-count-num">{filteredTools.length}</span>
-          <span className="home-tools-count-label">of {tools.length} tools</span>
+          <span className="home-tools-count-label">of {totalTools} tools</span>
         </div>
       </div>
 

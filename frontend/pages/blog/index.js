@@ -4,19 +4,35 @@ import useDebouncedValue from '../../hooks/useDebouncedValue';
 import Layout from '../../components/Layout';
 import BlogCard from '../../components/blog/BlogCard';
 import BlogSidebar from '../../components/blog/BlogSidebar';
-import { getAllBlogPosts, searchBlogPosts } from '../../utils/blogPosts';
+import { fetchRemoteBlogPosts } from '../../utils/cms/blogPosts';
 
-export default function BlogIndexPage() {
+function filterPosts(posts, search, category) {
+  let list = [...posts];
+  const q = String(search || '').trim().toLowerCase();
+
+  if (q) {
+    list = list.filter((post) =>
+      `${post.title} ${post.excerpt} ${post.category} ${(post.content || []).join(' ')}`.toLowerCase().includes(q)
+    );
+  }
+
+  if (category) {
+    list = list.filter((post) => post.category === category);
+  }
+
+  return list;
+}
+
+export default function BlogIndexPage({ posts = [] }) {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 250);
   const category = typeof router.query.category === 'string' ? router.query.category : '';
 
-  const posts = useMemo(() => {
-    let list = debouncedSearch ? searchBlogPosts(debouncedSearch) : getAllBlogPosts();
-    if (category) list = list.filter((p) => p.category === category);
-    return list;
-  }, [debouncedSearch, category]);
+  const visiblePosts = useMemo(
+    () => filterPosts(posts, debouncedSearch, category),
+    [posts, debouncedSearch, category]
+  );
 
   return (
     <Layout
@@ -44,7 +60,7 @@ export default function BlogIndexPage() {
         <section className="lg:col-span-2" aria-label="Blog articles">
           {category && (
             <p className="mb-4 text-sm text-muted">
-              Showing <strong className="text-heading">{category}</strong> · {posts.length} article(s)
+              Showing <strong className="text-heading">{category}</strong> · {visiblePosts.length} article(s)
               {' · '}
               <button type="button" onClick={() => router.push('/blog')} className="text-[var(--accent)] underline">
                 Clear filter
@@ -52,14 +68,14 @@ export default function BlogIndexPage() {
             </p>
           )}
 
-          {posts.length === 0 ? (
+          {visiblePosts.length === 0 ? (
             <div className="card py-16 text-center">
               <p className="font-display text-lg font-semibold text-heading">No articles found</p>
               <p className="mt-1 text-sm text-muted">Try a different search or category.</p>
             </div>
           ) : (
             <div className="grid gap-5">
-              {posts.map((post, index) => (
+              {visiblePosts.map((post, index) => (
                 <div key={post.slug} className="animate-fade-up" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
                   <BlogCard post={post} />
                 </div>
@@ -69,6 +85,7 @@ export default function BlogIndexPage() {
         </section>
 
         <BlogSidebar
+          posts={posts}
           search={search}
           onSearchChange={setSearch}
           currentCategory={category}
@@ -77,4 +94,9 @@ export default function BlogIndexPage() {
       </div>
     </Layout>
   );
+}
+
+export async function getStaticProps() {
+  const posts = await fetchRemoteBlogPosts();
+  return { props: { posts }, revalidate: 60 };
 }

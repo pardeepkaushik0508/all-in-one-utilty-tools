@@ -13,15 +13,15 @@ export function getCategoryHref(category) {
   return slug ? `/category/${slug}` : '/#tools';
 }
 
-export function getToolsCountByCategory() {
+export function getToolsCountByCategory(toolPool = tools) {
   return Object.fromEntries(
     toolCategories.map((category) => [
       category,
-      tools.filter((tool) => tool.category === category).length
+      toolPool.filter((tool) => tool.category === category).length
     ])
   );
 }
 
-export function getTopToolsByCategory(category, limit = 4) {
-  return tools.filter((tool) => tool.category === category).slice(0, limit);
+export function getTopToolsByCategory(category, limit = 4, toolPool = tools) {
+  return toolPool.filter((tool) => tool.category === category).slice(0, limit);
 }

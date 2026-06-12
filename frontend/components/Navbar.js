@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useSiteConfig } from '../context/SiteConfigContext';
 import NavMegaMenu from './NavMegaMenu';
 import ThemeToggle from './ThemeToggle';
 
-const navLinks = [
+const DEFAULT_NAV_LINKS = [
   { href: '/', label: 'Home', match: (path) => path === '/' },
   { href: '/blog', label: 'Blog', match: (path) => path.startsWith('/blog') },
   { href: '/about', label: 'About', match: (path) => path === '/about' },
@@ -17,12 +18,30 @@ function isActive(link, pathname) {
   return link.match(pathname);
 }
 
+function mapNavigationLinks(navigation) {
+  if (!navigation?.header?.length) return DEFAULT_NAV_LINKS;
+  return navigation.header
+    .filter((item) => item.enabled !== false && item.label?.toLowerCase() !== 'tools')
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((item) => ({
+      href: item.href,
+      label: item.label,
+      external: item.external,
+      openInNewTab: item.openInNewTab,
+      match: (path) => (item.href === '/' ? path === '/' : path.startsWith(item.href))
+    }));
+}
+
 export default function Navbar() {
   const router = useRouter();
+  const { navigation } = useSiteConfig();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const megaRef = useRef(null);
   const closeTimer = useRef(null);
+
+  const navLinks = useMemo(() => mapNavigationLinks(navigation), [navigation]);
+  const cta = navigation?.cta || { label: 'Explore Tools', href: '/#tools' };
 
   useEffect(() => {
     setMenuOpen(false);
@@ -57,6 +76,27 @@ export default function Navbar() {
 
   const toolsActive = toolsMatch(router.pathname);
 
+  const renderNavLink = (link, className) => {
+    if (link.external) {
+      return (
+        <a
+          key={link.href + link.label}
+          href={link.href}
+          className={className}
+          target={link.openInNewTab ? '_blank' : undefined}
+          rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
+        >
+          {link.label}
+        </a>
+      );
+    }
+    return (
+      <Link key={link.href + link.label} href={link.href} className={className}>
+        {link.label}
+      </Link>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 px-4 pt-3 sm:px-6 sm:pt-4">
       <a href="#main-content" className="skip-link">
@@ -83,15 +123,9 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden items-center gap-0.5 md:flex">
-            {navLinks.slice(0, 1).map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`nav-pill ${isActive(link, router.pathname) ? 'nav-pill-active' : ''}`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.slice(0, 1).map((link) =>
+              renderNavLink(link, `nav-pill ${isActive(link, router.pathname) ? 'nav-pill-active' : ''}`)
+            )}
 
             <div className="relative" onMouseEnter={openMega}>
               <button
@@ -113,19 +147,13 @@ export default function Navbar() {
               </button>
             </div>
 
-            {navLinks.slice(1).map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`nav-pill ${isActive(link, router.pathname) ? 'nav-pill-active' : ''}`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.slice(1).map((link) =>
+              renderNavLink(link, `nav-pill ${isActive(link, router.pathname) ? 'nav-pill-active' : ''}`)
+            )}
 
             <ThemeToggle className="ml-1" />
-            <Link href="/#tools" className="btn-primary btn-nav-cta ml-2">
-              Explore Tools
+            <Link href={cta.href || '/#tools'} className="btn-primary btn-nav-cta ml-2">
+              {cta.label || 'Explore Tools'}
             </Link>
           </div>
 
@@ -166,16 +194,33 @@ export default function Navbar() {
               className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[80vh] overflow-y-auto rounded-2xl border border-theme p-2 animate-slide-down md:hidden"
               style={{ background: 'var(--bg-elevated)', boxShadow: 'var(--shadow-nav)' }}
             >
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`mobile-nav-link ${isActive(link, router.pathname) ? 'mobile-nav-link-active' : ''}`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const className = `mobile-nav-link ${isActive(link, router.pathname) ? 'mobile-nav-link-active' : ''}`;
+                if (link.external) {
+                  return (
+                    <a
+                      key={link.href + link.label}
+                      href={link.href}
+                      className={className}
+                      target={link.openInNewTab ? '_blank' : undefined}
+                      rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.href + link.label}
+                    href={link.href}
+                    className={className}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <Link
                 href="/#tools"
                 className={`mobile-nav-link ${toolsActive ? 'mobile-nav-link-active' : ''}`}
@@ -187,8 +232,8 @@ export default function Navbar() {
                 <Link href="/blog" className="btn-secondary w-full !justify-center !text-xs" onClick={() => setMenuOpen(false)}>
                   Blog
                 </Link>
-                <Link href="/#tools" className="btn-primary w-full !text-xs" onClick={() => setMenuOpen(false)}>
-                  Explore Tools
+                <Link href={cta.href || '/#tools'} className="btn-primary w-full !text-xs" onClick={() => setMenuOpen(false)}>
+                  {cta.label || 'Explore Tools'}
                 </Link>
               </div>
             </div>

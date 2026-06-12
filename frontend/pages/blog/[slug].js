@@ -9,7 +9,8 @@ import FaqAccordion from '../../components/seo/FaqAccordion';
 import { SITE_URL } from '../../components/SEO';
 import { enhanceBlogPost } from '../../utils/seo/blogEnhancer';
 import { buildBlogPostingSchema, buildBreadcrumbSchema, buildFaqSchema } from '../../utils/seo/schema';
-import { findBlogBySlug, blogPosts, getRelatedPosts } from '../../utils/blogPosts';
+import { blogPosts } from '../../utils/blogPosts';
+import { fetchRemoteBlogPost, fetchRemoteBlogSlugs, getRelatedPostsFromList, fetchRemoteBlogPosts } from '../../utils/cms/blogPosts';
 import { tools } from '../../utils/tools';
 
 function AuthorAvatar({ name }) {
@@ -23,7 +24,7 @@ function AuthorAvatar({ name }) {
   return <span className="blog-author-avatar" aria-hidden>{initials}</span>;
 }
 
-export default function BlogDetailPage({ post, enhanced }) {
+export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
   const [search, setSearch] = useState('');
 
   if (!post || !enhanced) {
@@ -169,6 +170,7 @@ export default function BlogDetailPage({ post, enhanced }) {
           </div>
           <SocialShare title={post.title} path={`/blog/${post.slug}`} />
           <BlogSidebar
+            posts={allPosts}
             search={search}
             onSearchChange={setSearch}
             currentSlug={post.slug}
@@ -182,18 +184,21 @@ export default function BlogDetailPage({ post, enhanced }) {
 }
 
 export async function getStaticPaths() {
+  const remoteSlugs = await fetchRemoteBlogSlugs();
+  const slugs = [...new Set([...blogPosts.map((post) => post.slug), ...remoteSlugs])];
   return {
-    paths: blogPosts.map((post) => ({ params: { slug: post.slug } })),
-    fallback: false
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: 'blocking'
   };
 }
 
 export async function getStaticProps({ params }) {
-  const post = findBlogBySlug(params.slug);
-  if (!post) return { props: { post: null, enhanced: null } };
+  const post = await fetchRemoteBlogPost(params.slug);
+  if (!post) return { notFound: true, revalidate: 60 };
 
-  const relatedPosts = getRelatedPosts(post.slug, 4);
+  const allPosts = await fetchRemoteBlogPosts();
+  const relatedPosts = getRelatedPostsFromList(allPosts, post.slug, 4);
   const enhanced = enhanceBlogPost(post, relatedPosts);
 
-  return { props: { post, enhanced }, revalidate: 3600 };
+  return { props: { post, enhanced, allPosts }, revalidate: 60 };
 }

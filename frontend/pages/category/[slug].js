@@ -8,6 +8,8 @@ import { SITE_URL } from '../../components/SEO';
 import { getCategoryMeta } from '../../utils/categoryMeta';
 import { buildBreadcrumbSchema, buildCategorySchema } from '../../utils/seo/schema';
 import { getCategoryTools } from '../../utils/suiteToolsRegistry';
+import { useSiteConfig } from '../../context/SiteConfigContext';
+import { filterToolsForListing } from '../../utils/cms/siteConfig';
 import { tools } from '../../utils/tools';
 import { searchTools } from '../../utils/smartSearch';
 
@@ -65,8 +67,12 @@ const CATEGORY_PAGES = {
 export default function CategoryPage({ slug, page }) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 250);
+  const { toolSettingsMap } = useSiteConfig();
 
-  const categoryTools = useMemo(() => getCategoryTools(page.category, tools), [page.category]);
+  const categoryTools = useMemo(
+    () => filterToolsForListing(getCategoryTools(page.category, tools), toolSettingsMap),
+    [page.category, toolSettingsMap]
+  );
 
   const filtered = useMemo(() => {
     if (!debouncedSearch.trim()) return categoryTools;

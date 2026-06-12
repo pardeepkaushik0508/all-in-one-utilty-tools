@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SearchBar from '../SearchBar';
+import { getSectionContent } from '../../utils/cms/siteConfig';
 import { CATEGORY_COUNT, getToolCountLabel } from '../../utils/siteStats';
 
 const HERO_STATS = [
@@ -24,7 +25,16 @@ function StatIcon({ path }) {
   );
 }
 
-export default function HeroSection({ search, onSearchChange }) {
+export default function HeroSection({ search, onSearchChange, pageContent = null }) {
+  const hero = getSectionContent(pageContent, 'hero', {
+    badge: `${getToolCountLabel()} tools · Free forever · No sign-up`,
+    title: 'Every tool you need.',
+    titleAccent: 'One beautiful workspace.',
+    subtitle: 'PDF, image, video, AI, developer, and security utilities — fast, private, and built for everyday productivity.',
+    primaryButton: { label: 'Browse all tools', href: '#tools' },
+    secondaryButton: { label: 'Read guides', href: '/blog' }
+  });
+
   return (
     <section className="home-hero animate-fade-up">
       <div className="home-hero-bg" aria-hidden>
@@ -38,20 +48,23 @@ export default function HeroSection({ search, onSearchChange }) {
         <div className="home-hero-copy">
           <div className="badge mb-6">
             <span className="badge-dot" />
-            {getToolCountLabel()} tools · Free forever · No sign-up
+            {hero.badge || `${getToolCountLabel()} tools · Free forever · No sign-up`}
           </div>
 
           <h1 className="home-hero-title">
-            Every tool you need.
+            {hero.title || 'Every tool you need.'}
             <br />
             <span className="gradient-text">
-              One beautiful<br className="sm:hidden" /> workspace.
+              {hero.titleAccent || (
+                <>
+                  One beautiful<br className="sm:hidden" /> workspace.
+                </>
+              )}
             </span>
           </h1>
 
           <p className="home-hero-subtitle">
-            PDF, image, video, AI, developer, and security utilities — fast, private,
-            and built for everyday productivity.
+            {hero.subtitle || 'PDF, image, video, AI, developer, and security utilities — fast, private, and built for everyday productivity.'}
           </p>
 
           <div className="home-hero-search">
@@ -71,14 +84,14 @@ export default function HeroSection({ search, onSearchChange }) {
           </div>
 
           <div className="home-hero-actions">
-            <Link href="#tools" className="btn-primary">
-              Browse all tools
+            <Link href={hero.primaryButton?.href || '#tools'} className="btn-primary">
+              {hero.primaryButton?.label || 'Browse all tools'}
               <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
                 <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </Link>
-            <Link href="/blog" className="btn-secondary">
-              Read guides
+            <Link href={hero.secondaryButton?.href || '/blog'} className="btn-secondary">
+              {hero.secondaryButton?.label || 'Read guides'}
             </Link>
           </div>
         </div>

@@ -1,4 +1,452 @@
 {
   "tools": {},
-  "blogs": {}
+  "blogs": {},
+  "pages": {
+    "home": {
+      "id": "home",
+      "slug": "home",
+      "title": "Home",
+      "content": {},
+      "sections": [
+        {
+          "id": "hero",
+          "name": "Hero",
+          "enabled": true,
+          "order": 0,
+          "content": {
+            "badge": "",
+            "title": "Every tool you need.",
+            "titleAccent": "One beautiful workspace.",
+            "subtitle": "PDF, image, video, AI, developer, and security utilities — fast, private, and built for everyday productivity.",
+            "primaryButton": {
+              "label": "Browse all tools",
+              "href": "#tools"
+            },
+            "secondaryButton": {
+              "label": "Read guides",
+              "href": "/blog"
+            }
+          }
+        },
+        {
+          "id": "categoryShowcase",
+          "name": "Category Showcase",
+          "enabled": true,
+          "order": 1,
+          "content": {}
+        },
+        {
+          "id": "featuredTools",
+          "name": "Featured Tools",
+          "enabled": true,
+          "order": 2,
+          "content": {
+            "title": "Hand-picked essentials",
+            "eyebrow": "Featured"
+          }
+        },
+        {
+          "id": "trendingTools",
+          "name": "Trending Tools",
+          "enabled": true,
+          "order": 3,
+          "content": {
+            "title": "Trending now",
+            "eyebrow": "Popular"
+          }
+        },
+        {
+          "id": "recentTools",
+          "name": "Recent Tools",
+          "enabled": true,
+          "order": 4,
+          "content": {
+            "title": "Recently used",
+            "eyebrow": "Your history"
+          }
+        },
+        {
+          "id": "featuresStrip",
+          "name": "Features Strip",
+          "enabled": true,
+          "order": 5,
+          "content": {
+            "items": []
+          }
+        },
+        {
+          "id": "toolsSection",
+          "name": "Tools Section",
+          "enabled": true,
+          "order": 6,
+          "content": {
+            "title": "All tools",
+            "eyebrow": "Browse"
+          }
+        },
+        {
+          "id": "blogSection",
+          "name": "Blog Section",
+          "enabled": true,
+          "order": 7,
+          "content": {
+            "title": "Latest from the blog",
+            "eyebrow": "Guides & tips"
+          }
+        },
+        {
+          "id": "ctaBanner",
+          "name": "CTA Banner",
+          "enabled": true,
+          "order": 8,
+          "content": {
+            "eyebrow": "Start now",
+            "title": "Ready to get things done?",
+            "description": "Pick a tool, upload your file, and download the result — no account, no hassle.",
+            "primaryButton": {
+              "label": "Explore tools",
+              "href": "#tools"
+            },
+            "secondaryButton": {
+              "label": "Contact us",
+              "href": "/contact"
+            }
+          }
+        }
+      ],
+      "seo": {
+        "metaTitle": "Home",
+        "metaDescription": "",
+        "canonicalUrl": "/",
+        "ogTitle": "Home",
+        "ogDescription": "",
+        "ogImage": "",
+        "schemaJson": null,
+        "robotsIndex": true
+      },
+      "status": "published",
+      "scheduledAt": null,
+      "revisions": [],
+      "updatedAt": "2026-06-12T05:16:59.192Z"
+    },
+    "about": {
+      "id": "about",
+      "slug": "about",
+      "title": "About",
+      "content": {},
+      "sections": [
+        {
+          "id": "header",
+          "name": "Header",
+          "enabled": true,
+          "order": 0,
+          "content": {
+            "badge": "About",
+            "title": "Built for everyday work",
+            "titleAccent": "everyday work",
+            "subtitle": "All-in-One Utility Tools groups essential daily utilities into one clean, premium interface."
+          }
+        },
+        {
+          "id": "features",
+          "name": "Features Grid",
+          "enabled": true,
+          "order": 1,
+          "content": {
+            "items": []
+          }
+        }
+      ],
+      "seo": {
+        "metaTitle": "About",
+        "metaDescription": "",
+        "canonicalUrl": "/about",
+        "ogTitle": "About",
+        "ogDescription": "",
+        "ogImage": "",
+        "schemaJson": null,
+        "robotsIndex": true
+      },
+      "status": "published",
+      "scheduledAt": null,
+      "revisions": [],
+      "updatedAt": "2026-06-12T05:16:59.192Z"
+    },
+    "contact": {
+      "id": "contact",
+      "slug": "contact",
+      "title": "Contact",
+      "content": {},
+      "sections": [
+        {
+          "id": "header",
+          "name": "Header",
+          "enabled": true,
+          "order": 0,
+          "content": {
+            "badge": "Contact",
+            "title": "Get in touch",
+            "titleAccent": "touch",
+            "subtitle": "Questions, feature requests, or bug reports — send us a message."
+          }
+        },
+        {
+          "id": "form",
+          "name": "Contact Form",
+          "enabled": true,
+          "order": 1,
+          "content": {
+            "submitLabel": "Send Message"
+          }
+        }
+      ],
+      "seo": {
+        "metaTitle": "Contact",
+        "metaDescription": "",
+        "canonicalUrl": "/contact",
+        "ogTitle": "Contact",
+        "ogDescription": "",
+        "ogImage": "",
+        "schemaJson": null,
+        "robotsIndex": true
+      },
+      "status": "published",
+      "scheduledAt": null,
+      "revisions": [],
+      "updatedAt": "2026-06-12T05:16:59.192Z"
+    },
+    "footer": {
+      "id": "footer",
+      "slug": "footer",
+      "title": "Footer",
+      "content": {},
+      "sections": [
+        {
+          "id": "brand",
+          "name": "Brand",
+          "enabled": true,
+          "order": 0,
+          "content": {
+            "title": "UtilityTools",
+            "description": "Free online tools for PDF, image, video, text, developers, security, and more.",
+            "statusText": "All systems online"
+          }
+        },
+        {
+          "id": "links",
+          "name": "Footer Links",
+          "enabled": true,
+          "order": 1,
+          "content": {}
+        }
+      ],
+      "seo": {
+        "metaTitle": "Footer",
+        "metaDescription": "",
+        "canonicalUrl": "/footer",
+        "ogTitle": "Footer",
+        "ogDescription": "",
+        "ogImage": "",
+        "schemaJson": null,
+        "robotsIndex": true
+      },
+      "status": "published",
+      "scheduledAt": null,
+      "revisions": [],
+      "updatedAt": "2026-06-12T05:16:59.192Z"
+    },
+    "header": {
+      "id": "header",
+      "slug": "header",
+      "title": "Header",
+      "content": {},
+      "sections": [
+        {
+          "id": "brand",
+          "name": "Brand",
+          "enabled": true,
+          "order": 0,
+          "content": {
+            "title": "UtilityTools"
+          }
+        },
+        {
+          "id": "cta",
+          "name": "Header CTA",
+          "enabled": true,
+          "order": 1,
+          "content": {
+            "label": "Explore Tools",
+            "href": "/#tools"
+          }
+        }
+      ],
+      "seo": {
+        "metaTitle": "Header",
+        "metaDescription": "",
+        "canonicalUrl": "/header",
+        "ogTitle": "Header",
+        "ogDescription": "",
+        "ogImage": "",
+        "schemaJson": null,
+        "robotsIndex": true
+      },
+      "status": "published",
+      "scheduledAt": null,
+      "revisions": [],
+      "updatedAt": "2026-06-12T05:16:59.192Z"
+    }
+  },
+  "toolSettings": {
+    "merge-pdf": {
+      "id": "merge-pdf",
+      "slug": "merge-pdf",
+      "toolName": "merge-pdf",
+      "featured": false,
+      "updatedAt": "2026-06-12T05:30:19.908Z",
+      "enabled": true
+    }
+  },
+  "navigation": {
+    "header": [
+      {
+        "id": "nav-home",
+        "label": "Home",
+        "href": "/",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 0
+      },
+      {
+        "id": "nav-tools",
+        "label": "Tools",
+        "href": "/#tools",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 1
+      },
+      {
+        "id": "nav-blog",
+        "label": "Blog",
+        "href": "/blog",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 2
+      },
+      {
+        "id": "nav-about",
+        "label": "About",
+        "href": "/about",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 3
+      },
+      {
+        "id": "nav-contact",
+        "label": "Contact",
+        "href": "/contact",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 4
+      }
+    ],
+    "footer": [
+      {
+        "id": "footer-blog",
+        "label": "Blog",
+        "href": "/blog",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 0,
+        "group": "Resources"
+      },
+      {
+        "id": "footer-about",
+        "label": "About",
+        "href": "/about",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 1,
+        "group": "Resources"
+      },
+      {
+        "id": "footer-contact",
+        "label": "Contact",
+        "href": "/contact",
+        "external": false,
+        "openInNewTab": false,
+        "enabled": true,
+        "order": 2,
+        "group": "Resources"
+      }
+    ],
+    "footerBrand": {
+      "title": "UtilityTools",
+      "description": "Free online tools for PDF, image, video, text, developers, security, and more.",
+      "statusText": "All systems online"
+    },
+    "cta": {
+      "label": "Explore Tools",
+      "href": "/#tools"
+    }
+  },
+  "media": [],
+  "activityLog": [
+    {
+      "id": "log-0ce94d5dd7cc35cb",
+      "action": "tool.update",
+      "details": {
+        "slug": "merge-pdf",
+        "enabled": true,
+        "actor": "admin"
+      },
+      "createdAt": "2026-06-12T05:30:19.912Z"
+    },
+    {
+      "id": "log-e3c27e7430b08c3e",
+      "action": "tool.update",
+      "details": {
+        "slug": "merge-pdf",
+        "enabled": false,
+        "actor": "admin"
+      },
+      "createdAt": "2026-06-12T05:29:43.759Z"
+    },
+    {
+      "id": "log-3a0d63654e23bc6b",
+      "action": "tool.update",
+      "details": {
+        "slug": "merge-pdf",
+        "featured": false,
+        "actor": "admin"
+      },
+      "createdAt": "2026-06-12T05:29:41.404Z"
+    },
+    {
+      "id": "log-1b7f2a605af6e8b2",
+      "action": "tool.update",
+      "details": {
+        "slug": "merge-pdf",
+        "featured": true,
+        "actor": "admin"
+      },
+      "createdAt": "2026-06-12T05:29:38.658Z"
+    },
+    {
+      "id": "log-fb21fac487c3e74b",
+      "action": "navigation.update",
+      "details": {
+        "actor": "admin"
+      },
+      "createdAt": "2026-06-12T05:20:09.307Z"
+    }
+  ],
+  "cacheVersion": 6
 }
