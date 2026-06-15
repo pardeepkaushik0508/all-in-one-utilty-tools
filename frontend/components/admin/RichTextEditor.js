@@ -83,7 +83,73 @@ const FontFamily = Extension.create({
   },
 });
 
-// ── Constants ───────────────────────────────────────────────────────────────
+// ── Smart Paste — preserve HTML formatting from clipboard ─────────────────
+// TipTap strips inline styles on paste by default. This extension intercepts
+// the paste event on the editor DOM element and re-inserts the clipboard HTML
+// via editor.commands.insertContent so bold, italic, colours, font-size,
+// headings, links, lists, tables etc. are all preserved.
+const SmartPaste = Extension.create({
+  name: 'smartPaste',
+
+  addOptions() {
+    return {
+      // Tags whose content should be fully removed (not just the tag)
+      stripTags: ['script', 'style', 'meta', 'head', 'noscript', 'iframe']
+    };
+  },
+
+  onCreate() {
+    const editor = this.editor;
+
+    const handlePaste = (event) => {
+      const clipboardData = event.clipboardData;
+      if (!clipboardData) return;
+
+      const html = clipboardData.getData('text/html');
+      if (!html) return; // no HTML — let default plain-text paste handle it
+
+      // Prevent the default paste
+      event.preventDefault();
+      event.stopPropagation();
+
+      // ── Clean the HTML ──────────────────────────────────────────────────
+      let clean = html;
+
+      // Remove dangerous / noisy tags entirely (including content)
+      this.options.stripTags.forEach((tag) => {
+        clean = clean.replace(new RegExp(`<${tag}[\\s\\S]*?<\\/${tag}>`, 'gi'), '');
+        clean = clean.replace(new RegExp(`<${tag}[^>]*/?>`, 'gi'), '');
+      });
+
+      // Strip XML/namespace tags from Word / Google Docs
+      clean = clean.replace(/<\/?[a-z]+:[^>]*>/gi, '');
+      // Strip HTML/body/head wrapper tags but keep their content
+      clean = clean.replace(/<\/?(html|body|head)[^>]*>/gi, '');
+      // Strip HTML comments
+      clean = clean.replace(/<!--[\s\S]*?-->/g, '');
+      // Remove class & id attributes (they add no visual value)
+      clean = clean.replace(/\s(class|id)="[^"]*"/gi, '');
+      // Keep style= attributes — these carry font-size, color, font-family etc.
+      clean = clean.trim();
+
+      if (!clean) return;
+
+      // ── Insert into editor ──────────────────────────────────────────────
+      editor.commands.insertContent(clean, {
+        parseOptions: { preserveWhitespace: 'full' }
+      });
+    };
+
+    // Attach to the editor's DOM element
+    const el = editor.view.dom;
+    el.addEventListener('paste', handlePaste, true); // capture phase
+
+    // Cleanup when editor is destroyed
+    editor.on('destroy', () => {
+      el.removeEventListener('paste', handlePaste, true);
+    });
+  }
+});
 const FONT_SIZES = ['10', '11', '12', '13', '14', '16', '18', '20', '22', '24', '28', '32', '36', '48', '64'];
 const FONT_FAMILIES = [
   { label: 'Default', value: '' },
@@ -144,6 +210,7 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'St
       TextStyle,
       FontSize,
       FontFamily,
+      SmartPaste,
       Color,
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
