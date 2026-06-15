@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminLoginPage from '../../components/admin/AdminLoginPage';
 import BlogManager from '../../components/admin/BlogManager';
+import BlogCategoryManager from '../../components/admin/BlogCategoryManager';
 import ContentManager from '../../components/admin/ContentManager';
 import Dashboard from '../../components/admin/Dashboard';
 import NavigationManager from '../../components/admin/NavigationManager';
@@ -20,7 +21,11 @@ const TAB_COPY = {
   },
   blog: {
     title: 'Blog Manager',
-    subtitle: 'Edit blog posts, article content, categories, and SEO settings.'
+    subtitle: 'Create and edit blog posts with the rich text editor.'
+  },
+  categories: {
+    title: 'Blog Categories',
+    subtitle: 'Add, edit, enable/disable, and delete blog categories.'
   },
   seo: {
     title: 'Tool SEO',
@@ -62,11 +67,12 @@ export default function AdminPage() {
       activeTab={activeTab}
       onLogout={logout}
     >
-      {activeTab === 'dashboard' && <Dashboard token={token} />}
-      {activeTab === 'content' && <ContentManager token={token} />}
-      {activeTab === 'blog' && <BlogManager token={token} />}
-      {activeTab === 'seo' && <ToolSeoEditor token={token} />}
-      {activeTab === 'tools' && <ToolsManager token={token} />}
+      {activeTab === 'dashboard'  && <Dashboard token={token} />}
+      {activeTab === 'content'    && <ContentManager token={token} />}
+      {activeTab === 'blog'       && <BlogManager token={token} />}
+      {activeTab === 'categories' && <BlogCategoryManager token={token} />}
+      {activeTab === 'seo'        && <ToolSeoEditor token={token} />}
+      {activeTab === 'tools'      && <ToolsManager token={token} />}
       {activeTab === 'navigation' && <NavigationManager token={token} />}
     </AdminLayout>
   );

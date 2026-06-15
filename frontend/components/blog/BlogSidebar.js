@@ -1,16 +1,18 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import SearchBar from '../SearchBar';
-import { blogCategories } from '../../utils/blogPosts';
 import { getToolCountLabel } from '../../utils/siteStats';
 import { tools } from '../../utils/tools';
 
 function searchInPosts(posts, query) {
   const q = String(query || '').trim().toLowerCase();
   if (!q) return posts;
-  return posts.filter((post) =>
-    `${post.title} ${post.excerpt} ${post.category} ${(post.content || []).join(' ')}`.toLowerCase().includes(q)
-  );
+  return posts.filter((post) => {
+    const contentText = Array.isArray(post.content)
+      ? post.content.join(' ')
+      : (typeof post.content === 'string' ? post.content : '');
+    return `${post.title} ${post.excerpt} ${post.category} ${contentText}`.toLowerCase().includes(q);
+  });
 }
 
 export default function BlogSidebar({
@@ -28,10 +30,26 @@ export default function BlogSidebar({
     return list.filter((p) => p.slug !== currentSlug).slice(0, 6);
   }, [search, filteredPosts, posts, currentSlug]);
 
-  const currentPost = currentSlug
-    ? posts.find((p) => p.slug === currentSlug)
-    : null;
+  // Derive categories from actual posts so they always match what's rendered
+  const categories = useMemo(() => {
+    const seen = new Set();
+    const result = [];
+    posts.forEach((post) => {
+      // Support both multi-category array and single category string
+      const cats = Array.isArray(post.categories) && post.categories.length
+        ? post.categories
+        : [post.category].filter(Boolean);
+      cats.forEach((cat) => {
+        if (cat && !seen.has(cat)) {
+          seen.add(cat);
+          result.push(cat);
+        }
+      });
+    });
+    return result.sort();
+  }, [posts]);
 
+  const currentPost = currentSlug ? posts.find((p) => p.slug === currentSlug) : null;
   const relatedTool = currentPost?.relatedToolSlug
     ? tools.find((t) => t.slug === currentPost.relatedToolSlug)
     : null;
@@ -63,7 +81,7 @@ export default function BlogSidebar({
               All posts
             </Link>
           </li>
-          {blogCategories.map((cat) => (
+          {categories.map((cat) => (
             <li key={cat}>
               <Link
                 href={`/blog?category=${encodeURIComponent(cat)}`}

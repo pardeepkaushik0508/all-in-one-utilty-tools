@@ -21,20 +21,29 @@ function isPublishedRecord(record = {}) {
 }
 
 function normalizeCmsBlog(slug, record = {}) {
+  const cats = Array.isArray(record.categories) && record.categories.length
+    ? record.categories
+    : [record.category || 'Guides'];
+
   return {
     slug,
     title: record.title || 'Untitled post',
     excerpt: record.excerpt || '',
-    category: record.category || 'Guides',
+    category: cats[0],
+    categories: cats,
     date: record.date || record.publishedAt?.slice(0, 10) || record.createdAt?.slice(0, 10) || new Date().toISOString().slice(0, 10),
     readTime: record.readTime || '5 min',
     relatedToolSlug: record.relatedToolSlug || '',
     author: record.author || 'UtilityTools Team',
-    content: Array.isArray(record.content) ? record.content : [],
+    content: record.content || '',
     status: record.status || 'published',
     source: record.source || 'cms',
     metaTitle: record.metaTitle,
     metaDescription: record.metaDescription,
+    canonicalUrl: record.canonicalUrl || '',
+    ogTitle: record.ogTitle || '',
+    ogDescription: record.ogDescription || '',
+    featuredImage: record.featuredImage || '',
     keywords: record.keywords || [],
     robotsIndex: record.robotsIndex !== false
   };
@@ -85,10 +94,11 @@ export async function fetchRemoteBlogPosts({ includeDrafts = false } = {}) {
     const response = await fetch(resolveApiUrl('/api/content/blogs'), {
       headers: { Accept: 'application/json' }
     });
-    if (!response.ok) return [];
+    if (!response.ok) return mergeBlogCatalog(blogPosts, [], { includeDrafts });
     const data = await response.json();
     return mergeBlogCatalog(blogPosts, data.posts || [], { includeDrafts });
   } catch {
+    // Always fall back to static posts so the page never shows empty
     return mergeBlogCatalog(blogPosts, [], { includeDrafts });
   }
 }

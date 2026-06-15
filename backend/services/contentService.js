@@ -49,10 +49,26 @@ async function saveBlogContent(slug, payload) {
   store.blogs = store.blogs || {};
   const existing = store.blogs[slug] || {};
   const now = new Date().toISOString();
+
+  // Normalise categories — keep both `category` (primary) and `categories` (array)
+  let categories = existing.categories || (existing.category ? [existing.category] : ['Guides']);
+  if (Array.isArray(payload.categories) && payload.categories.length) {
+    categories = payload.categories;
+  } else if (payload.category) {
+    categories = [payload.category];
+  }
+
   store.blogs[slug] = {
     ...existing,
     ...payload,
     slug,
+    category: categories[0],
+    categories,
+    // Extra SEO fields — preserve existing if not in payload
+    canonicalUrl: payload.canonicalUrl !== undefined ? payload.canonicalUrl : (existing.canonicalUrl || ''),
+    ogTitle: payload.ogTitle !== undefined ? payload.ogTitle : (existing.ogTitle || ''),
+    ogDescription: payload.ogDescription !== undefined ? payload.ogDescription : (existing.ogDescription || ''),
+    featuredImage: payload.featuredImage !== undefined ? payload.featuredImage : (existing.featuredImage || ''),
     updatedAt: now,
     createdAt: existing.createdAt || now
   };
@@ -95,17 +111,28 @@ async function createBlog(payload = {}) {
     source: 'cms',
     title: payload.title.trim(),
     excerpt: payload.excerpt || '',
-    category: payload.category || 'Guides',
+    // Support both single string and array of categories
+    category: Array.isArray(payload.categories) && payload.categories.length
+      ? payload.categories[0]
+      : (payload.category || 'Guides'),
+    categories: Array.isArray(payload.categories) && payload.categories.length
+      ? payload.categories
+      : [payload.category || 'Guides'],
     author: payload.author || 'UtilityTools Team',
     readTime: payload.readTime || '5 min',
     relatedToolSlug: payload.relatedToolSlug || '',
-    content: Array.isArray(payload.content) ? payload.content : [],
+    content: Array.isArray(payload.content) ? payload.content : (payload.content || ''),
     status: payload.status || 'draft',
     scheduledAt: payload.scheduledAt || null,
     date: payload.date || now.slice(0, 10),
+    // SEO
     metaTitle: payload.metaTitle || payload.title.trim(),
     metaDescription: payload.metaDescription || payload.excerpt || '',
     keywords: payload.keywords || [],
+    canonicalUrl: payload.canonicalUrl || '',
+    ogTitle: payload.ogTitle || payload.metaTitle || payload.title.trim(),
+    ogDescription: payload.ogDescription || payload.metaDescription || payload.excerpt || '',
+    featuredImage: payload.featuredImage || '',
     robotsIndex: payload.robotsIndex !== false,
     createdAt: now,
     updatedAt: now,
@@ -120,41 +147,123 @@ async function createBlog(payload = {}) {
 
 // ── Blog categories ──────────────────────────────────────────────────────────
 
-const DEFAULT_CATEGORIES = ['PDF Tools', 'Image Tools', 'Video & Audio', 'Text & AI', 'Developer', 'Security', 'Guides'];
+const DEFAULT_CATEGORIES = [
+  { name: 'PDF Tools',     slug: 'pdf-tools',     description: 'Guides for PDF merge, split, compress, and more.', status: 'active' },
+  { name: 'Image Tools',   slug: 'image-tools',   description: 'Guides for image compression, resizing, and conversion.', status: 'active' },
+  { name: 'Video & Audio', slug: 'video-audio',   description: 'Guides for video/audio extraction, trimming, and downloading.', status: 'active' },
+  { name: 'Text & AI',     slug: 'text-ai',       description: 'Guides for AI content generation, grammar, and paraphrasing.', status: 'active' },
+  { name: 'Developer',     slug: 'developer',     description: 'Guides for JSON formatting, code minification, and developer tools.', status: 'active' },
+  { name: 'Security',      slug: 'security',      description: 'Guides for password generation, hashing, and security tools.', status: 'active' },
+  { name: 'Guides',        slug: 'guides',        description: 'General how-to guides for all utility tools.', status: 'active' }
+];
+
+const DEFAULT_SLUGS = DEFAULT_CATEGORIES.map((c) => c.slug);
+const DEFAULT_NAMES = DEFAULT_CATEGORIES.map((c) => c.name);
+
+function slugifyCategory(name = '') {
+  return String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 async function getBlogCategories() {
   const store = await readContentStore();
   const custom = Array.isArray(store.blogCategories) ? store.blogCategories : [];
-  // Merge defaults + custom, deduplicate
+
+  // Normalise legacy string entries to objects
+  const normalised = custom.map((c) => {
+    if (typeof c === 'string') {
+      return { name: c, slug: slugifyCategory(c), description: '', status: 'active' };
+    }
+    return { description: '', status: 'active', ...c };
+  });
+
+  // Merge: defaults first, then custom (no duplicates by slug)
   const all = [...DEFAULT_CATEGORIES];
-  custom.forEach((cat) => { if (!all.includes(cat)) all.push(cat); });
+  normalised.forEach((cat) => {
+    if (!all.find((d) => d.slug === cat.slug || d.name === cat.name)) all.push(cat);
+  });
   return all;
 }
 
-async function addBlogCategory(name) {
-  const trimmed = String(name || '').trim();
-  if (!trimmed) throw Object.assign(new Error('Category name is required.'), { status: 400 });
+async function addBlogCategory(data = {}) {
+  const name = String(data.name || data || '').trim();
+  if (!name) throw Object.assign(new Error('Category name is required.'), { status: 400 });
+
+  const slug = data.slug ? String(data.slug).trim() : slugifyCategory(name);
+  if (!slug) throw Object.assign(new Error('Invalid category slug.'), { status: 400 });
+
   const store = await readContentStore();
-  store.blogCategories = store.blogCategories || [];
-  if (DEFAULT_CATEGORIES.includes(trimmed) || store.blogCategories.includes(trimmed)) {
+  store.blogCategories = (store.blogCategories || []).map((c) =>
+    typeof c === 'string' ? { name: c, slug: slugifyCategory(c), description: '', status: 'active' } : c
+  );
+
+  if (DEFAULT_NAMES.includes(name) || DEFAULT_SLUGS.includes(slug)) {
+    throw Object.assign(new Error('Category already exists as a default.'), { status: 409 });
+  }
+  if (store.blogCategories.find((c) => c.slug === slug || c.name === name)) {
     throw Object.assign(new Error('Category already exists.'), { status: 409 });
   }
-  store.blogCategories.push(trimmed);
+
+  const record = {
+    name,
+    slug,
+    description: String(data.description || '').trim(),
+    status: data.status === 'inactive' ? 'inactive' : 'active',
+    createdAt: new Date().toISOString()
+  };
+
+  store.blogCategories.push(record);
   await writeContentStore(store, { bumpCache: false });
-  await logActivity('blog.category.add', { name: trimmed });
-  return trimmed;
+  await logActivity('blog.category.add', { name, slug });
+  return record;
 }
 
-async function deleteBlogCategory(name) {
-  const trimmed = String(name || '').trim();
-  if (DEFAULT_CATEGORIES.includes(trimmed)) {
+async function updateBlogCategory(slug, data = {}) {
+  const trimmedSlug = String(slug || '').trim();
+  if (DEFAULT_SLUGS.includes(trimmedSlug)) {
+    throw Object.assign(new Error('Built-in categories cannot be edited.'), { status: 400 });
+  }
+  const store = await readContentStore();
+  store.blogCategories = (store.blogCategories || []).map((c) =>
+    typeof c === 'string' ? { name: c, slug: slugifyCategory(c), description: '', status: 'active' } : c
+  );
+  const idx = store.blogCategories.findIndex((c) => c.slug === trimmedSlug);
+  if (idx === -1) throw Object.assign(new Error('Category not found.'), { status: 404 });
+
+  store.blogCategories[idx] = {
+    ...store.blogCategories[idx],
+    name: data.name ? String(data.name).trim() : store.blogCategories[idx].name,
+    description: data.description !== undefined ? String(data.description).trim() : store.blogCategories[idx].description,
+    status: data.status === 'inactive' ? 'inactive' : 'active',
+    updatedAt: new Date().toISOString()
+  };
+
+  await writeContentStore(store, { bumpCache: false });
+  await logActivity('blog.category.update', { slug: trimmedSlug });
+  return store.blogCategories[idx];
+}
+
+async function deleteBlogCategory(slug) {
+  const trimmed = String(slug || '').trim();
+  if (DEFAULT_SLUGS.includes(trimmed)) {
     throw Object.assign(new Error('Built-in categories cannot be deleted.'), { status: 400 });
   }
   const store = await readContentStore();
-  store.blogCategories = (store.blogCategories || []).filter((c) => c !== trimmed);
+  store.blogCategories = (store.blogCategories || []).map((c) =>
+    typeof c === 'string' ? { name: c, slug: slugifyCategory(c), description: '', status: 'active' } : c
+  );
+  const existing = store.blogCategories.find((c) => c.slug === trimmed);
+  if (!existing) throw Object.assign(new Error('Category not found.'), { status: 404 });
+
+  store.blogCategories = store.blogCategories.filter((c) => c.slug !== trimmed);
   await writeContentStore(store, { bumpCache: false });
-  await logActivity('blog.category.delete', { name: trimmed });
-  return { deleted: true, name: trimmed };
+  await logActivity('blog.category.delete', { slug: trimmed });
+  return { deleted: true, slug: trimmed };
 }
 
 async function deleteBlog(slug) {
@@ -192,5 +301,6 @@ module.exports = {
   listContentSummary,
   getBlogCategories,
   addBlogCategory,
+  updateBlogCategory,
   deleteBlogCategory
 };

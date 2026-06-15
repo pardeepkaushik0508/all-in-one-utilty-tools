@@ -13,6 +13,7 @@ const {
   readContentStore,
   getBlogCategories,
   addBlogCategory,
+  updateBlogCategory,
   deleteBlogCategory
 } = require('../services/contentService');
 const {
@@ -169,16 +170,25 @@ router.get('/blog-categories', requireAdmin, async (_req, res, next) => {
 
 router.post('/blog-categories', requireAdmin, async (req, res, next) => {
   try {
-    const name = await addBlogCategory(req.body?.name);
-    return res.status(201).json({ name });
+    const record = await addBlogCategory(req.body || {});
+    return res.status(201).json({ category: record });
   } catch (error) {
     return next(error);
   }
 });
 
-router.delete('/blog-categories/:name', requireAdmin, async (req, res, next) => {
+router.put('/blog-categories/:slug', requireAdmin, async (req, res, next) => {
   try {
-    const result = await deleteBlogCategory(decodeURIComponent(req.params.name));
+    const record = await updateBlogCategory(decodeURIComponent(req.params.slug), req.body || {});
+    return res.json({ category: record });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.delete('/blog-categories/:slug', requireAdmin, async (req, res, next) => {
+  try {
+    const result = await deleteBlogCategory(decodeURIComponent(req.params.slug));
     return res.json(result);
   } catch (error) {
     return next(error);

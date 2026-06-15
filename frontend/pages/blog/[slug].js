@@ -41,9 +41,16 @@ export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
   const relatedTool = tools.find((t) => t.slug === post.relatedToolSlug);
   const faqSection = enhanced.sections.find((section) => section.id === 'faq');
 
+  // Support multi-category display
+  const postCategories = Array.isArray(post.categories) && post.categories.length
+    ? post.categories
+    : [post.category].filter(Boolean);
+
+  const ogImage = post.featuredImage || `${SITE_URL}/og-default.svg`;
+
   const jsonLd = [
     buildBlogPostingSchema(post, {
-      featuredImage: `${SITE_URL}/og-default.svg`,
+      featuredImage: ogImage,
       wordCount: enhanced.wordCount
     }),
     buildBreadcrumbSchema([
@@ -56,12 +63,12 @@ export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
 
   return (
     <Layout
-      title={post.title}
-      description={post.excerpt}
-      keywords={[post.category, post.title, 'utility tools guide', 'free online tools']}
-      canonical={`/blog/${post.slug}`}
+      title={post.ogTitle || post.metaTitle || post.title}
+      description={post.ogDescription || post.metaDescription || post.excerpt}
+      keywords={[...postCategories, post.title, 'utility tools guide', 'free online tools']}
+      canonical={post.canonicalUrl || `/blog/${post.slug}`}
       ogType="article"
-      ogImage={`${SITE_URL}/og-default.svg`}
+      ogImage={ogImage}
       jsonLd={jsonLd}
     >
       <nav aria-label="Breadcrumb" className="breadcrumb-modern animate-fade-up mb-6">
@@ -79,7 +86,9 @@ export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
               <div className={`blog-hero-glow bg-gradient-to-br ${enhanced.featuredImageGradient}`} />
               <div className="blog-hero-content">
                 <div className="blog-hero-meta">
-                  <span className="blog-category">{post.category}</span>
+                  {postCategories.map((cat) => (
+                    <span key={cat} className="blog-category">{cat}</span>
+                  ))}
                   <span className="blog-hero-chip">{post.readTime}</span>
                   <span className="blog-hero-chip">{enhanced.wordCount} words</span>
                 </div>

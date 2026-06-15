@@ -5,19 +5,35 @@ import Layout from '../../components/Layout';
 import BlogCard from '../../components/blog/BlogCard';
 import BlogSidebar from '../../components/blog/BlogSidebar';
 import { fetchRemoteBlogPosts } from '../../utils/cms/blogPosts';
+import { blogPosts as staticBlogPosts } from '../../utils/blogPosts';
+
+// Returns true if the post belongs to the given category
+function postMatchesCategory(post, category) {
+  if (!category) return true;
+  // Check categories array first, fall back to category string
+  if (Array.isArray(post.categories) && post.categories.length) {
+    return post.categories.includes(category);
+  }
+  return post.category === category;
+}
 
 function filterPosts(posts, search, category) {
   let list = [...posts];
   const q = String(search || '').trim().toLowerCase();
 
   if (q) {
-    list = list.filter((post) =>
-      `${post.title} ${post.excerpt} ${post.category} ${(post.content || []).join(' ')}`.toLowerCase().includes(q)
-    );
+    list = list.filter((post) => {
+      const contentText = Array.isArray(post.content)
+        ? post.content.join(' ')
+        : (typeof post.content === 'string' ? post.content : '');
+      return `${post.title} ${post.excerpt} ${post.category} ${contentText}`
+        .toLowerCase()
+        .includes(q);
+    });
   }
 
   if (category) {
-    list = list.filter((post) => post.category === category);
+    list = list.filter((post) => postMatchesCategory(post, category));
   }
 
   return list;
@@ -97,6 +113,19 @@ export default function BlogIndexPage({ posts = [] }) {
 }
 
 export async function getStaticProps() {
-  const posts = await fetchRemoteBlogPosts();
+  let posts = [];
+  try {
+    posts = await fetchRemoteBlogPosts();
+  } catch {
+    // Guaranteed fallback — never ship an empty page
+  }
+  // If remote fetch returned nothing, use static posts directly
+  if (!posts || posts.length === 0) {
+    posts = staticBlogPosts.map((p) => ({
+      ...p,
+      categories: [p.category],
+      source: 'static'
+    }));
+  }
   return { props: { posts }, revalidate: 60 };
 }
