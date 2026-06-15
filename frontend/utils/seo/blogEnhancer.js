@@ -14,6 +14,14 @@ function countWords(parts = []) {
   return parts.join(' ').split(/\s+/).filter(Boolean).length;
 }
 
+/**
+ * Detect if content is HTML (produced by TipTap) vs legacy string[].
+ */
+function isHtmlContent(content) {
+  if (typeof content === 'string') return /<[a-z][\s\S]*>/i.test(content);
+  return false;
+}
+
 function buildExtraSections(post) {
   const relatedTool = tools.find((t) => t.slug === post.relatedToolSlug);
   const toolName = relatedTool?.name || 'our utility tools';
@@ -67,11 +75,17 @@ function buildExtraSections(post) {
 }
 
 export function enhanceBlogPost(post, relatedPosts = []) {
+  const rawContent = post.content;
+  const htmlContent = isHtmlContent(rawContent) ? rawContent : null;
+  // For legacy string[] content, use the array. For HTML, use empty paragraphs (rendered separately).
+  const introParagraphs = htmlContent ? [] : (Array.isArray(rawContent) ? rawContent : []);
+
   const sections = [
     {
       id: 'introduction',
       heading: 'Introduction',
-      paragraphs: post.content || []
+      paragraphs: introParagraphs,
+      htmlContent  // will be non-null for rich-text posts
     },
     ...buildExtraSections(post)
   ];

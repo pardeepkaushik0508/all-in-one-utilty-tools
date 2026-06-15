@@ -118,6 +118,45 @@ async function createBlog(payload = {}) {
   return record;
 }
 
+// ── Blog categories ──────────────────────────────────────────────────────────
+
+const DEFAULT_CATEGORIES = ['PDF Tools', 'Image Tools', 'Video & Audio', 'Text & AI', 'Developer', 'Security', 'Guides'];
+
+async function getBlogCategories() {
+  const store = await readContentStore();
+  const custom = Array.isArray(store.blogCategories) ? store.blogCategories : [];
+  // Merge defaults + custom, deduplicate
+  const all = [...DEFAULT_CATEGORIES];
+  custom.forEach((cat) => { if (!all.includes(cat)) all.push(cat); });
+  return all;
+}
+
+async function addBlogCategory(name) {
+  const trimmed = String(name || '').trim();
+  if (!trimmed) throw Object.assign(new Error('Category name is required.'), { status: 400 });
+  const store = await readContentStore();
+  store.blogCategories = store.blogCategories || [];
+  if (DEFAULT_CATEGORIES.includes(trimmed) || store.blogCategories.includes(trimmed)) {
+    throw Object.assign(new Error('Category already exists.'), { status: 409 });
+  }
+  store.blogCategories.push(trimmed);
+  await writeContentStore(store, { bumpCache: false });
+  await logActivity('blog.category.add', { name: trimmed });
+  return trimmed;
+}
+
+async function deleteBlogCategory(name) {
+  const trimmed = String(name || '').trim();
+  if (DEFAULT_CATEGORIES.includes(trimmed)) {
+    throw Object.assign(new Error('Built-in categories cannot be deleted.'), { status: 400 });
+  }
+  const store = await readContentStore();
+  store.blogCategories = (store.blogCategories || []).filter((c) => c !== trimmed);
+  await writeContentStore(store, { bumpCache: false });
+  await logActivity('blog.category.delete', { name: trimmed });
+  return { deleted: true, name: trimmed };
+}
+
 async function deleteBlog(slug) {
   const store = await readContentStore();
   const existing = store.blogs?.[slug];
@@ -150,5 +189,8 @@ module.exports = {
   deleteBlog,
   isBlogPublished,
   normalizeSlug,
-  listContentSummary
+  listContentSummary,
+  getBlogCategories,
+  addBlogCategory,
+  deleteBlogCategory
 };

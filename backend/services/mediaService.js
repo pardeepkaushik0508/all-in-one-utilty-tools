@@ -51,7 +51,9 @@ function runFfmpeg(args) {
 }
 
 async function videoToMp3(file) {
-  const outputName = `audio-${Date.now()}.mp3`;
+  // Output is always MP3 regardless of input format
+  const baseName = path.parse(file.originalname || 'audio').name;
+  const outputName = `${baseName}.mp3`;
   const outputPath = path.join(processedDir, outputName);
 
   await runFfmpeg(['-i', file.path, '-vn', '-acodec', 'libmp3lame', '-q:a', '2', outputPath]);
@@ -61,7 +63,9 @@ async function videoToMp3(file) {
 
 async function compressVideo(file, options = {}) {
   const crf = Math.min(35, Math.max(18, Number(options.crf || 28)));
-  const outputName = `video-compressed-${Date.now()}.mp4`;
+  // Output is always MP4 (H.264)
+  const baseName = path.parse(file.originalname || 'video').name;
+  const outputName = `${baseName}.mp4`;
   const outputPath = path.join(processedDir, outputName);
 
   await runFfmpeg([
@@ -85,7 +89,9 @@ async function compressVideo(file, options = {}) {
 async function cutAudio(file, options = {}) {
   const start = String(options.start || '0');
   const duration = String(options.duration || '30');
-  const outputName = `audio-cut-${Date.now()}.mp3`;
+  // Output is always MP3
+  const baseName = path.parse(file.originalname || 'audio').name;
+  const outputName = `${baseName}.mp3`;
   const outputPath = path.join(processedDir, outputName);
 
   await runFfmpeg([
@@ -107,8 +113,15 @@ async function cutAudio(file, options = {}) {
 }
 
 async function downloadYouTubeVideo(videoUrl) {
-  const outputStem = `youtube-${Date.now()}`;
-  const outputTemplate = path.join(processedDir, `${outputStem}.%(ext)s`);
+  // Try to extract a meaningful name from the YouTube URL (video ID)
+  let stemName = 'youtube-video';
+  try {
+    const u = new URL(videoUrl);
+    const vid = u.searchParams.get('v') || u.pathname.replace(/^\//, '').split('/')[0];
+    if (vid) stemName = vid;
+  } catch { /* use default */ }
+
+  const outputTemplate = path.join(processedDir, `${stemName}.%(ext)s`);
 
   await runYtDlp([
     '--no-playlist',
@@ -123,7 +136,7 @@ async function downloadYouTubeVideo(videoUrl) {
   ]);
 
   const files = await fs.readdir(processedDir);
-  const downloaded = files.filter((name) => name.startsWith(outputStem)).sort((a, b) => b.localeCompare(a));
+  const downloaded = files.filter((name) => name.startsWith(stemName)).sort((a, b) => b.localeCompare(a));
 
   if (!downloaded.length) {
     throw new Error('YouTube video could not be saved. The video may be private, age-restricted, or unavailable.');
@@ -149,8 +162,11 @@ async function downloadDirectVideo(videoUrl) {
     );
   }
 
-  const ext = contentType.includes('mp4') ? 'mp4' : contentType.includes('webm') ? 'webm' : 'video';
-  const outputName = `downloaded-${Date.now()}.${ext}`;
+  const ext = contentType.includes('mp4') ? 'mp4' : contentType.includes('webm') ? 'webm' : 'mp4';
+  // Derive filename from URL path, fall back to 'video'
+  const urlPath = (() => { try { return new URL(videoUrl).pathname; } catch { return ''; } })();
+  const urlBase = path.parse(urlPath || 'video').name || 'video';
+  const outputName = `${urlBase}.${ext}`;
   await fs.writeFile(path.join(processedDir, outputName), response.data);
   return { filename: outputName };
 }

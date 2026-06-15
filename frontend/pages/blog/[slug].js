@@ -114,9 +114,17 @@ export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
               >
                 <h2 className="blog-section-heading">{section.heading}</h2>
                 <div className="prose-blog mt-5 space-y-4">
-                  {section.paragraphs.map((paragraph) => (
-                    <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-                  ))}
+                  {/* Rich-text HTML from TipTap editor */}
+                  {section.htmlContent ? (
+                    <div
+                      className="prose-blog-html"
+                      dangerouslySetInnerHTML={{ __html: section.htmlContent }}
+                    />
+                  ) : (
+                    section.paragraphs.map((paragraph) => (
+                      <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                    ))
+                  )}
                   {section.faqs && <div className="mt-6"><FaqAccordion faqs={section.faqs} /></div>}
                 </div>
               </section>

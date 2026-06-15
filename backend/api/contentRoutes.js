@@ -5,7 +5,8 @@ const {
   getToolContent,
   getBlogContent,
   listBlogs,
-  isBlogPublished
+  isBlogPublished,
+  getBlogCategories
 } = require('../services/contentService');
 const {
   listPages,
@@ -95,6 +96,15 @@ router.get('/blogs', async (req, res, next) => {
   try {
     const posts = await listBlogs({ includeDrafts: false });
     return res.json({ posts });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/blog-categories', async (_req, res, next) => {
+  try {
+    const categories = await getBlogCategories();
+    return res.json({ categories });
   } catch (error) {
     return next(error);
   }

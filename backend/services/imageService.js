@@ -10,10 +10,21 @@ const { generateGeminiImage } = require('./geminiService');
 async function compressImage(file, options = {}) {
   const quality = Math.min(100, Math.max(1, Number(options.quality || 70)));
   const width = options.width ? Number(options.width) : null;
-  const outputName = `compressed-${Date.now()}.jpg`;
+  const baseName = path.parse(file.originalname || 'image').name;
+  const origExt = path.extname(file.originalname || '').toLowerCase();
+  // Keep original extension if it's a supported format, otherwise use jpg
+  const outExt = ['.jpg', '.jpeg', '.png', '.webp'].includes(origExt) ? origExt.replace('.jpeg', '.jpg') : '.jpg';
+  const outputName = `${baseName}${outExt}`;
   const outputPath = path.join(processedDir, outputName);
 
-  let pipeline = sharp(file.path).jpeg({ quality, mozjpeg: true });
+  let pipeline = sharp(file.path);
+  if (outExt === '.png') {
+    pipeline = pipeline.png({ compressionLevel: 7 });
+  } else if (outExt === '.webp') {
+    pipeline = pipeline.webp({ quality, effort: 4 });
+  } else {
+    pipeline = pipeline.jpeg({ quality, mozjpeg: true });
+  }
   if (width && !Number.isNaN(width)) {
     pipeline = pipeline.resize({ width, withoutEnlargement: true });
   }
@@ -30,19 +41,24 @@ async function resizeImage(file, options = {}) {
     throw new Error('Provide width and/or height.');
   }
 
-  const outputName = `resized-${Date.now()}.png`;
+  const baseName = path.parse(file.originalname || 'image').name;
+  const origExt = path.extname(file.originalname || '').toLowerCase();
+  const outExt = origExt || '.png';
+  const outputName = `${baseName}${outExt}`;
   const outputPath = path.join(processedDir, outputName);
 
-  await sharp(file.path)
-    .resize({
-      width: width || undefined,
-      height: height || undefined,
-      fit: 'inside',
-      withoutEnlargement: true
-    })
-    .png()
-    .toFile(outputPath);
+  let pipeline = sharp(file.path).resize({
+    width: width || undefined,
+    height: height || undefined,
+    fit: 'inside',
+    withoutEnlargement: true
+  });
 
+  if (outExt === '.jpg' || outExt === '.jpeg') pipeline = pipeline.jpeg({ quality: 90, mozjpeg: true });
+  else if (outExt === '.webp') pipeline = pipeline.webp({ quality: 90 });
+  else pipeline = pipeline.png();
+
+  await pipeline.toFile(outputPath);
   await removeFiles([file]);
   return { filename: outputName };
 }
@@ -55,7 +71,8 @@ async function convertImage(file, targetFormat) {
   }
 
   const ext = format === 'jpeg' ? 'jpg' : format;
-  const outputName = `converted-${Date.now()}.${ext}`;
+  const baseName = path.parse(file.originalname || 'image').name;
+  const outputName = `${baseName}.${ext}`;
   const outputPath = path.join(processedDir, outputName);
 
   let pipeline = sharp(file.path);
@@ -99,7 +116,9 @@ async function removeImageBackground(file) {
     timeout
   ]);
 
-  const outputName = `bg-removed-${Date.now()}.png`;
+  // Background removal always outputs PNG (transparent background)
+  const baseName = path.parse(file.originalname || 'image').name;
+  const outputName = `${baseName}.png`;
   const outputPath = path.join(processedDir, outputName);
   await fs.writeFile(outputPath, Buffer.from(await blob.arrayBuffer()));
   await removeFiles([file]);
@@ -116,9 +135,10 @@ async function generateAiImage(prompt, options = {}) {
 
 async function processImage(file, options = {}) {
   const operation = String(options.operation || 'convert');
-  const format = String(options.format || 'png').toLowerCase();
+  const format = String(options.format || path.extname(file.originalname || '').slice(1) || 'png').toLowerCase();
   const ext = format === 'jpeg' ? 'jpg' : format;
-  const outputName = `processed-${Date.now()}.${ext}`;
+  const baseName = path.parse(file.originalname || 'image').name;
+  const outputName = `${baseName}.${ext}`;
   const outputPath = path.join(processedDir, outputName);
 
   let pipeline = sharp(file.path);

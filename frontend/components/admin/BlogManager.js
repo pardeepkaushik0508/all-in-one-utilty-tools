@@ -1,21 +1,25 @@
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { blogCategories, blogPosts } from '../../utils/blogPosts';
+import { blogPosts } from '../../utils/blogPosts';
 import { mergeBlogCatalog, slugifyBlogTitle } from '../../utils/cms/blogPosts';
 import { adminFetch, triggerRevalidate } from '../../utils/adminApi';
 import { tools } from '../../utils/tools';
 import {
   Field,
   FormSection,
-  ParagraphListInput,
   StatusBar,
   StringListInput
 } from './AdminFormFields';
+import CategoryManager from './CategoryManager';
+
+// Load TipTap editor client-side only (no SSR)
+const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false });
 
 const EMPTY_FORM = {
   slug: '',
   title: '',
   excerpt: '',
-  category: blogCategories[0],
+  category: 'Guides',
   author: 'UtilityTools Team',
   readTime: '5 min',
   relatedToolSlug: '',
@@ -25,17 +29,35 @@ const EMPTY_FORM = {
   metaDescription: '',
   keywords: [],
   robotsIndex: true,
-  content: []
+  content: '',
+  contentHtml: ''
 };
+
+/**
+ * Convert legacy string[] content to HTML for the editor.
+ */
+function contentToHtml(content) {
+  if (!content) return '';
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .filter(Boolean)
+      .map((para) => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+      .join('\n');
+  }
+  return '';
+}
 
 function buildDefaultBlogForm(post, cmsRecord = null) {
   const base = post || {};
   const merged = cmsRecord ? { ...base, ...cmsRecord } : base;
+  const rawContent = merged.content || [];
+  const html = contentToHtml(rawContent);
   return {
     slug: merged.slug || '',
     title: merged.title || '',
     excerpt: merged.excerpt || '',
-    category: merged.category || blogCategories[0],
+    category: merged.category || 'Guides',
     author: merged.author || 'UtilityTools Team',
     readTime: merged.readTime || '5 min',
     relatedToolSlug: merged.relatedToolSlug || '',
@@ -45,7 +67,9 @@ function buildDefaultBlogForm(post, cmsRecord = null) {
     metaDescription: merged.metaDescription || merged.excerpt || '',
     keywords: merged.keywords || [],
     robotsIndex: merged.robotsIndex !== false,
-    content: merged.content || [],
+    // Store both: html for editor display, content for save payload
+    contentHtml: html,
+    content: rawContent,
     source: merged.source || (post ? 'static' : 'cms')
   };
 }
@@ -104,7 +128,7 @@ export default function BlogManager({ token }) {
     } finally {
       setLoading(false);
     }
-  }, [token, catalog]);
+  }, [token]);
 
   useEffect(() => {
     loadCatalog()
@@ -136,6 +160,10 @@ export default function BlogManager({ token }) {
     setForm((prev) => ({ ...prev, slug: slugifyBlogTitle(value), slugTouched: true }));
   };
 
+  const handleContentChange = (html) => {
+    setForm((prev) => ({ ...prev, contentHtml: html, content: html }));
+  };
+
   const handleCreateNew = () => {
     setMode('create');
     setSelectedSlug('');
@@ -152,8 +180,12 @@ export default function BlogManager({ token }) {
       const payload = {
         ...form,
         status: nextStatus || form.status,
-        date: form.date || new Date().toISOString().slice(0, 10)
+        date: form.date || new Date().toISOString().slice(0, 10),
+        // Send HTML string as content; backend stores it
+        content: form.contentHtml || form.content || ''
       };
+      // Remove internal-only key
+      delete payload.contentHtml;
 
       if (mode === 'create') {
         const created = await adminFetch('/api/admin/blogs', { method: 'POST', body: payload, token });
@@ -276,26 +308,50 @@ export default function BlogManager({ token }) {
               </Field>
             )}
             <Field label="Title" className="admin-field-full">
-              <input className="input-field" value={form.title || ''} onChange={(e) => updateField('title', e.target.value)} />
+              <input
+                className="input-field"
+                value={form.title || ''}
+                onChange={(e) => updateField('title', e.target.value)}
+              />
             </Field>
             <Field label="Excerpt" className="admin-field-full">
-              <textarea className="input-field min-h-[90px]" value={form.excerpt || ''} onChange={(e) => updateField('excerpt', e.target.value)} />
+              <textarea
+                className="input-field min-h-[90px]"
+                value={form.excerpt || ''}
+                onChange={(e) => updateField('excerpt', e.target.value)}
+              />
             </Field>
-            <Field label="Category">
-              <select className="input-field" value={form.category || ''} onChange={(e) => updateField('category', e.target.value)}>
-                {blogCategories.map((category) => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+
+            {/* Category with create option */}
+            <Field label="Category" hint="Select an existing category or create a new one.">
+              <CategoryManager
+                token={token}
+                value={form.category}
+                onChange={(val) => updateField('category', val)}
+              />
             </Field>
+
             <Field label="Author">
-              <input className="input-field" value={form.author || ''} onChange={(e) => updateField('author', e.target.value)} />
+              <input
+                className="input-field"
+                value={form.author || ''}
+                onChange={(e) => updateField('author', e.target.value)}
+              />
             </Field>
             <Field label="Read time">
-              <input className="input-field" value={form.readTime || ''} onChange={(e) => updateField('readTime', e.target.value)} placeholder="e.g. 5 min" />
+              <input
+                className="input-field"
+                value={form.readTime || ''}
+                onChange={(e) => updateField('readTime', e.target.value)}
+                placeholder="e.g. 5 min"
+              />
             </Field>
             <Field label="Related tool">
-              <select className="input-field" value={form.relatedToolSlug || ''} onChange={(e) => updateField('relatedToolSlug', e.target.value)}>
+              <select
+                className="input-field"
+                value={form.relatedToolSlug || ''}
+                onChange={(e) => updateField('relatedToolSlug', e.target.value)}
+              >
                 <option value="">None</option>
                 {tools.map((tool) => (
                   <option key={tool.slug} value={tool.slug}>{tool.name}</option>
@@ -303,7 +359,11 @@ export default function BlogManager({ token }) {
               </select>
             </Field>
             <Field label="Status">
-              <select className="input-field" value={form.status || 'draft'} onChange={(e) => updateField('status', e.target.value)}>
+              <select
+                className="input-field"
+                value={form.status || 'draft'}
+                onChange={(e) => updateField('status', e.target.value)}
+              >
                 <option value="published">Published</option>
                 <option value="draft">Draft</option>
                 <option value="scheduled">Scheduled</option>
@@ -314,26 +374,44 @@ export default function BlogManager({ token }) {
                 type="datetime-local"
                 className="input-field"
                 value={form.scheduledAt ? form.scheduledAt.slice(0, 16) : ''}
-                onChange={(e) => updateField('scheduledAt', e.target.value ? new Date(e.target.value).toISOString() : '')}
+                onChange={(e) =>
+                  updateField('scheduledAt', e.target.value ? new Date(e.target.value).toISOString() : '')
+                }
               />
             </Field>
           </FormSection>
 
-          <FormSection title="Article body" description="Each block becomes a paragraph on the blog page.">
-            <Field label="Content paragraphs" hint="Separate paragraphs with a blank line." className="admin-field-full">
-              <ParagraphListInput value={form.content} onChange={(value) => updateField('content', value)} />
+          {/* Rich text body */}
+          <FormSection title="Article body" description="Write your blog content using the rich text editor below.">
+            <Field label="Content" className="admin-field-full">
+              <RichTextEditor
+                value={form.contentHtml || ''}
+                onChange={handleContentChange}
+                placeholder="Start writing your blog post..."
+              />
             </Field>
           </FormSection>
 
           <FormSection title="SEO" description="Search engine settings for this blog post.">
             <Field label="Meta title" className="admin-field-full">
-              <input className="input-field" value={form.metaTitle || ''} onChange={(e) => updateField('metaTitle', e.target.value)} />
+              <input
+                className="input-field"
+                value={form.metaTitle || ''}
+                onChange={(e) => updateField('metaTitle', e.target.value)}
+              />
             </Field>
             <Field label="Meta description" className="admin-field-full">
-              <textarea className="input-field min-h-[90px]" value={form.metaDescription || ''} onChange={(e) => updateField('metaDescription', e.target.value)} />
+              <textarea
+                className="input-field min-h-[90px]"
+                value={form.metaDescription || ''}
+                onChange={(e) => updateField('metaDescription', e.target.value)}
+              />
             </Field>
             <Field label="Keywords" hint="One keyword per line." className="admin-field-full">
-              <StringListInput value={form.keywords || []} onChange={(value) => updateField('keywords', value)} />
+              <StringListInput
+                value={form.keywords || []}
+                onChange={(value) => updateField('keywords', value)}
+              />
             </Field>
             <Field label="Allow search indexing">
               <label className="inline-flex items-center gap-2 text-sm">

@@ -78,9 +78,9 @@ function fitImageInPage(imageWidth, imageHeight, pageWidth, pageHeight) {
   };
 }
 
-async function writeOutputPdf(pdfDoc, prefix) {
+async function writeOutputPdf(pdfDoc, baseName) {
   const bytes = await pdfDoc.save({ useObjectStreams: true });
-  const outputName = `${prefix}-${Date.now()}.pdf`;
+  const outputName = `${baseName}.pdf`;
   await fs.writeFile(path.join(processedDir, outputName), bytes);
   return { filename: outputName };
 }
@@ -160,7 +160,9 @@ async function mergePdfFiles(files) {
     copied.forEach((page) => mergedPdf.addPage(page));
   }
 
-  const { filename } = await writeOutputPdf(mergedPdf, 'merged');
+  // Use first file's name as the output name
+  const baseName = path.parse(files[0].originalname || 'merged').name;
+  const { filename } = await writeOutputPdf(mergedPdf, baseName);
   await removeFiles(files);
   return { filename };
 }
@@ -180,7 +182,8 @@ async function splitPdfFile(file, rangeText) {
   const copied = await outputPdf.copyPages(source, zeroBased);
   copied.forEach((page) => outputPdf.addPage(page));
 
-  const { filename } = await writeOutputPdf(outputPdf, 'split');
+  const baseName = path.parse(file.originalname || 'document').name;
+  const { filename } = await writeOutputPdf(outputPdf, baseName);
   await removeFiles([file]);
   return { filename, pages: pageNumbers };
 }
@@ -189,7 +192,8 @@ async function compressPdfFile(file) {
   const bytes = await fs.readFile(file.path);
   const pdf = await PDFDocument.load(bytes);
   const compressedBytes = await pdf.save({ useObjectStreams: true });
-  const outputName = `compressed-${Date.now()}.pdf`;
+  const baseName = path.parse(file.originalname || 'document').name;
+  const outputName = `${baseName}.pdf`;
   await fs.writeFile(path.join(processedDir, outputName), compressedBytes);
   await removeFiles([file]);
 
@@ -251,7 +255,7 @@ async function createPdfFromText({ text, pageSize, orientation, fontSize }) {
     }
   });
 
-  return writeOutputPdf(pdf, 'created');
+  return writeOutputPdf(pdf, 'document');
 }
 
 async function createPdfFromImages(files, options = {}) {
@@ -285,7 +289,7 @@ async function createPdfFromImages(files, options = {}) {
     });
   }
 
-  const result = await writeOutputPdf(pdf, options.scanMode ? 'scan' : 'created');
+  const result = await writeOutputPdf(pdf, options.scanMode ? 'scan' : 'document');
   await removeFiles(files);
   return result;
 }
@@ -329,7 +333,7 @@ async function createPdfFromMixed(files, options = {}) {
     }
   }
 
-  const result = await writeOutputPdf(pdf, 'created');
+  const result = await writeOutputPdf(pdf, 'document');
   await removeFiles(files);
   return result;
 }
@@ -356,7 +360,8 @@ async function deletePdfPages(file, rangeText) {
   );
   copied.forEach((page) => outputPdf.addPage(page));
 
-  const { filename } = await writeOutputPdf(outputPdf, 'deleted-pages');
+  const baseName = path.parse(file.originalname || 'document').name;
+  const { filename } = await writeOutputPdf(outputPdf, baseName);
   await removeFiles([file]);
   return { filename, removedPages: [...pagesToDelete].sort((a, b) => a - b), keptPages: pagesToKeep };
 }
@@ -385,7 +390,8 @@ async function reorderRotatePdf(file, { order, rotations }) {
     outputPdf.addPage(page);
   });
 
-  const { filename } = await writeOutputPdf(outputPdf, 'reordered');
+  const baseName = path.parse(file.originalname || 'document').name;
+  const { filename } = await writeOutputPdf(outputPdf, baseName);
   await removeFiles([file]);
   return { filename, pageCount: indices.length };
 }
@@ -520,7 +526,8 @@ async function editPdfFile(file, annotationsJson, overlayFiles = []) {
     }
   }
 
-  const { filename } = await writeOutputPdf(pdf, 'edited');
+  const baseName = path.parse(file.originalname || 'document').name;
+  const { filename } = await writeOutputPdf(pdf, baseName);
   await removeFiles([file, ...overlayFiles]);
   return { filename, annotationCount: annotations.length };
 }
