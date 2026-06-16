@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { SITE_NAME } from './SEO';
 import { CATEGORY_COUNT, getToolCountLabel, TOOL_COUNT } from '../utils/siteStats';
-import { getAllBlogPosts } from '../utils/blogPosts';
 
 const DEFAULT_FOOTER_LINKS = {
   Tools: [
@@ -36,7 +35,7 @@ function groupFooterLinks(footerLinks) {
 
 export default function Footer({ pageContent = null }) {
   const { navigation } = useSiteConfig();
-  const articleCount = getAllBlogPosts().length;
+  const articleCount = navigation?.blogCount ?? null;
   const brand = pageContent?.sections?.find((s) => s.id === 'brand')?.content || navigation?.footerBrand || {};
   const footerGroups = useMemo(
     () => groupFooterLinks(navigation?.footer?.length ? navigation.footer : null),
@@ -106,7 +105,7 @@ export default function Footer({ pageContent = null }) {
           <div className="flex flex-wrap gap-4 text-xs text-muted">
             <span>{TOOL_COUNT} tools</span>
             <span>{CATEGORY_COUNT} categories</span>
-            <span>{articleCount}+ articles</span>
+            <span>{articleCount != null ? `${articleCount}+ articles` : 'Blog guides'}</span>
           </div>
         </div>
       </div>

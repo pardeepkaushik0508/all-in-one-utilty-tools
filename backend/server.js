@@ -5,6 +5,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { isCloudinaryEnabled } = require('./utils/cloudinary');
 const { apiLimiter, uploadLimiter } = require('./middleware/rateLimit');
+const { getPrisma } = require('./prisma/client');
 const pdfRoutes = require('./api/pdfRoutes');
 const imageRoutes = require('./api/imageRoutes');
 const mediaRoutes = require('./api/mediaRoutes');
@@ -57,10 +58,23 @@ app.use(apiLimiter);
 
 app.use('/downloads', express.static(path.join(__dirname, 'processed')));
 
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
+  let database = 'not_configured';
+  if (process.env.DATABASE_URL) {
+    try {
+      const prisma = getPrisma();
+      await prisma.$queryRaw`SELECT 1`;
+      database = 'connected';
+    } catch (error) {
+      database = 'error';
+      console.error('[health] Database check failed:', error.message);
+    }
+  }
+
   res.json({
-    status: 'ok',
+    status: database === 'error' ? 'degraded' : 'ok',
     message: 'All-in-One Utility Tools API running',
+    database,
     gemini: Boolean(process.env.GEMINI_API_KEY),
     ffmpeg: require('./utils/binaries').resolveFfmpegPath()
   });

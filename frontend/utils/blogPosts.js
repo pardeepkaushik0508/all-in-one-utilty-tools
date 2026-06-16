@@ -1,3 +1,10 @@
+/**
+ * Blog data is loaded from the database via /api/content/blogs.
+ * This module provides backward-compatible helpers for components that
+ * previously imported static blog data.
+ */
+import { fetchRemoteBlogPosts, fetchRemoteBlogPost } from './cms/blogPosts';
+
 export const blogCategories = [
   'PDF Tools',
   'Image Tools',
@@ -8,347 +15,24 @@ export const blogCategories = [
   'Guides'
 ];
 
-function p(...paragraphs) {
-  return paragraphs;
+/** @deprecated Static posts removed — use fetchRemoteBlogPosts() */
+export const blogPosts = [];
+
+export async function getAllBlogPosts() {
+  const { posts } = await fetchRemoteBlogPosts();
+  return posts;
 }
 
-export const blogPosts = [
-  {
-    slug: 'how-to-merge-pdf-files-online-free',
-    title: 'How to Merge PDF Files Online for Free',
-    excerpt: 'Combine multiple PDF documents into one file in seconds using our free Merge PDF tool — no software install required.',
-    category: 'PDF Tools',
-    date: '2026-05-28',
-    readTime: '4 min',
-    relatedToolSlug: 'merge-pdf',
-    author: 'UtilityTools Team',
-    content: p(
-      'Managing multiple PDF files can be frustrating — especially when you need to share a single document with a client or colleague. Our Merge PDF tool lets you combine two or more PDFs into one polished file directly in your browser.',
-      'Simply upload your PDF files, arrange them in the order you want, and click merge. The tool processes everything on the server and delivers a downloadable result stored securely via Cloudinary.',
-      'Unlike desktop software, there is nothing to install and no account to create. Whether you are merging invoices, reports, or scanned pages, the workflow takes under a minute.',
-      'Pro tip: merge files in chronological order before uploading. Name your files clearly (01-intro.pdf, 02-body.pdf) so you can verify the sequence at a glance.'
-    )
-  },
-  {
-    slug: 'split-pdf-extract-pages-guide',
-    title: 'Split PDF: Extract Only the Pages You Need',
-    excerpt: 'Learn how to pull specific pages from a large PDF using page ranges like 1-3, 5, or 10-15.',
-    category: 'PDF Tools',
-    date: '2026-05-27',
-    readTime: '3 min',
-    relatedToolSlug: 'split-pdf',
-    author: 'UtilityTools Team',
-    content: p(
-      'Not every PDF needs to be shared in full. Our Split PDF tool extracts selected pages so you can send only what matters.',
-      'Enter a page range such as 1-3 for the first three pages, or combine ranges like 1-2, 5, 8-10. Leave the field empty to extract all pages into a new file.',
-      'This is ideal for pulling a single chapter from an e-book, isolating a signed contract page, or sharing one slide deck section with your team.',
-      'The output is a brand-new PDF with only your chosen pages — the original file stays untouched on your device.'
-    )
-  },
-  {
-    slug: 'compress-pdf-reduce-file-size',
-    title: 'Compress PDF: Reduce File Size Without the Hassle',
-    excerpt: 'Shrink large PDF files for email attachments and faster uploads using our free online compressor.',
-    category: 'PDF Tools',
-    date: '2026-05-26',
-    readTime: '4 min',
-    relatedToolSlug: 'compress-pdf',
-    author: 'UtilityTools Team',
-    content: p(
-      'Email providers often block attachments over 10–25 MB. Our Compress PDF tool reduces file size so your documents pass through inbox limits.',
-      'Upload your PDF and the tool optimizes internal structure using pdf-lib processing. You will see original size, compressed size, and bytes saved in the result.',
-      'Compression works best on PDFs with heavy images or redundant data. Text-only documents may see smaller gains, but every byte counts when sharing at scale.',
-      'Use compression before merging multiple large files — smaller inputs mean faster merges and quicker downloads for everyone.'
-    )
-  },
-  {
-    slug: 'compress-images-for-web-performance',
-    title: 'Compress Images for Faster Websites',
-    excerpt: 'Optimize JPG and PNG files for web performance while keeping visual quality acceptable.',
-    category: 'Image Tools',
-    date: '2026-05-25',
-    readTime: '5 min',
-    relatedToolSlug: 'compress-image',
-    author: 'UtilityTools Team',
-    content: p(
-      'Large images are the number-one cause of slow page loads. Our Compress Image tool uses Sharp to reduce file size with adjustable quality from 1 to 100.',
-      'Start at quality 70 for a good balance. For hero banners, try 80–85. For thumbnails, 50–60 is often enough.',
-      'You can optionally set a max width to downscale oversized photos from modern phone cameras. This single step often saves more bytes than compression alone.',
-      'Every compressed image is delivered as a downloadable file — perfect for bloggers, shop owners, and developers who need quick assets without Photoshop.'
-    )
-  },
-  {
-    slug: 'resize-images-correct-dimensions',
-    title: 'Resize Images to the Correct Dimensions',
-    excerpt: 'Set exact width and height for social posts, product photos, and profile pictures.',
-    category: 'Image Tools',
-    date: '2026-05-24',
-    readTime: '3 min',
-    relatedToolSlug: 'resize-image',
-    author: 'UtilityTools Team',
-    content: p(
-      'Social platforms each expect different image sizes. Instead of guessing in a photo editor, use our Resize Image tool to set precise dimensions.',
-      'Enter width, height, or both. The tool maintains aspect ratio with a fit-inside strategy so nothing gets awkwardly stretched.',
-      'Common sizes: Instagram square 1080×1080, LinkedIn banner 1584×396, blog thumbnail 1200×630. Resize first, then compress for the smallest final file.',
-      'Output is PNG by default for crisp edges — ideal for graphics, screenshots, and UI assets.'
-    )
-  },
-  {
-    slug: 'convert-jpg-png-when-to-use',
-    title: 'JPG vs PNG: When to Convert Between Formats',
-    excerpt: 'Understand which image format fits your use case and convert instantly with our free tool.',
-    category: 'Image Tools',
-    date: '2026-05-23',
-    readTime: '4 min',
-    relatedToolSlug: 'convert-jpg-png',
-    author: 'UtilityTools Team',
-    content: p(
-      'JPG is best for photographs and gradients — smaller files, no transparency. PNG is best for logos, icons, and screenshots that need sharp edges or alpha channels.',
-      'Our Convert JPG PNG tool handles both directions plus WebP output for modern browsers.',
-      'Converting a logo from JPG to PNG will not add transparency that was not there — start with a proper source file. But converting PNG to JPG can dramatically reduce size for photo-like images.',
-      'Pick your target format, upload, and download. The entire conversion runs in seconds on our backend.'
-    )
-  },
-  {
-    slug: 'image-to-text-ocr-guide',
-    title: 'Image to Text: OCR Made Simple',
-    excerpt: 'Extract readable text from screenshots, scans, and photos using optical character recognition.',
-    category: 'Image Tools',
-    date: '2026-05-22',
-    readTime: '5 min',
-    relatedToolSlug: 'image-to-text',
-    author: 'UtilityTools Team',
-    content: p(
-      'Optical Character Recognition (OCR) turns pixels into editable text. Our Image to Text tool uses Tesseract.js to read English text from uploaded images.',
-      'This is perfect for digitizing receipts, copying text from a photo of a whiteboard, or pulling quotes from a scanned book page.',
-      'For best results, use high-contrast images with clear fonts. Avoid blurry photos and heavy shadows. Straight-on photos outperform angled shots.',
-      'Copy the extracted text directly to your clipboard and paste into docs, emails, or code editors — no retyping required.'
-    )
-  },
-  {
-    slug: 'extract-mp3-from-video-online',
-    title: 'Video to MP3: Extract Audio from Any Video',
-    excerpt: 'Pull high-quality MP3 audio tracks from video files using ffmpeg-powered processing.',
-    category: 'Video & Audio',
-    date: '2026-05-21',
-    readTime: '4 min',
-    relatedToolSlug: 'video-to-mp3',
-    author: 'UtilityTools Team',
-    content: p(
-      'Need the audio from a presentation recording or a music video clip? Our Video to MP3 tool strips the audio track and saves it as a compressed MP3.',
-      'Upload MP4, MOV, or other common video formats up to 50 MB. Processing uses ffmpeg on the server — the same industry-standard tool professionals rely on.',
-      'The output MP3 is ready for podcasts, ringtones, study playlists, or background tracks in video edits.',
-      'Always respect copyright when extracting audio from content you do not own. This tool is intended for files you have the right to use.'
-    )
-  },
-  {
-    slug: 'compress-video-without-losing-quality',
-    title: 'Compress Video Files for Sharing and Storage',
-    excerpt: 'Reduce video file size with adjustable CRF settings for email, chat, and cloud uploads.',
-    category: 'Video & Audio',
-    date: '2026-05-20',
-    readTime: '5 min',
-    relatedToolSlug: 'video-compression',
-    author: 'UtilityTools Team',
-    content: p(
-      'Raw screen recordings and phone videos can easily exceed 100 MB. Our Video Compression tool re-encodes with H.264 and AAC for broad compatibility.',
-      'CRF (Constant Rate Factor) controls quality versus size. Lower values mean better quality and larger files. The default of 28 is a solid starting point.',
-      'Compressed videos are ideal for Slack messages, Google Drive uploads, and portfolio reels where full resolution is unnecessary.',
-      'Upload, set your CRF, compress, and download. The tool handles the heavy lifting so your laptop fans stay quiet.'
-    )
-  },
-  {
-    slug: 'trim-audio-clips-online',
-    title: 'Audio Cutter: Trim Clips to the Perfect Length',
-    excerpt: 'Cut audio files by start time and duration — great for ringtones, samples, and podcast edits.',
-    category: 'Video & Audio',
-    date: '2026-05-19',
-    readTime: '3 min',
-    relatedToolSlug: 'audio-cutter',
-    author: 'UtilityTools Team',
-    content: p(
-      'Sometimes you only need thirty seconds from a longer recording. Our Audio Cutter lets you specify a start time and duration in seconds.',
-      'Upload MP3, WAV, or other audio formats. Set start to 0 and duration to 30 for a half-minute clip, or trim the intro off a podcast episode.',
-      'The output is a new MP3 file you can download immediately. Original uploads are removed after processing for privacy.',
-      'Pair this with Video to MP3: extract audio from video first, then trim to the exact segment you need.'
-    )
-  },
-  {
-    slug: 'download-youtube-videos-guide',
-    title: 'Video Downloader: Save Videos from YouTube and Direct Links',
-    excerpt: 'Download videos from YouTube URLs or direct MP4/WebM links with our built-in downloader.',
-    category: 'Video & Audio',
-    date: '2026-05-18',
-    readTime: '4 min',
-    relatedToolSlug: 'video-downloader',
-    author: 'UtilityTools Team',
-    content: p(
-      'Our Video Downloader supports YouTube links (youtu.be and youtube.com) as well as direct video file URLs ending in MP4 or WebM.',
-      'Paste the URL, click download, and the tool uses yt-dlp on the server to fetch the best available quality. Results are stored on Cloudinary for reliable delivery.',
-      'Direct links work for files hosted on CDNs or your own storage. The tool validates that the URL points to actual video content.',
-      'Only download content you have permission to save. Respect creator rights and platform terms of service at all times.'
-    )
-  },
-  {
-    slug: 'grammar-checker-better-writing',
-    title: 'Grammar Checker: Polish Your Writing Instantly',
-    excerpt: 'Catch spelling and grammar issues with LanguageTool-powered checking — free and browser-based.',
-    category: 'Text & AI',
-    date: '2026-05-17',
-    readTime: '4 min',
-    relatedToolSlug: 'grammar-checker',
-    author: 'UtilityTools Team',
-    content: p(
-      'Good grammar builds trust. Our Grammar Checker sends your text to LanguageTool and returns a list of issues with suggested replacements.',
-      'Paste an email draft, blog paragraph, or essay excerpt. The tool highlights errors with clear messages so you can fix them fast.',
-      'It is not a replacement for a human editor on long-form books, but it catches the mistakes that slip through after a late-night writing session.',
-      'Use it before sending client proposals, publishing social posts, or submitting assignments.'
-    )
-  },
-  {
-    slug: 'paraphrasing-tool-rephrase-content',
-    title: 'Paraphrasing Tool: Say the Same Thing, Differently',
-    excerpt: 'Rephrase sentences and paragraphs while keeping the original meaning intact.',
-    category: 'Text & AI',
-    date: '2026-05-16',
-    readTime: '4 min',
-    relatedToolSlug: 'paraphrasing-tool',
-    author: 'UtilityTools Team',
-    content: p(
-      'Writer\'s block often means you know what to say but not how to say it differently. Our Paraphrasing Tool rewrites your text with fresh phrasing.',
-      'When a Gemini or OpenAI key is configured on the server, you get AI-powered paraphrasing. Otherwise a local synonym engine provides basic rewrites.',
-      'Paraphrasing helps avoid repetitive language in reports, refresh old blog posts, and simplify complex sentences for wider audiences.',
-      'Always review AI output before publishing. The tool assists your writing — you stay in control of the final message.'
-    )
-  },
-  {
-    slug: 'plagiarism-checker-basics',
-    title: 'Plagiarism Checker: Compare Two Texts for Similarity',
-    excerpt: 'Measure word-level overlap between a source text and a comparison text with a similarity percentage.',
-    category: 'Text & AI',
-    date: '2026-05-15',
-    readTime: '3 min',
-    relatedToolSlug: 'plagiarism-checker',
-    author: 'UtilityTools Team',
-    content: p(
-      'Our Plagiarism Checker compares two blocks of text and reports what percentage of words overlap. It is a straightforward duplicate-detection helper for students and editors.',
-      'Paste the original source in the first field and the suspect text in the second. The tool tokenizes words and calculates matched versus total counts.',
-      'High similarity does not always mean plagiarism — quoted material and common phrases will register matches. Use the score as a signal, not a verdict.',
-      'For thorough academic review, combine this with proper citation practices and human judgment.'
-    )
-  },
-  {
-    slug: 'ai-content-generator-gemini-guide',
-    title: 'AI Content Generator: Write with Gemini + Image Upload',
-    excerpt: 'Generate blog posts, product descriptions, and captions using Google Gemini with optional image context.',
-    category: 'Text & AI',
-    date: '2026-05-14',
-    readTime: '6 min',
-    relatedToolSlug: 'ai-content-generator',
-    author: 'UtilityTools Team',
-    content: p(
-      'Our AI Content Generator is powered by Google Gemini. Enter a prompt, optionally attach a reference image, and receive generated content in seconds.',
-      'Image upload enables multimodal prompts — describe what you see, ask for a product listing based on a photo, or request alt text for an accessibility audit.',
-      'Example prompts: "Write a 150-word product description for this item", "Create three Instagram captions for a travel photo", or "Draft a FAQ section for a PDF merging tool".',
-      'Gemini runs server-side with your API key. Nothing is stored permanently. Copy the output and edit as needed before publishing.'
-    )
-  },
-  {
-    slug: 'json-formatter-developer-essential',
-    title: 'JSON Formatter: Every Developer\'s Essential Tool',
-    excerpt: 'Format, minify, and validate JSON in the browser with syntax-aware error messages.',
-    category: 'Developer',
-    date: '2026-05-13',
-    readTime: '4 min',
-    relatedToolSlug: 'json-formatter',
-    author: 'UtilityTools Team',
-    content: p(
-      'Raw JSON from APIs is often a single unreadable line. Our JSON Formatter beautifies it with proper indentation so you can debug faster.',
-      'Toggle auto-format on paste to streamline API testing workflows. Validate checks syntax before you ship config files to production.',
-      'Minify removes whitespace for smaller payloads. Copy or download the result directly from the tool panel.',
-      'Whether you are inspecting a webhook payload or cleaning a package.json snippet, this tool lives in your browser with zero setup.'
-    )
-  },
-  {
-    slug: 'code-minifier-css-html-js',
-    title: 'Code Minifier: Shrink JS, CSS, and HTML',
-    excerpt: 'Reduce file size of code snippets with our online minifier for JavaScript, CSS, and HTML.',
-    category: 'Developer',
-    date: '2026-05-12',
-    readTime: '4 min',
-    relatedToolSlug: 'code-minifier',
-    author: 'UtilityTools Team',
-    content: p(
-      'Minification removes comments, whitespace, and optional syntax to produce smaller files for production. Our Code Minifier handles JavaScript (Terser), CSS (CleanCSS), and HTML.',
-      'Select your language, paste the code, and click minify. The output is ready to embed inline or deploy to a CDN.',
-      'Minified code is harder to read — always keep an unminified source copy in version control. Never minify what you cannot recover.',
-      'Pair with our CSS Beautifier when you inherit minified stylesheets and need to make sense of them again.'
-    )
-  },
-  {
-    slug: 'password-generator-stay-secure',
-    title: 'Password Generator: Create Strong Passwords Instantly',
-    excerpt: 'Generate random secure passwords with adjustable length and optional symbols.',
-    category: 'Security',
-    date: '2026-05-11',
-    readTime: '3 min',
-    relatedToolSlug: 'password-generator',
-    author: 'UtilityTools Team',
-    content: p(
-      'Weak passwords are still the top cause of account breaches. Our Password Generator creates cryptographically random strings from 6 to 64 characters.',
-      'Enable symbols for maximum entropy. Use at least 16 characters for important accounts like email and banking.',
-      'Generated passwords are shown once — copy them immediately into a password manager. We do not store or log generated passwords.',
-      'Also try our Password Strength Checker to audit existing passwords before you rotate them.'
-    )
-  },
-  {
-    slug: 'unit-converter-emi-age-calculators',
-    title: 'Unit Converter, EMI & Age Calculators Explained',
-    excerpt: 'Convert units, calculate loan EMI, and find exact age — three everyday utilities in one place.',
-    category: 'Guides',
-    date: '2026-05-10',
-    readTime: '5 min',
-    relatedToolSlug: 'unit-converter',
-    author: 'UtilityTools Team',
-    content: p(
-      'Our Utility Tools category covers everyday math you should not have to Google separately. Unit Converter handles length, mass, and temperature.',
-      'EMI Calculator estimates monthly loan payments from principal, annual interest rate, and tenure in months — useful for home and car loan planning.',
-      'Age Calculator gives precise years, months, and days from a birth date. Currency Converter fetches live exchange rates for quick conversions.',
-      'These tools run instantly with no sign-up. Bookmark the ones you use most for one-click access later.'
-    )
-  },
-  {
-    slug: '29-free-online-tools-one-platform',
-    title: '29 Free Online Tools on One Premium Platform',
-    excerpt: 'A complete overview of every tool on UtilityTools — PDF, image, video, text, developer, security, and more.',
-    category: 'Guides',
-    date: '2026-05-09',
-    readTime: '8 min',
-    relatedToolSlug: 'merge-pdf',
-    author: 'UtilityTools Team',
-    content: p(
-      'UtilityTools brings 29 professional utilities into one clean, modern workspace. No accounts, no paywalls, no clutter — just open a tool and get to work.',
-      'PDF Tools: merge, split, and compress. Image Tools: compress, resize, convert formats, and OCR. Video & Audio: MP3 extraction, compression, trimming, and downloading.',
-      'Text & AI: grammar checking, paraphrasing, plagiarism comparison, and Gemini-powered content generation with image upload. Developer Tools: JSON formatting, code minification, HTML to text, and CSS beautification.',
-      'Social Media Tools help with Instagram media, YouTube thumbnails, and hashtag generation. Security Tools cover password generation, strength checking, and hash generation.',
-      'Everything is free, runs in the browser, and delivers results you can download instantly. Explore the full catalog from the homepage and bookmark your favorites today.'
-    )
-  }
-];
-
-export function getAllBlogPosts() {
-  return [...blogPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
+export async function findBlogBySlug(slug) {
+  return fetchRemoteBlogPost(slug);
 }
 
-export function findBlogBySlug(slug) {
-  return blogPosts.find((post) => post.slug === slug) || null;
-}
+export async function getRelatedPosts(currentSlug, limit = 4) {
+  const { posts } = await fetchRemoteBlogPosts();
+  const current = posts.find((post) => post.slug === currentSlug);
+  if (!current) return posts.slice(0, limit);
 
-export function getRelatedPosts(currentSlug, limit = 4) {
-  const current = findBlogBySlug(currentSlug);
-  if (!current) return getAllBlogPosts().slice(0, limit);
-
-  return getAllBlogPosts()
+  return posts
     .filter((post) => post.slug !== currentSlug)
     .sort((a, b) => {
       const aScore = a.category === current.category ? 2 : 0;
@@ -358,11 +42,13 @@ export function getRelatedPosts(currentSlug, limit = 4) {
     .slice(0, limit);
 }
 
-export function searchBlogPosts(query) {
+export async function searchBlogPosts(query) {
+  const { posts } = await fetchRemoteBlogPosts();
   const q = String(query || '').trim().toLowerCase();
-  if (!q) return getAllBlogPosts();
+  if (!q) return posts;
 
-  return getAllBlogPosts().filter((post) =>
-    `${post.title} ${post.excerpt} ${post.category} ${post.content.join(' ')}`.toLowerCase().includes(q)
-  );
+  return posts.filter((post) => {
+    const contentText = typeof post.content === 'string' ? post.content : '';
+    return `${post.title} ${post.excerpt} ${post.category} ${contentText}`.toLowerCase().includes(q);
+  });
 }

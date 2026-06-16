@@ -23,13 +23,19 @@ const router = express.Router();
 
 router.get('/site', async (_req, res, next) => {
   try {
-    const [pages, navigation, toolSettings, cacheVersion] = await Promise.all([
+    const [pages, navigation, toolSettings, cacheVersion, blogResult] = await Promise.all([
       listPages({ includeDrafts: false }),
       getNavigation(),
       listToolSettings([]),
-      getCacheVersion()
+      getCacheVersion(),
+      listBlogs({ includeDrafts: false, page: 1, limit: 1 })
     ]);
-    return res.json({ pages, navigation, toolSettings, cacheVersion });
+    return res.json({
+      pages,
+      navigation: { ...navigation, blogCount: blogResult.pagination?.total ?? 0 },
+      toolSettings,
+      cacheVersion
+    });
   } catch (error) {
     return next(error);
   }
@@ -94,8 +100,10 @@ router.get('/tools/:slug', async (req, res, next) => {
 
 router.get('/blogs', async (req, res, next) => {
   try {
-    const posts = await listBlogs({ includeDrafts: false });
-    return res.json({ posts });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 50;
+    const result = await listBlogs({ includeDrafts: false, page, limit });
+    return res.json({ posts: result.posts, pagination: result.pagination });
   } catch (error) {
     return next(error);
   }

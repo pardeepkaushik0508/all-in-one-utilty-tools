@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { blogPosts } from '../../utils/blogPosts';
-import { mergeBlogCatalog, slugifyBlogTitle } from '../../utils/cms/blogPosts';
+import { slugifyBlogTitle } from '../../utils/cms/blogPosts';
 import { adminFetch, triggerRevalidate } from '../../utils/adminApi';
 import { tools } from '../../utils/tools';
 import {
@@ -80,14 +79,13 @@ function buildDefaultBlogForm(post, cmsRecord = null) {
     robotsIndex: merged.robotsIndex !== false,
     contentHtml: html,
     content: rawContent,
-    source: merged.source || (post ? 'static' : 'cms')
+    source: merged.source || 'cms'
   };
 }
 
 function statusLabel(post) {
   if (post.status === 'draft') return 'Draft';
   if (post.status === 'scheduled') return 'Scheduled';
-  if (post.source === 'cms') return 'Custom';
   return 'Published';
 }
 
@@ -146,27 +144,19 @@ export default function BlogManager({ token }) {
 
   const loadCatalog = useCallback(async () => {
     const data = await adminFetch('/api/admin/blogs', { token });
-    const cmsPosts = data.blogs || [];
-    const merged = mergeBlogCatalog(blogPosts, cmsPosts, { includeDrafts: true }).map((post) => {
-      const cms = cmsPosts.find((item) => item.slug === post.slug) || {};
-      return { ...post, ...cms, source: cms.source || post.source || 'static' };
-    });
-    cmsPosts
-      .filter((post) => post.source === 'cms' && !merged.find((item) => item.slug === post.slug))
-      .forEach((post) => merged.unshift({ ...post, source: 'cms' }));
-    setCatalog(merged.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)));
-    return merged;
+    const posts = (data.blogs || []).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    setCatalog(posts);
+    return posts;
   }, [token]);
 
   const loadEditor = useCallback(async (slug) => {
     if (!slug) return;
-    const post = blogPosts.find((item) => item.slug === slug) || null;
     setError('');
     setStatus('Loading...');
     setLoading(true);
     try {
       const remote = await adminFetch(`/api/admin/content/blogs/${slug}`, { token });
-      setForm(buildDefaultBlogForm(post, remote.content));
+      setForm(buildDefaultBlogForm(null, remote.content));
       setMode('edit');
       setStatus('Loaded');
       // Check for autosaved draft
@@ -317,7 +307,7 @@ export default function BlogManager({ token }) {
   };
 
   const handleDelete = async () => {
-    if (mode === 'create' || form.source !== 'cms') return;
+    if (mode === 'create') return;
     if (!window.confirm('Delete this blog post? This cannot be undone.')) return;
     setError('');
     setLoading(true);
@@ -335,13 +325,6 @@ export default function BlogManager({ token }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleReset = () => {
-    const post = blogPosts.find((item) => item.slug === selectedSlug);
-    if (!post) return;
-    setForm(buildDefaultBlogForm(post));
-    setStatus('Reset to default content.');
   };
 
   return (
@@ -382,10 +365,7 @@ export default function BlogManager({ token }) {
           <button type="button" className="btn-secondary" onClick={handlePublish} disabled={loading}>
             Publish
           </button>
-          {mode === 'edit' && form.source === 'static' && (
-            <button type="button" className="btn-secondary" onClick={handleReset} disabled={loading}>Reset</button>
-          )}
-          {mode === 'edit' && form.source === 'cms' && (
+          {mode === 'edit' && (
             <button type="button" className="btn-secondary" onClick={handleDelete} disabled={loading}>Delete</button>
           )}
           {autosaveMsg && <span className="ml-auto text-xs text-muted">{autosaveMsg}</span>}

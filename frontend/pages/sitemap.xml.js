@@ -1,9 +1,9 @@
 import { tools } from '../utils/tools';
-import { blogPosts } from '../utils/blogPosts';
+import { fetchRemoteBlogPosts } from '../utils/cms/blogPosts';
 import { CATEGORY_SLUGS } from '../utils/suiteToolsRegistry';
 import { getSiteUrl } from '../utils/siteUrl';
 
-function generateSiteMap(siteUrl) {
+function generateSiteMap(siteUrl, blogPosts = []) {
   const categoryPaths = Object.values(CATEGORY_SLUGS).map((slug) => `/category/${slug}`);
   const staticPages = ['', '/about', '/contact', '/blog', ...categoryPaths];
   const today = new Date().toISOString().split('T')[0];
@@ -34,7 +34,7 @@ function generateSiteMap(siteUrl) {
     .map(
       (post) => `  <url>
     <loc>${siteUrl}/blog/${post.slug}</loc>
-    <lastmod>${post.date}</lastmod>
+    <lastmod>${post.date || today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`
@@ -51,9 +51,10 @@ ${blogUrls}
 
 export async function getServerSideProps({ req, res }) {
   const siteUrl = getSiteUrl(req);
+  const { posts } = await fetchRemoteBlogPosts({ limit: 500 });
   res.setHeader('Content-Type', 'text/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
-  res.write(generateSiteMap(siteUrl));
+  res.write(generateSiteMap(siteUrl, posts));
   res.end();
   return { props: {} };
 }

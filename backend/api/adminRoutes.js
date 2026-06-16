@@ -10,7 +10,6 @@ const {
   createBlog,
   deleteBlog,
   listContentSummary,
-  readContentStore,
   getBlogCategories,
   addBlogCategory,
   updateBlogCategory,
@@ -35,6 +34,7 @@ const {
   getActivityLog,
   getCacheVersion,
   getDashboardStats,
+  readContentStore,
   MEDIA_DIR
 } = require('../services/cmsService');
 const { mediaUpload } = require('../utils/upload');
@@ -133,8 +133,19 @@ router.put('/content/blogs/:slug', requireAdmin, async (req, res, next) => {
 
 router.get('/blogs', requireAdmin, async (req, res, next) => {
   try {
-    const blogs = await listBlogs({ includeDrafts: true });
-    return res.json({ blogs });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 100;
+    const result = await listBlogs({ includeDrafts: true, page, limit });
+    return res.json({ blogs: result.posts, pagination: result.pagination });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.put('/blogs/:slug', requireAdmin, async (req, res, next) => {
+  try {
+    const saved = await saveBlogContent(req.params.slug, req.body || {});
+    return res.json({ message: 'Blog updated.', blog: saved });
   } catch (error) {
     return next(error);
   }

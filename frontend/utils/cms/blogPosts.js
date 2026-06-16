@@ -1,4 +1,3 @@
-import { blogPosts } from '../blogPosts';
 import { resolveApiUrl } from '../apiBase';
 
 export function slugifyBlogTitle(title = '') {
@@ -20,13 +19,13 @@ function isPublishedRecord(record = {}) {
   return true;
 }
 
-function normalizeCmsBlog(slug, record = {}) {
+function normalizeCmsBlog(record = {}) {
   const cats = Array.isArray(record.categories) && record.categories.length
     ? record.categories
     : [record.category || 'Guides'];
 
   return {
-    slug,
+    slug: record.slug,
     title: record.title || 'Untitled post',
     excerpt: record.excerpt || '',
     category: cats[0],
@@ -37,96 +36,75 @@ function normalizeCmsBlog(slug, record = {}) {
     author: record.author || 'UtilityTools Team',
     content: record.content || '',
     status: record.status || 'published',
-    source: record.source || 'cms',
+    source: 'cms',
     metaTitle: record.metaTitle,
     metaDescription: record.metaDescription,
     canonicalUrl: record.canonicalUrl || '',
     ogTitle: record.ogTitle || '',
     ogDescription: record.ogDescription || '',
     featuredImage: record.featuredImage || '',
-    keywords: record.keywords || [],
+    keywords: record.keywords || record.tags || [],
+    tags: record.tags || record.keywords || [],
     robotsIndex: record.robotsIndex !== false
   };
 }
 
-export function mergeBlogPost(staticPost, cmsRecord = null) {
-  if (!staticPost && !cmsRecord) return null;
-  if (!staticPost) return normalizeCmsBlog(cmsRecord.slug, cmsRecord);
-  if (!cmsRecord) return { ...staticPost, source: 'static' };
-
-  return normalizeCmsBlog(staticPost.slug, {
-    ...staticPost,
-    ...cmsRecord,
-    content: cmsRecord.content?.length ? cmsRecord.content : staticPost.content,
-    date: cmsRecord.date || staticPost.date,
-    source: cmsRecord.source === 'cms' ? 'cms' : 'static'
-  });
+export function normalizeBlogList(posts = [], { includeDrafts = false } = {}) {
+  return (posts || [])
+    .filter((record) => includeDrafts || isPublishedRecord(record))
+    .map((record) => normalizeCmsBlog(record))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-export function mergeBlogCatalog(staticList = blogPosts, cmsPosts = [], { includeDrafts = false } = {}) {
-  const map = new Map(staticList.map((post) => [post.slug, { ...post, source: 'static' }]));
-
-  cmsPosts.forEach((record) => {
-    const slug = record.slug;
-    if (!slug) return;
-
-    if (record.source === 'cms') {
-      if (includeDrafts || isPublishedRecord(record)) {
-        map.set(slug, normalizeCmsBlog(slug, record));
-      }
-      return;
-    }
-
-    if (map.has(slug)) {
-      if (!includeDrafts && !isPublishedRecord(record)) {
-        map.delete(slug);
-        return;
-      }
-      map.set(slug, mergeBlogPost(map.get(slug), record));
-    }
-  });
-
-  return [...map.values()].sort((a, b) => new Date(b.date) - new Date(a.date));
-}
-
-export async function fetchRemoteBlogPosts({ includeDrafts = false } = {}) {
+export async function fetchRemoteBlogPosts({ includeDrafts = false, page = 1, limit = 100 } = {}) {
   try {
-    const response = await fetch(resolveApiUrl('/api/content/blogs'), {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    const response = await fetch(resolveApiUrl(`/api/content/blogs?${params}`), {
       headers: { Accept: 'application/json' }
     });
-    if (!response.ok) return mergeBlogCatalog(blogPosts, [], { includeDrafts });
+    if (!response.ok) return { posts: [], pagination: null, error: true };
     const data = await response.json();
-    return mergeBlogCatalog(blogPosts, data.posts || [], { includeDrafts });
+    return {
+      posts: normalizeBlogList(data.posts || [], { includeDrafts }),
+      pagination: data.pagination || null,
+      error: false
+    };
   } catch {
-    // Always fall back to static posts so the page never shows empty
-    return mergeBlogCatalog(blogPosts, [], { includeDrafts });
+    return { posts: [], pagination: null, error: true };
   }
 }
 
 export async function fetchRemoteBlogPost(slug) {
-  const staticPost = blogPosts.find((post) => post.slug === slug) || null;
-
   try {
     const response = await fetch(resolveApiUrl(`/api/content/blogs/${slug}`), {
       headers: { Accept: 'application/json' }
     });
-    if (!response.ok) return staticPost;
+    if (!response.ok) return null;
     const data = await response.json();
-    if (!data.content) return staticPost;
-    return mergeBlogPost(staticPost, { slug, ...data.content });
+    if (!data.content) return null;
+    return normalizeCmsBlog({ slug, ...data.content });
   } catch {
-    return staticPost;
+    return null;
   }
 }
 
 export async function fetchRemoteBlogSlugs() {
   try {
-    const response = await fetch(resolveApiUrl('/api/content/blogs'), {
+    const { posts } = await fetchRemoteBlogPosts({ limit: 500 });
+    return posts.map((post) => post.slug).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchBlogCategories() {
+  try {
+    const response = await fetch(resolveApiUrl('/api/content/blog-categories'), {
       headers: { Accept: 'application/json' }
     });
     if (!response.ok) return [];
     const data = await response.json();
-    return (data.posts || []).map((post) => post.slug).filter(Boolean);
+    return data.categories || [];
   } catch {
     return [];
   }

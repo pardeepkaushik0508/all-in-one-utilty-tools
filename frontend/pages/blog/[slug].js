@@ -9,7 +9,6 @@ import FaqAccordion from '../../components/seo/FaqAccordion';
 import { SITE_URL } from '../../components/SEO';
 import { enhanceBlogPost } from '../../utils/seo/blogEnhancer';
 import { buildBlogPostingSchema, buildBreadcrumbSchema, buildFaqSchema } from '../../utils/seo/schema';
-import { blogPosts } from '../../utils/blogPosts';
 import { fetchRemoteBlogPost, fetchRemoteBlogSlugs, getRelatedPostsFromList, fetchRemoteBlogPosts } from '../../utils/cms/blogPosts';
 import { tools } from '../../utils/tools';
 
@@ -202,20 +201,15 @@ export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
 
 export async function getStaticPaths() {
   const remoteSlugs = await fetchRemoteBlogSlugs();
-  const slugs = [...new Set([...blogPosts.map((post) => post.slug), ...remoteSlugs])];
   return {
-    paths: slugs.map((slug) => ({ params: { slug } })),
+    paths: remoteSlugs.map((slug) => ({ params: { slug } })),
     fallback: 'blocking'
   };
 }
 
 export async function getStaticProps({ params }) {
-  let post = await fetchRemoteBlogPost(params.slug);
-  const allPosts = await fetchRemoteBlogPosts();
-
-  if (!post) {
-    post = allPosts.find((item) => item.slug === params.slug) || null;
-  }
+  const post = await fetchRemoteBlogPost(params.slug);
+  const { posts: allPosts } = await fetchRemoteBlogPosts({ limit: 100 });
 
   if (!post) return { notFound: true, revalidate: 60 };
 

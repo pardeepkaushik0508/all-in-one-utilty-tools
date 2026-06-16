@@ -1,0 +1,43 @@
+# Render deployment — backend API service
+# Set Root Directory to repo root; use this as the Blueprint or configure manually.
+
+services:
+  - type: web
+    name: aio-tools-backend
+    runtime: node
+    buildCommand: npm install && npm run db:setup --workspace backend
+    startCommand: bash scripts/start-backend.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aio-tools-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: APP_ROLE
+        value: backend
+
+  - type: web
+    name: aio-tools-frontend
+    runtime: node
+    buildCommand: npm install && npm run build --workspace frontend
+    startCommand: bash scripts/start-frontend.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_URL
+        fromService:
+          name: aio-tools-backend
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          name: aio-tools-backend
+          type: web
+          property: host
+
+databases:
+  - name: aio-tools-db
+    plan: free
+    databaseName: utilitytools
+    user: utilitytools

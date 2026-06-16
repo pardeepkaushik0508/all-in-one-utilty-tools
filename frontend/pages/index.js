@@ -107,14 +107,14 @@ export default function HomePage({ pageContent = null, featuredPosts = [] }) {
 }
 
 export async function getStaticProps() {
-  const [pageContent, blogPostsList] = await Promise.all([
+  const [pageContent, blogResult] = await Promise.all([
     fetchRemotePage('home'),
     fetchRemoteBlogPosts()
   ]);
   return {
     props: {
       pageContent,
-      featuredPosts: blogPostsList.slice(0, 3)
+      featuredPosts: (blogResult.posts || []).slice(0, 3)
     },
     revalidate: 60
   };

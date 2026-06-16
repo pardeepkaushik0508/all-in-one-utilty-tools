@@ -1,4 +1,3 @@
-import seoOverrides from '../../data/seo-overrides.json';
 import { generateToolSeoContent } from './contentGenerator';
 
 function deepMerge(base, override = {}) {
@@ -17,9 +16,8 @@ function deepMerge(base, override = {}) {
 export function getToolSeoContent(tool, remoteOverride = null) {
   if (!tool) return null;
   const generated = generateToolSeoContent(tool);
-  const localOverride = seoOverrides.tools?.[tool.slug] || {};
   const adminOverride = remoteOverride || {};
-  return deepMerge(deepMerge(generated, localOverride), adminOverride);
+  return deepMerge(generated, adminOverride);
 }
 
 export async function fetchRemoteToolSeoOverride(slug) {

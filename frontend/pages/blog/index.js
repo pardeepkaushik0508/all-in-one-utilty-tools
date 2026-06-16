@@ -5,12 +5,9 @@ import Layout from '../../components/Layout';
 import BlogCard from '../../components/blog/BlogCard';
 import BlogSidebar from '../../components/blog/BlogSidebar';
 import { fetchRemoteBlogPosts } from '../../utils/cms/blogPosts';
-import { blogPosts as staticBlogPosts } from '../../utils/blogPosts';
 
-// Returns true if the post belongs to the given category
 function postMatchesCategory(post, category) {
   if (!category) return true;
-  // Check categories array first, fall back to category string
   if (Array.isArray(post.categories) && post.categories.length) {
     return post.categories.includes(category);
   }
@@ -23,9 +20,7 @@ function filterPosts(posts, search, category) {
 
   if (q) {
     list = list.filter((post) => {
-      const contentText = Array.isArray(post.content)
-        ? post.content.join(' ')
-        : (typeof post.content === 'string' ? post.content : '');
+      const contentText = typeof post.content === 'string' ? post.content : '';
       return `${post.title} ${post.excerpt} ${post.category} ${contentText}`
         .toLowerCase()
         .includes(q);
@@ -39,7 +34,7 @@ function filterPosts(posts, search, category) {
   return list;
 }
 
-export default function BlogIndexPage({ posts = [] }) {
+export default function BlogIndexPage({ posts = [], loadError = false }) {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 250);
@@ -72,6 +67,12 @@ export default function BlogIndexPage({ posts = [] }) {
         </div>
       </header>
 
+      {loadError && (
+        <div className="card mb-6 border-amber-500/30 bg-amber-500/5 py-4 text-center text-sm text-amber-700 dark:text-amber-300">
+          Could not load articles from the server. Please try again shortly.
+        </div>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-3">
         <section className="lg:col-span-2" aria-label="Blog articles">
           {category && (
@@ -86,8 +87,12 @@ export default function BlogIndexPage({ posts = [] }) {
 
           {visiblePosts.length === 0 ? (
             <div className="card py-16 text-center">
-              <p className="font-display text-lg font-semibold text-heading">No articles found</p>
-              <p className="mt-1 text-sm text-muted">Try a different search or category.</p>
+              <p className="font-display text-lg font-semibold text-heading">
+                {loadError ? 'Unable to load articles' : 'No articles found'}
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {loadError ? 'Check your connection and refresh the page.' : 'Try a different search or category.'}
+              </p>
             </div>
           ) : (
             <div className="grid gap-5">
@@ -113,19 +118,9 @@ export default function BlogIndexPage({ posts = [] }) {
 }
 
 export async function getStaticProps() {
-  let posts = [];
-  try {
-    posts = await fetchRemoteBlogPosts();
-  } catch {
-    // Guaranteed fallback — never ship an empty page
-  }
-  // If remote fetch returned nothing, use static posts directly
-  if (!posts || posts.length === 0) {
-    posts = staticBlogPosts.map((p) => ({
-      ...p,
-      categories: [p.category],
-      source: 'static'
-    }));
-  }
-  return { props: { posts }, revalidate: 60 };
+  const { posts, error } = await fetchRemoteBlogPosts({ limit: 100 });
+  return {
+    props: { posts, loadError: error },
+    revalidate: 60
+  };
 }
