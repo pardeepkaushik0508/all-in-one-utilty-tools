@@ -226,34 +226,65 @@ export function AiImageGeneratorTool() {
 }
 
 export function ImageToTextTool() {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [status, setStatus] = useState('');
   const { loading, error, result, run } = useToolRequest();
 
   const handleSubmit = () => {
-    if (!file) return run(() => Promise.reject(new Error('Please upload or capture an image first.')));
-    return run(() => api.imageToText(file));
+    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one image first.')));
+    if (files.length === 1) return run(() => api.imageToText(files[0]));
+    return run(() => api.imageToTextBatch(files));
   };
 
   return (
     <ToolPanel>
-      <MediaUploadZone
+      <BatchUploader
         accept="image/*"
-        files={file ? [file] : []}
-        onFilesChange={(files) => setFile(files[0] || null)}
-        label="Upload image"
+        files={files}
+        onChange={setFiles}
+        maxFiles={20}
       />
       <ToolActions>
-        <PrimaryButton onClick={handleSubmit} disabled={loading}>Extract Text</PrimaryButton>
+        <PrimaryButton onClick={handleSubmit} disabled={loading}>
+          {files.length > 1 ? `Extract Text from ${files.length} Images` : 'Extract Text'}
+        </PrimaryButton>
       </ToolActions>
-      <ToolLoading loading={loading} text="Running OCR..." />
+      <ToolLoading loading={loading} text={files.length > 1 ? `Running OCR on ${files.length} images...` : 'Running OCR...'} />
       <ToolError message={error} />
+
+      {/* Single file result */}
       {result?.text && (
         <div className="animate-fade-in space-y-3">
           <textarea readOnly value={result.text} className="input-field h-56 font-mono" />
           <ToolActions>
             <CopyButton text={result.text} onCopied={(msg) => setStatus(msg)} />
           </ToolActions>
+          {status && <ToolSuccess message={status} />}
+        </div>
+      )}
+
+      {/* Batch results */}
+      {result?.results?.length > 0 && (
+        <div className="animate-fade-in space-y-3">
+          {result.results.map((item, index) => (
+            <div key={index} className="rounded-xl border border-theme bg-[var(--bg-elevated)] p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium text-heading truncate">{item.original}</p>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${item.status === 'success' ? 'bg-green-400/10 text-green-500' : 'bg-red-400/10 text-red-500'}`}>
+                  {item.status}
+                </span>
+              </div>
+              {item.status === 'success' && item.text && (
+                <>
+                  <textarea readOnly value={item.text} className="input-field h-32 font-mono text-xs" />
+                  <CopyButton text={item.text} onCopied={(msg) => setStatus(msg)} />
+                </>
+              )}
+              {item.status === 'failed' && (
+                <p className="text-xs text-red-400">{item.error}</p>
+              )}
+            </div>
+          ))}
           {status && <ToolSuccess message={status} />}
         </div>
       )}

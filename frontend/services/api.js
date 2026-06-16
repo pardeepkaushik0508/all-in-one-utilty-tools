@@ -227,6 +227,12 @@ export const imageToText = (file) => {
   return postForm('/api/image/ocr', formData);
 };
 
+export const imageToTextBatch = (files) => {
+  const formData = new FormData();
+  appendFiles(formData, files);
+  return postForm('/api/image/ocr/batch', formData);
+};
+
 export const generateAiImage = (prompt, options = {}) => {
   const formData = new FormData();
   formData.append('prompt', prompt);
@@ -242,11 +248,24 @@ export const videoToMp3 = (file) => {
   return postForm('/api/media/video-to-mp3', formData);
 };
 
+export const videoToMp3Batch = (files) => {
+  const formData = new FormData();
+  appendFiles(formData, files);
+  return postForm('/api/media/video-to-mp3/batch', formData);
+};
+
 export const compressVideo = (file, crf) => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('crf', String(crf));
   return postForm('/api/media/compress', formData);
+};
+
+export const compressVideoBatch = (files, crf) => {
+  const formData = new FormData();
+  appendFiles(formData, files);
+  formData.append('crf', String(crf));
+  return postForm('/api/media/compress/batch', formData);
 };
 
 export const cutAudio = (file, start, duration) => {
@@ -255,6 +274,14 @@ export const cutAudio = (file, start, duration) => {
   formData.append('start', String(start));
   formData.append('duration', String(duration));
   return postForm('/api/media/audio-cut', formData);
+};
+
+export const cutAudioBatch = (files, start, duration) => {
+  const formData = new FormData();
+  appendFiles(formData, files);
+  formData.append('start', String(start));
+  formData.append('duration', String(duration));
+  return postForm('/api/media/audio-cut/batch', formData);
 };
 
 export const downloadVideo = (url) => postJson('/api/media/download', { url });

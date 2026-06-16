@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import FileDropZone from '../FileDropZone';
+import BatchUploader from './BatchUploader';
+import { BatchResults } from './BatchResults';
+import DownloadAllButton from './DownloadAllButton';
 import useToolRequest from '../../hooks/useToolRequest';
 import * as api from '../../services/api';
 import {
@@ -15,99 +17,108 @@ import {
 } from './shared';
 
 export function VideoToMp3Tool() {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const { loading, error, result, run } = useToolRequest();
+
+  const handleSubmit = () => {
+    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one video file.')));
+    if (files.length === 1) return run(() => api.videoToMp3(files[0]));
+    return run(() => api.videoToMp3Batch(files));
+  };
 
   return (
     <ToolPanel>
-      <FileDropZone
+      <BatchUploader
         accept="video/*"
-        onFiles={(files) => setFile(files[0] || null)}
-        selectedFiles={file ? [file] : []}
-        onRemoveFile={() => setFile(null)}
+        files={files}
+        onChange={setFiles}
+        maxFiles={20}
       />
       <ToolActions>
-        <PrimaryButton
-          onClick={() => {
-            if (!file) return run(() => Promise.reject(new Error('Please upload a video file.')));
-            return run(() => api.videoToMp3(file));
-          }}
-          disabled={loading}
-        >
-          Convert to MP3
+        <PrimaryButton onClick={handleSubmit} disabled={loading}>
+          {files.length > 1 ? `Convert ${files.length} Videos to MP3` : 'Convert to MP3'}
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} label="Download MP3" />
+        {!result?.results && <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} label="Download MP3" />}
+        <DownloadAllButton items={result?.results || []} zipName="mp3-files.zip" />
       </ToolActions>
-      <ToolLoading loading={loading} text="Extracting audio..." />
+      <ToolLoading loading={loading} text={files.length > 1 ? `Extracting audio from ${files.length} files...` : 'Extracting audio...'} />
       <ToolError message={error} />
+      <ToolSuccess message={!result?.results ? result?.message : ''} />
+      <BatchResults items={result?.results} />
     </ToolPanel>
   );
 }
 
 export function VideoCompressionTool() {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [crf, setCrf] = useState(28);
   const { loading, error, result, run } = useToolRequest();
 
+  const handleSubmit = () => {
+    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one video file.')));
+    if (files.length === 1) return run(() => api.compressVideo(files[0], crf));
+    return run(() => api.compressVideoBatch(files, crf));
+  };
+
   return (
     <ToolPanel>
-      <FileDropZone
+      <BatchUploader
         accept="video/*"
-        onFiles={(files) => setFile(files[0] || null)}
-        selectedFiles={file ? [file] : []}
-        onRemoveFile={() => setFile(null)}
+        files={files}
+        onChange={setFiles}
+        maxFiles={10}
       />
       <NumberField label="CRF (18 best quality, 35 smallest)" value={crf} onChange={setCrf} min={18} max={35} />
       <ToolActions>
-        <PrimaryButton
-          onClick={() => {
-            if (!file) return run(() => Promise.reject(new Error('Please upload a video file.')));
-            return run(() => api.compressVideo(file, crf));
-          }}
-          disabled={loading}
-        >
-          Compress Video
+        <PrimaryButton onClick={handleSubmit} disabled={loading}>
+          {files.length > 1 ? `Compress ${files.length} Videos` : 'Compress Video'}
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
+        {!result?.results && <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />}
+        <DownloadAllButton items={result?.results || []} zipName="compressed-videos.zip" />
       </ToolActions>
-      <ToolLoading loading={loading} text="Compressing video..." />
+      <ToolLoading loading={loading} text={files.length > 1 ? `Compressing ${files.length} videos...` : 'Compressing video...'} />
       <ToolError message={error} />
+      <ToolSuccess message={!result?.results ? result?.message : ''} />
+      <BatchResults items={result?.results} />
     </ToolPanel>
   );
 }
 
 export function AudioCutterTool() {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [start, setStart] = useState('0');
   const [duration, setDuration] = useState('30');
   const { loading, error, result, run } = useToolRequest();
 
+  const handleSubmit = () => {
+    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one audio file.')));
+    if (files.length === 1) return run(() => api.cutAudio(files[0], start, duration));
+    return run(() => api.cutAudioBatch(files, start, duration));
+  };
+
   return (
     <ToolPanel>
-      <FileDropZone
+      <BatchUploader
         accept="audio/*"
-        onFiles={(files) => setFile(files[0] || null)}
-        selectedFiles={file ? [file] : []}
-        onRemoveFile={() => setFile(null)}
+        files={files}
+        onChange={setFiles}
+        maxFiles={20}
       />
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField label="Start (seconds)" value={start} onChange={setStart} min={0} />
         <NumberField label="Duration (seconds)" value={duration} onChange={setDuration} min={1} />
       </div>
       <ToolActions>
-        <PrimaryButton
-          onClick={() => {
-            if (!file) return run(() => Promise.reject(new Error('Please upload an audio file.')));
-            return run(() => api.cutAudio(file, start, duration));
-          }}
-          disabled={loading}
-        >
-          Cut Audio
+        <PrimaryButton onClick={handleSubmit} disabled={loading}>
+          {files.length > 1 ? `Cut ${files.length} Audio Files` : 'Cut Audio'}
         </PrimaryButton>
-        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
+        {!result?.results && <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />}
+        <DownloadAllButton items={result?.results || []} zipName="trimmed-audio.zip" />
       </ToolActions>
-      <ToolLoading loading={loading} text="Trimming audio..." />
+      <ToolLoading loading={loading} text={files.length > 1 ? `Trimming ${files.length} audio files...` : 'Trimming audio...'} />
       <ToolError message={error} />
+      <ToolSuccess message={!result?.results ? result?.message : ''} />
+      <BatchResults items={result?.results} />
     </ToolPanel>
   );
 }

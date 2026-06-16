@@ -139,9 +139,23 @@ router.post('/ocr', upload.single('file'), async (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload an image file.' });
     }
-
     const { text } = await extractTextFromImage(req.file);
     return res.json({ message: 'Text extracted successfully.', text });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/ocr/batch', upload.array('files', 20), async (req, res, next) => {
+  try {
+    if (!req.files?.length) {
+      return res.status(400).json({ error: 'Please upload at least one image file.' });
+    }
+    const results = await processBatch(req.files, async (file) => {
+      const { text } = await extractTextFromImage(file);
+      return { text };
+    });
+    return res.json({ message: 'Batch OCR completed.', results });
   } catch (error) {
     return next(error);
   }
