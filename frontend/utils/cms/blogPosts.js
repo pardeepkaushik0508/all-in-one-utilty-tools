@@ -104,17 +104,18 @@ export async function fetchRemoteBlogPosts({ includeDrafts = false } = {}) {
 }
 
 export async function fetchRemoteBlogPost(slug) {
+  const staticPost = blogPosts.find((post) => post.slug === slug) || null;
+
   try {
     const response = await fetch(resolveApiUrl(`/api/content/blogs/${slug}`), {
       headers: { Accept: 'application/json' }
     });
-    if (!response.ok) return null;
+    if (!response.ok) return staticPost;
     const data = await response.json();
-    const staticPost = blogPosts.find((post) => post.slug === slug) || null;
     if (!data.content) return staticPost;
     return mergeBlogPost(staticPost, { slug, ...data.content });
   } catch {
-    return blogPosts.find((post) => post.slug === slug) || null;
+    return staticPost;
   }
 }
 

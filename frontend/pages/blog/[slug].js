@@ -210,10 +210,15 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const post = await fetchRemoteBlogPost(params.slug);
+  let post = await fetchRemoteBlogPost(params.slug);
+  const allPosts = await fetchRemoteBlogPosts();
+
+  if (!post) {
+    post = allPosts.find((item) => item.slug === params.slug) || null;
+  }
+
   if (!post) return { notFound: true, revalidate: 60 };
 
-  const allPosts = await fetchRemoteBlogPosts();
   const relatedPosts = getRelatedPostsFromList(allPosts, post.slug, 4);
   const enhanced = enhanceBlogPost(post, relatedPosts);
 

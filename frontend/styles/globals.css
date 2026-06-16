@@ -1852,7 +1852,7 @@ html[data-theme='dark'] {
 
   .home-tools-grid {
     @apply grid gap-4 lg:gap-5;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.75rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.75rem), 1fr));
     align-items: stretch;
     overflow-anchor: none;
   }
