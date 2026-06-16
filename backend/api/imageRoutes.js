@@ -1,6 +1,6 @@
 const express = require('express');
 const upload = require('../utils/upload');
-const { sendDownload } = require('../utils/response');
+const { buildDownloadResponse, sendDownload } = require('../utils/response');
 const {
   compressImage,
   resizeImage,
@@ -11,6 +11,27 @@ const {
 } = require('../services/imageService');
 
 const router = express.Router();
+
+async function processBatch(files, handler) {
+  const results = [];
+  for (const file of files) {
+    try {
+      const data = await handler(file);
+      results.push({
+        original: file.originalname,
+        status: 'success',
+        ...data
+      });
+    } catch (error) {
+      results.push({
+        original: file.originalname,
+        status: 'failed',
+        error: error.message || 'Processing failed.'
+      });
+    }
+  }
+  return results;
+}
 
 router.post('/compress', upload.single('file'), async (req, res, next) => {
   try {
@@ -24,6 +45,25 @@ router.post('/compress', upload.single('file'), async (req, res, next) => {
     });
 
     return sendDownload(req, res, { filename, message: 'Image compressed successfully.' });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/compress/batch', upload.array('files', 50), async (req, res, next) => {
+  try {
+    if (!req.files?.length) {
+      return res.status(400).json({ error: 'Please upload at least one image file.' });
+    }
+
+    const results = await processBatch(req.files, async (file) => {
+      const { filename } = await compressImage(file, {
+        quality: req.body.quality,
+        width: req.body.width
+      });
+      return buildDownloadResponse(filename, 'Image compressed successfully.');
+    });
+    return res.json({ message: 'Batch image compression completed.', results });
   } catch (error) {
     return next(error);
   }
@@ -46,6 +86,25 @@ router.post('/resize', upload.single('file'), async (req, res, next) => {
   }
 });
 
+router.post('/resize/batch', upload.array('files', 50), async (req, res, next) => {
+  try {
+    if (!req.files?.length) {
+      return res.status(400).json({ error: 'Please upload at least one image file.' });
+    }
+
+    const results = await processBatch(req.files, async (file) => {
+      const { filename } = await resizeImage(file, {
+        width: req.body.width,
+        height: req.body.height
+      });
+      return buildDownloadResponse(filename, 'Image resized successfully.');
+    });
+    return res.json({ message: 'Batch image resize completed.', results });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.post('/convert', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) {
@@ -54,6 +113,22 @@ router.post('/convert', upload.single('file'), async (req, res, next) => {
 
     const { filename } = await convertImage(req.file, req.body.format);
     return sendDownload(req, res, { filename, message: 'Image converted successfully.' });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/convert/batch', upload.array('files', 50), async (req, res, next) => {
+  try {
+    if (!req.files?.length) {
+      return res.status(400).json({ error: 'Please upload at least one image file.' });
+    }
+
+    const results = await processBatch(req.files, async (file) => {
+      const { filename } = await convertImage(file, req.body.format);
+      return buildDownloadResponse(filename, 'Image converted successfully.');
+    });
+    return res.json({ message: 'Batch image conversion completed.', results });
   } catch (error) {
     return next(error);
   }
@@ -102,6 +177,23 @@ router.post('/process', upload.single('file'), async (req, res, next) => {
 
     const { filename } = await processImage(req.file, req.body);
     return sendDownload(req, res, { filename, message: 'Image processed successfully.' });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/process/batch', upload.array('files', 50), async (req, res, next) => {
+  try {
+    if (!req.files?.length) {
+      return res.status(400).json({ error: 'Please upload at least one image file.' });
+    }
+
+    const results = await processBatch(req.files, async (file) => {
+      const { filename } = await processImage(file, req.body);
+      return buildDownloadResponse(filename, 'Image processed successfully.');
+    });
+
+    return res.json({ message: 'Batch image processing completed.', results });
   } catch (error) {
     return next(error);
   }
