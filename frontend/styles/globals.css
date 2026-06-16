@@ -225,6 +225,93 @@ html[data-theme='dark'] {
     box-shadow: var(--shadow-card);
   }
 
+  .file-preview-grid {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.75rem), 1fr));
+  }
+
+  .file-preview-card {
+    @apply grid h-full min-h-[8.5rem] grid-cols-[3.5rem_minmax(0,1fr)] gap-3 rounded-xl border p-3 text-left transition-all duration-300;
+    align-content: start;
+    background: var(--bg-elevated);
+    border-color: var(--border);
+  }
+
+  .file-preview-card:hover,
+  .file-preview-card:focus-within {
+    border-color: var(--accent-border);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-1px);
+  }
+
+  .file-preview-thumb {
+    @apply flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg border;
+    background: var(--bg-card);
+    border-color: var(--border);
+  }
+
+  .file-preview-kind {
+    @apply px-1 text-center text-[10px] font-semibold uppercase;
+    color: var(--text-muted);
+  }
+
+  .file-preview-body {
+    @apply min-w-0 self-start;
+  }
+
+  .file-preview-name {
+    @apply line-clamp-2 break-words text-sm font-medium leading-snug;
+    color: var(--text-primary);
+  }
+
+  .file-preview-meta {
+    @apply mt-0.5 truncate text-xs;
+    color: var(--text-muted);
+  }
+
+  .file-preview-actions {
+    @apply col-span-full flex flex-wrap items-center gap-2 pt-1;
+  }
+
+  .file-preview-action {
+    @apply rounded-lg px-2 py-1 text-xs font-medium underline-offset-2 transition-colors duration-200;
+    color: var(--text-muted);
+  }
+
+  .file-preview-action:hover,
+  .file-preview-action:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+    outline: none;
+  }
+
+  .file-preview-action:disabled {
+    @apply cursor-not-allowed opacity-40;
+    text-decoration: none;
+  }
+
+  .upload-queue-panel {
+    @apply space-y-3 rounded-xl border p-3;
+    background: var(--bg-elevated);
+    border-color: var(--border);
+  }
+
+  .upload-queue-header {
+    @apply flex items-center justify-between gap-3 text-xs;
+    color: var(--text-muted);
+  }
+
+  .upload-queue-clear {
+    @apply shrink-0 font-medium underline underline-offset-2 transition-colors duration-200;
+    color: var(--text-muted);
+  }
+
+  .upload-queue-clear:hover,
+  .upload-queue-clear:focus-visible {
+    color: var(--accent);
+    outline: none;
+  }
+
   .nav-pill {
     @apply rounded-full px-4 py-2 text-sm font-medium transition-all duration-300;
     color: var(--text-muted);
@@ -1753,18 +1840,20 @@ html[data-theme='dark'] {
   }
 
   .home-tools-results {
-    min-height: calc(var(--tool-rows, 4) * 11.5rem);
+    min-height: 0;
     overflow-anchor: none;
   }
 
   @media (min-width: 640px) {
     .home-tools-results {
-      min-height: calc(var(--tool-rows, 4) * 12rem);
+      min-height: 0;
     }
   }
 
   .home-tools-grid {
-    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5;
+    @apply grid gap-4 lg:gap-5;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.75rem), 1fr));
+    align-items: stretch;
     overflow-anchor: none;
   }
 
@@ -1849,7 +1938,7 @@ html[data-theme='dark'] {
 
   /* ─── Modern tool cards ─── */
   .tool-card-modern {
-    @apply relative h-full overflow-hidden rounded-2xl border transition-all duration-300;
+    @apply relative h-full min-h-[13.5rem] overflow-hidden rounded-2xl border transition-all duration-300;
     border-color: var(--border);
     background: var(--bg-card);
     box-shadow: var(--shadow-card);
@@ -1866,11 +1955,11 @@ html[data-theme='dark'] {
   }
 
   .tool-card-modern-body {
-    @apply flex h-full flex-col p-5;
+    @apply flex h-full flex-col p-4 sm:p-5;
   }
 
   .tool-card-modern-top {
-    @apply mb-4 flex items-start justify-between gap-3;
+    @apply mb-3 flex items-start justify-between gap-3;
   }
 
   .tool-card-modern-icon {
@@ -1882,14 +1971,14 @@ html[data-theme='dark'] {
   }
 
   .tool-card-modern-badge {
-    @apply rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider;
+    @apply max-w-[7.5rem] truncate rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider;
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     color: var(--text-muted);
   }
 
   .tool-card-modern-title {
-    @apply font-display text-lg font-bold leading-snug transition-colors duration-300;
+    @apply line-clamp-2 font-display text-base font-bold leading-snug transition-colors duration-300 sm:text-lg;
     color: var(--text-primary);
   }
 
@@ -1898,12 +1987,12 @@ html[data-theme='dark'] {
   }
 
   .tool-card-modern-desc {
-    @apply mt-2 flex-1 text-sm leading-relaxed;
+    @apply mt-2 line-clamp-3 flex-1 text-sm leading-relaxed;
     color: var(--text-muted);
   }
 
   .tool-card-modern-footer {
-    @apply mt-5 flex items-center justify-between border-t pt-4;
+    @apply mt-4 flex items-center justify-between gap-3 border-t pt-3;
     border-color: var(--border);
   }
 

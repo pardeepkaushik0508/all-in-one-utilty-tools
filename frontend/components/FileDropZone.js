@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-function formatFileSize(bytes) {
+export function formatFileSize(bytes) {
   if (!bytes && bytes !== 0) return '';
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -14,60 +14,10 @@ function fileTypeLabel(file) {
   return ext ? `.${ext.toUpperCase()}` : 'Unknown type';
 }
 
-function FilePreviewCard({ file, previewUrl, onRemove }) {
-  const isImage = file.type?.startsWith('image/');
-  const isVideo = file.type?.startsWith('video/');
-  const isAudio = file.type?.startsWith('audio/');
-  const isPdf = file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf');
+const EMPTY_FILES = [];
 
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-theme bg-[var(--bg-elevated)] p-3 text-left">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-theme bg-white">
-        {isImage && previewUrl ? (
-          <img src={previewUrl} alt={file.name} className="h-full w-full object-cover" />
-        ) : isVideo && previewUrl ? (
-          <video src={previewUrl} className="h-full w-full object-cover" muted playsInline />
-        ) : (
-          <span className="px-1 text-center text-[10px] font-semibold uppercase text-muted">
-            {isPdf ? 'PDF' : isVideo ? 'Video' : isAudio ? 'Audio' : 'File'}
-          </span>
-        )}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-heading">{file.name}</p>
-        <p className="mt-0.5 text-xs text-muted">{fileTypeLabel(file)}</p>
-        <p className="text-xs text-muted">{formatFileSize(file.size)}</p>
-      </div>
-
-      {onRemove && (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onRemove();
-          }}
-          className="text-xs text-muted underline"
-        >
-          Remove
-        </button>
-      )}
-    </div>
-  );
-}
-
-export default function FileDropZone({
-  multiple = false,
-  accept,
-  onFiles,
-  selectedFiles = [],
-  onRemoveFile
-}) {
-  const inputRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
+export function useFilePreviewUrls(files) {
   const [previewUrls, setPreviewUrls] = useState([]);
-
-  const files = useMemo(() => selectedFiles.filter(Boolean), [selectedFiles]);
 
   useEffect(() => {
     const urls = files.map((file) => {
@@ -83,6 +33,71 @@ export default function FileDropZone({
       });
     };
   }, [files]);
+
+  return previewUrls;
+}
+
+export function FilePreviewCard({ file, previewUrl, onRemove, actions }) {
+  const isImage = file.type?.startsWith('image/');
+  const isVideo = file.type?.startsWith('video/');
+  const isAudio = file.type?.startsWith('audio/');
+  const isPdf = file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf');
+
+  return (
+    <article className="file-preview-card">
+      <div className="file-preview-thumb">
+        {isImage && previewUrl ? (
+          <img src={previewUrl} alt={file.name} className="h-full w-full object-cover" />
+        ) : isVideo && previewUrl ? (
+          <video src={previewUrl} className="h-full w-full object-cover" muted playsInline />
+        ) : (
+          <span className="file-preview-kind">
+            {isPdf ? 'PDF' : isVideo ? 'Video' : isAudio ? 'Audio' : 'File'}
+          </span>
+        )}
+      </div>
+
+      <div className="file-preview-body">
+        <p className="file-preview-name" title={file.name}>{file.name}</p>
+        <p className="file-preview-meta">{fileTypeLabel(file)}</p>
+        <p className="file-preview-meta">{formatFileSize(file.size)}</p>
+      </div>
+
+      {(onRemove || actions) && (
+        <div className="file-preview-actions">
+          {actions}
+          {onRemove && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onRemove();
+              }}
+              className="file-preview-action"
+              aria-label={`Remove ${file.name}`}
+            >
+              Remove
+            </button>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+export default function FileDropZone({
+  multiple = false,
+  accept,
+  onFiles,
+  selectedFiles = [],
+  onRemoveFile,
+  showFileList = true
+}) {
+  const inputRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const files = useMemo(() => selectedFiles.filter(Boolean), [selectedFiles]);
+  const previewUrls = useFilePreviewUrls(showFileList ? files : EMPTY_FILES);
 
   const handleFiles = (fileList) => {
     const nextFiles = Array.from(fileList || []);
@@ -128,11 +143,11 @@ export default function FileDropZone({
         <p className="mt-1 text-xs text-muted">Max 100MB per file</p>
       </div>
 
-      {files.length > 0 && (
-        <div className="space-y-2">
+      {showFileList && files.length > 0 && (
+        <div className="file-preview-grid" aria-label="Selected files">
           {files.map((file, index) => (
             <FilePreviewCard
-              key={`${file.name}-${file.size}-${file.lastModified}`}
+              key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
               file={file}
               previewUrl={previewUrls[index]}
               onRemove={

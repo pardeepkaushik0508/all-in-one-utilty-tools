@@ -58,10 +58,7 @@ export default function ToolsSection({
         />
       </div>
 
-      <div
-        className="home-tools-results"
-        style={{ '--tool-rows': Math.max(1, Math.ceil(filteredTools.length / 3)) }}
-      >
+      <div className="home-tools-results">
         {filteredTools.length === 0 ? (
           <div className="home-empty-state">
             <div className="home-empty-icon">

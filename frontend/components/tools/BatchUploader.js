@@ -1,11 +1,4 @@
-import FileDropZone from '../FileDropZone';
-
-function formatFileSize(bytes) {
-  if (!bytes && bytes !== 0) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+import FileDropZone, { FilePreviewCard, useFilePreviewUrls } from '../FileDropZone';
 
 export default function BatchUploader({
   files,
@@ -14,6 +7,8 @@ export default function BatchUploader({
   maxFiles = 50,
   multiple = true
 }) {
+  const previewUrls = useFilePreviewUrls(files);
+
   const handleFiles = (incoming) => {
     const merged = [...files, ...incoming];
     const deduped = merged.filter(
@@ -38,31 +33,52 @@ export default function BatchUploader({
 
   return (
     <div className="space-y-3">
-      <FileDropZone multiple={multiple} accept={accept} onFiles={handleFiles} selectedFiles={files} onRemoveFile={(index) => onChange(files.filter((_, i) => i !== index))} />
+      <FileDropZone
+        multiple={multiple}
+        accept={accept}
+        onFiles={handleFiles}
+        selectedFiles={files}
+        onRemoveFile={(index) => onChange(files.filter((_, i) => i !== index))}
+        showFileList={false}
+      />
       {files.length > 0 && (
-        <div className="space-y-2 rounded-xl border border-theme bg-[var(--bg-elevated)] p-3">
-          <div className="flex items-center justify-between text-xs text-muted">
+        <div className="upload-queue-panel">
+          <div className="upload-queue-header">
             <span>{files.length} file(s) in queue</span>
-            <button type="button" className="underline" onClick={() => onChange([])}>
+            <button type="button" className="upload-queue-clear" onClick={() => onChange([])}>
               Clear all
             </button>
           </div>
-          <div className="space-y-1">
+          <div className="file-preview-grid">
             {files.map((file, index) => (
-              <div key={`${file.name}-${file.lastModified}-${file.size}`} className="flex items-center justify-between gap-3 rounded-lg border border-theme px-3 py-2 text-xs">
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-heading">{file.name}</p>
-                  <p className="text-muted">{formatFileSize(file.size)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="button" className="text-muted underline" onClick={() => moveFile(index, index - 1)} disabled={index === 0}>
-                    Up
-                  </button>
-                  <button type="button" className="text-muted underline" onClick={() => moveFile(index, index + 1)} disabled={index === files.length - 1}>
-                    Down
-                  </button>
-                </div>
-              </div>
+              <FilePreviewCard
+                key={`${file.name}-${file.lastModified}-${file.size}-${index}`}
+                file={file}
+                previewUrl={previewUrls[index]}
+                onRemove={() => onChange(files.filter((_, i) => i !== index))}
+                actions={(
+                  <>
+                    <button
+                      type="button"
+                      className="file-preview-action"
+                      onClick={() => moveFile(index, index - 1)}
+                      disabled={index === 0}
+                      aria-label={`Move ${file.name} up`}
+                    >
+                      Up
+                    </button>
+                    <button
+                      type="button"
+                      className="file-preview-action"
+                      onClick={() => moveFile(index, index + 1)}
+                      disabled={index === files.length - 1}
+                      aria-label={`Move ${file.name} down`}
+                    >
+                      Down
+                    </button>
+                  </>
+                )}
+              />
             ))}
           </div>
         </div>
