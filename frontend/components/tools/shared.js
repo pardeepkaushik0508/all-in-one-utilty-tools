@@ -32,17 +32,6 @@ export function DownloadLink({ url, label = 'Download Result', filename }) {
   const handleDownload = async () => {
     if (downloading) return;
 
-    if (url.startsWith('blob:') || url.startsWith('data:')) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = guessFilename(url, filename);
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      return;
-    }
-
     const fetchUrl = resolveApiUrl(url.startsWith('http') ? url : url.startsWith('/') ? url : `/${url}`);
     const saveAs = guessFilename(fetchUrl, filename);
 

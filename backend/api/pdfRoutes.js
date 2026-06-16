@@ -16,27 +16,6 @@ const {
 
 const router = express.Router();
 
-async function processBatch(files, handler) {
-  const results = [];
-  for (const file of files) {
-    try {
-      const data = await handler(file);
-      results.push({
-        original: file.originalname,
-        status: 'success',
-        ...data
-      });
-    } catch (error) {
-      results.push({
-        original: file.originalname,
-        status: 'failed',
-        error: error.message || 'Processing failed.'
-      });
-    }
-  }
-  return results;
-}
-
 router.post('/merge', upload.array('files', 20), async (req, res, next) => {
   try {
     if (!req.files || req.files.length < 2) {
@@ -65,23 +44,6 @@ router.post('/split', upload.single('file'), async (req, res, next) => {
   }
 });
 
-router.post('/split/batch', upload.array('files', 30), async (req, res, next) => {
-  try {
-    if (!req.files?.length) {
-      return res.status(400).json({ error: 'Please upload at least one PDF file.' });
-    }
-
-    const results = await processBatch(req.files, async (file) => {
-      const { filename, pages } = await splitPdfFile(file, req.body.range);
-      return buildDownloadResponse(filename, `Extracted pages: ${pages.join(', ')}`, { pages });
-    });
-
-    return res.json({ message: 'Batch PDF split completed.', results });
-  } catch (error) {
-    return next(error);
-  }
-});
-
 router.post('/compress', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) {
@@ -96,27 +58,6 @@ router.post('/compress', upload.single('file'), async (req, res, next) => {
         savedBytes: Math.max(0, originalSize - compressedSize)
       })
     );
-  } catch (error) {
-    return next(error);
-  }
-});
-
-router.post('/compress/batch', upload.array('files', 30), async (req, res, next) => {
-  try {
-    if (!req.files?.length) {
-      return res.status(400).json({ error: 'Please upload at least one PDF file.' });
-    }
-
-    const results = await processBatch(req.files, async (file) => {
-      const { filename, originalSize, compressedSize } = await compressPdfFile(file);
-      return buildDownloadResponse(filename, 'PDF compressed successfully.', {
-        originalSize,
-        compressedSize,
-        savedBytes: Math.max(0, originalSize - compressedSize)
-      });
-    });
-
-    return res.json({ message: 'Batch PDF compression completed.', results });
   } catch (error) {
     return next(error);
   }

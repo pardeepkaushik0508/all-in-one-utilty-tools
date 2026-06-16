@@ -62,10 +62,6 @@ async function postForm(path, formData) {
   });
 }
 
-function appendFiles(formData, files, key = 'files') {
-  files.forEach((file) => formData.append(key, file));
-}
-
 // PDF
 export const mergePdf = (files) => {
   const formData = new FormData();
@@ -80,23 +76,10 @@ export const splitPdf = (file, range) => {
   return postForm('/api/pdf/split', formData);
 };
 
-export const splitPdfBatch = (files, range) => {
-  const formData = new FormData();
-  appendFiles(formData, files);
-  formData.append('range', range || '');
-  return postForm('/api/pdf/split/batch', formData);
-};
-
 export const compressPdf = (file) => {
   const formData = new FormData();
   formData.append('file', file);
   return postForm('/api/pdf/compress', formData);
-};
-
-export const compressPdfBatch = (files) => {
-  const formData = new FormData();
-  appendFiles(formData, files);
-  return postForm('/api/pdf/compress/batch', formData);
 };
 
 export const createPdfFromText = ({ text, pageSize, orientation, fontSize, compression }) =>
@@ -161,14 +144,6 @@ export const compressImage = (file, quality, width) => {
   return postForm('/api/image/compress', formData);
 };
 
-export const compressImageBatch = (files, quality, width) => {
-  const formData = new FormData();
-  appendFiles(formData, files);
-  formData.append('quality', String(quality));
-  if (width) formData.append('width', String(width));
-  return postForm('/api/image/compress/batch', formData);
-};
-
 export const resizeImage = (file, width, height) => {
   const formData = new FormData();
   formData.append('file', file);
@@ -177,26 +152,11 @@ export const resizeImage = (file, width, height) => {
   return postForm('/api/image/resize', formData);
 };
 
-export const resizeImageBatch = (files, width, height) => {
-  const formData = new FormData();
-  appendFiles(formData, files);
-  if (width) formData.append('width', String(width));
-  if (height) formData.append('height', String(height));
-  return postForm('/api/image/resize/batch', formData);
-};
-
 export const convertImage = (file, format) => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('format', format);
   return postForm('/api/image/convert', formData);
-};
-
-export const convertImageBatch = (files, format) => {
-  const formData = new FormData();
-  appendFiles(formData, files);
-  formData.append('format', format);
-  return postForm('/api/image/convert/batch', formData);
 };
 
 export const processImage = (file, options = {}) => {
@@ -208,17 +168,6 @@ export const processImage = (file, options = {}) => {
     }
   });
   return postForm('/api/image/process', formData);
-};
-
-export const processImageBatch = (files, options = {}) => {
-  const formData = new FormData();
-  appendFiles(formData, files);
-  Object.entries(options).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      formData.append(key, String(value));
-    }
-  });
-  return postForm('/api/image/process/batch', formData);
 };
 
 export const imageToText = (file) => {

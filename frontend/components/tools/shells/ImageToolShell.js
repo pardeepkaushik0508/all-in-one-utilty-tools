@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import FileDropZone from '../../FileDropZone';
 import MediaUploadZone from '../../MediaUploadZone';
-import BatchUploader from '../BatchUploader';
-import { BatchResults } from '../BatchResults';
-import DownloadAllButton from '../DownloadAllButton';
 import useToolRequest from '../../../hooks/useToolRequest';
 import * as api from '../../../services/api';
 import {
@@ -73,7 +71,6 @@ export default function ImageToolShell({ config }) {
   const [preview, setPreview] = useState('');
   const [resultBlob, setResultBlob] = useState(null);
   const [resultUrl, setResultUrl] = useState('');
-  const [batchResults, setBatchResults] = useState([]);
   const [downloadMeta, setDownloadMeta] = useState(null);
   const [metadata, setMetadata] = useState(null);
   const [color, setColor] = useState(null);
@@ -85,7 +82,6 @@ export default function ImageToolShell({ config }) {
   const { loading, error, result, run } = useToolRequest();
 
   const file = files[0] || null;
-  const isBatchRun = files.length > 1 && config.mode !== 'collage';
   const isProcessing = loading || clientLoading;
 
   useEffect(() => {
@@ -103,23 +99,14 @@ export default function ImageToolShell({ config }) {
     return () => URL.revokeObjectURL(resultUrl);
   }, [resultUrl]);
 
-  useEffect(() => {
-    const blobUrls = batchResults
-      .map((item) => item.downloadUrl)
-      .filter((url) => typeof url === 'string' && url.startsWith('blob:'));
-    return () => {
-      blobUrls.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [batchResults]);
-
   const setOpt = (key, value) => setOptions((prev) => ({ ...prev, [key]: value }));
 
-  const processClientSingle = async (sourceFile) => {
-    if (!sourceFile && config.mode !== 'collage') throw new Error('Please upload an image first.');
+  const processClient = async () => {
+    if (!file && config.mode !== 'collage') throw new Error('Please upload an image first.');
 
     if (config.mode === 'metadata') {
-      setMetadata(getImageMetadata(sourceFile));
-      return null;
+      setMetadata(getImageMetadata(file));
+      return;
     }
 
     if (config.mode === 'collage') {
@@ -127,14 +114,18 @@ export default function ImageToolShell({ config }) {
       const images = await Promise.all(files.map(loadImageFromFile));
       const canvas = createCollage(images, Number(options.columns) || 2);
       const blob = await canvasToBlob(canvas, 'image/png');
-      return { blob, url: URL.createObjectURL(blob) };
+      setResultBlob(blob);
+      setResultUrl(URL.createObjectURL(blob));
+      setDownloadMeta(null);
+      return;
     }
 
-    const img = await loadImageFromFile(sourceFile);
+    const img = await loadImageFromFile(file);
     let canvas;
 
+    // ML segmentation for background removal — uses uploaded file directly for best quality.
     if (config.clientOp === 'bg-remove') {
-      canvas = await removeBackgroundFromFile(sourceFile, {
+      canvas = await removeBackgroundFromFile(file, {
         tolerance: Number(options.tolerance) || 40,
         onProgress: setProgressPct,
         signal: abortRef.current?.signal
@@ -147,81 +138,19 @@ export default function ImageToolShell({ config }) {
     const format = options.format || config.defaultFormat || 'png';
     const mime = formatToMime(format);
     const blob = await canvasToBlob(canvas, mime, 0.92);
-    return { blob, url: URL.createObjectURL(blob) };
-  };
-
-  const processClientBatch = async () => {
-    const next = files.map((queuedFile) => ({ original: queuedFile.name, status: 'pending' }));
-    setBatchResults(next);
-    const outputs = [];
-
-    for (let index = 0; index < files.length; index += 1) {
-      const queuedFile = files[index];
-      setBatchResults((prev) => prev.map((item, i) => (i === index ? { ...item, status: 'processing' } : item)));
-      try {
-        const processed = await processClientSingle(queuedFile);
-        outputs.push(processed);
-        setBatchResults((prev) =>
-          prev.map((item, i) =>
-            i === index
-              ? {
-                  ...item,
-                  status: 'success',
-                  downloadUrl: processed?.url,
-                  downloadFilename: `${queuedFile.name.split('.').slice(0, -1).join('.') || queuedFile.name}.${options.format || config.defaultFormat || 'png'}`
-                }
-              : item
-          )
-        );
-      } catch (err) {
-        setBatchResults((prev) =>
-          prev.map((item, i) => (i === index ? { ...item, status: 'failed', error: err.message || 'Processing failed.' } : item))
-        );
-      }
-    }
-    return outputs;
-  };
-
-  const processServerSingle = (sourceFile) => {
-    if (!sourceFile) return run(() => Promise.reject(new Error('Please upload an image first.')));
-    const payload = {
-      ...options,
-      operation: config.serverOp,
-      format: options.format || config.defaultFormat || 'png'
-    };
-    return api.processImage(sourceFile, payload);
-  };
-
-  const processServerBatch = async () => {
-    const payload = {
-      ...options,
-      operation: config.serverOp,
-      format: options.format || config.defaultFormat || 'png'
-    };
-    const data = await api.processImageBatch(files, payload);
-    setBatchResults(data?.results || []);
-    return data;
-  };
-
-  const processClient = async () => {
-    if (!file && config.mode !== 'collage') throw new Error('Please upload an image first.');
-    if (isBatchRun) {
-      await processClientBatch();
-      return;
-    }
-    const processed = await processClientSingle(file);
-    if (processed) {
-      setResultBlob(processed.blob);
-      setResultUrl(processed.url);
-      setDownloadMeta(null);
-    }
+    setResultBlob(blob);
+    setResultUrl(URL.createObjectURL(blob));
+    setDownloadMeta(null);
   };
 
   const processServer = () => {
-    if (isBatchRun) {
-      return run(() => processServerBatch());
-    }
-    return run(() => processServerSingle(file)).then((data) => {
+    if (!file) return run(() => Promise.reject(new Error('Please upload an image first.')));
+    const payload = {
+      ...options,
+      operation: config.serverOp,
+      format: options.format || config.defaultFormat || 'png'
+    };
+    return run(() => api.processImage(file, payload)).then((data) => {
       if (data?.downloadUrl) {
         setDownloadMeta({ url: data.downloadUrl, filename: data.downloadFilename });
         setResultUrl(data.downloadUrl);
@@ -234,7 +163,6 @@ export default function ImageToolShell({ config }) {
   const handleProcess = async () => {
     setResultBlob(null);
     setResultUrl('');
-    setBatchResults([]);
     setDownloadMeta(null);
     setMetadata(null);
     setColor(null);
@@ -273,16 +201,17 @@ export default function ImageToolShell({ config }) {
   const uploadZone = config.useCamera ? (
     <MediaUploadZone
       accept="image/*"
-      multiple={config.multiple || true}
-      files={files}
-      onFilesChange={setFiles}
+      onFiles={(selected) => setFiles(selected)}
+      selectedFiles={files}
+      onRemoveFile={(index) => setFiles((prev) => prev.filter((_, i) => i !== index))}
     />
   ) : (
-    <BatchUploader
+    <FileDropZone
       accept="image/*"
-      multiple={config.multiple || true}
-      files={files}
-      onChange={setFiles}
+      multiple={config.multiple}
+      onFiles={(selected) => setFiles(selected)}
+      selectedFiles={files}
+      onRemoveFile={(index) => setFiles((prev) => prev.filter((_, i) => i !== index))}
     />
   );
 
@@ -353,13 +282,12 @@ export default function ImageToolShell({ config }) {
         <PrimaryButton onClick={handleProcess} disabled={isProcessing}>
           {config.buttonLabel || 'Process Image'}
         </PrimaryButton>
-        {!batchResults.length && resultBlob && (
+        {resultBlob && (
           <DownloadBlobButton blob={resultBlob} filename={config.downloadFilename || 'processed-image.png'} />
         )}
-        {!batchResults.length && downloadMeta?.url && (
+        {downloadMeta?.url && (
           <DownloadLink url={downloadMeta.url} filename={downloadMeta.filename} />
         )}
-        <DownloadAllButton items={batchResults} zipName={`${config.slug || 'image'}-batch.zip`} />
       </ToolActions>
 
       <ToolLoading
@@ -372,13 +300,12 @@ export default function ImageToolShell({ config }) {
       />
       <ToolError message={error || clientError} />
 
-      {resultUrl && !batchResults.length && config.mode !== 'metadata' && (
+      {resultUrl && config.mode !== 'metadata' && (
         <div className="animate-fade-in space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Result</p>
           <img src={resultUrl} alt="Processed result" className="max-h-96 w-full rounded-xl border border-theme object-contain" />
         </div>
       )}
-      <BatchResults items={batchResults} />
 
       {metadata && (
         <div className="grid gap-2 sm:grid-cols-2">

@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import FileDropZone from '../FileDropZone';
 import MediaUploadZone from '../MediaUploadZone';
-import BatchUploader from './BatchUploader';
-import { BatchResults } from './BatchResults';
-import DownloadAllButton from './DownloadAllButton';
 import useToolRequest from '../../hooks/useToolRequest';
 import * as api from '../../services/api';
 import {
@@ -21,88 +18,90 @@ import {
 } from './shared';
 
 export function CompressImageTool() {
-  const [files, setFiles] = useState([]);
+  const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(70);
   const [width, setWidth] = useState('');
   const { loading, error, result, run } = useToolRequest();
 
   const handleSubmit = () => {
-    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one image first.')));
-    if (files.length === 1) {
-      return run(() => api.compressImage(files[0], quality, width || undefined));
-    }
-    return run(() => api.compressImageBatch(files, quality, width || undefined));
+    if (!file) return run(() => Promise.reject(new Error('Please upload an image first.')));
+    return run(() => api.compressImage(file, quality, width || undefined));
   };
 
   return (
     <ToolPanel>
-      <BatchUploader accept="image/*" files={files} onChange={setFiles} />
+      <FileDropZone
+        accept="image/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField label="Quality (1-100)" value={quality} onChange={setQuality} min={1} max={100} />
         <NumberField label="Width (optional)" value={width} onChange={setWidth} />
       </div>
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Compress Image</PrimaryButton>
-        {!result?.results && <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />}
-        <DownloadAllButton items={result?.results || []} zipName="compressed-images.zip" />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Compressing image..." />
       <ToolError message={error} />
       <ToolSuccess message={result?.message} />
-      <BatchResults items={result?.results} />
     </ToolPanel>
   );
 }
 
 export function ResizeImageTool() {
-  const [files, setFiles] = useState([]);
+  const [file, setFile] = useState(null);
   const [width, setWidth] = useState('800');
   const [height, setHeight] = useState('');
   const { loading, error, result, run } = useToolRequest();
 
   const handleSubmit = () => {
-    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one image first.')));
-    if (files.length === 1) {
-      return run(() => api.resizeImage(files[0], width, height || undefined));
-    }
-    return run(() => api.resizeImageBatch(files, width, height || undefined));
+    if (!file) return run(() => Promise.reject(new Error('Please upload an image first.')));
+    return run(() => api.resizeImage(file, width, height || undefined));
   };
 
   return (
     <ToolPanel>
-      <BatchUploader accept="image/*" files={files} onChange={setFiles} />
+      <FileDropZone
+        accept="image/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField label="Width" value={width} onChange={setWidth} />
         <NumberField label="Height (optional)" value={height} onChange={setHeight} />
       </div>
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Resize Image</PrimaryButton>
-        {!result?.results && <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />}
-        <DownloadAllButton items={result?.results || []} zipName="resized-images.zip" />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Resizing image..." />
       <ToolError message={error} />
-      <BatchResults items={result?.results} />
     </ToolPanel>
   );
 }
 
 export function ConvertJpgPngTool() {
-  const [files, setFiles] = useState([]);
+  const [file, setFile] = useState(null);
   const [format, setFormat] = useState('png');
   const { loading, error, result, run } = useToolRequest();
 
   const handleSubmit = () => {
-    if (!files.length) return run(() => Promise.reject(new Error('Please upload at least one image first.')));
-    if (files.length === 1) {
-      return run(() => api.convertImage(files[0], format));
-    }
-    return run(() => api.convertImageBatch(files, format));
+    if (!file) return run(() => Promise.reject(new Error('Please upload an image first.')));
+    return run(() => api.convertImage(file, format));
   };
 
   return (
     <ToolPanel>
-      <BatchUploader accept="image/*" files={files} onChange={setFiles} />
+      <FileDropZone
+        accept="image/*"
+        onFiles={(files) => setFile(files[0] || null)}
+        selectedFiles={file ? [file] : []}
+        onRemoveFile={() => setFile(null)}
+      />
       <SelectField
         label="Target format"
         value={format}
@@ -115,12 +114,10 @@ export function ConvertJpgPngTool() {
       />
       <ToolActions>
         <PrimaryButton onClick={handleSubmit} disabled={loading}>Convert Image</PrimaryButton>
-        {!result?.results && <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />}
-        <DownloadAllButton items={result?.results || []} zipName="converted-images.zip" />
+        <DownloadLink url={result?.downloadUrl} filename={result?.downloadFilename} />
       </ToolActions>
       <ToolLoading loading={loading} text="Converting image..." />
       <ToolError message={error} />
-      <BatchResults items={result?.results} />
     </ToolPanel>
   );
 }
