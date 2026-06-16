@@ -15,7 +15,9 @@ const DEFAULT_FOOTER_LINKS = {
   Resources: [
     { href: '/blog', label: 'Blog' },
     { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' }
+    { href: '/contact', label: 'Contact' },
+    { href: '/privacy-policy', label: 'Privacy Policy' },
+    { href: '/terms-and-conditions', label: 'Terms & Conditions' }
   ]
 };
 

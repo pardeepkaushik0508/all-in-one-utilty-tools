@@ -24,7 +24,9 @@ const DEFAULT_NAVIGATION = {
   footer: [
     { id: 'footer-blog', label: 'Blog', href: '/blog', external: false, openInNewTab: false, enabled: true, order: 0, group: 'Resources' },
     { id: 'footer-about', label: 'About', href: '/about', external: false, openInNewTab: false, enabled: true, order: 1, group: 'Resources' },
-    { id: 'footer-contact', label: 'Contact', href: '/contact', external: false, openInNewTab: false, enabled: true, order: 2, group: 'Resources' }
+    { id: 'footer-contact', label: 'Contact', href: '/contact', external: false, openInNewTab: false, enabled: true, order: 2, group: 'Resources' },
+    { id: 'footer-privacy', label: 'Privacy Policy', href: '/privacy-policy', external: false, openInNewTab: false, enabled: true, order: 3, group: 'Resources' },
+    { id: 'footer-terms', label: 'Terms & Conditions', href: '/terms-and-conditions', external: false, openInNewTab: false, enabled: true, order: 4, group: 'Resources' }
   ],
   footerBrand: {
     title: 'UtilityTools',
@@ -33,6 +35,22 @@ const DEFAULT_NAVIGATION = {
   },
   cta: { label: 'Explore Tools', href: '/#tools' }
 };
+
+function ensureFooterLinks(navigation) {
+  const next = { ...navigation };
+  const footer = Array.isArray(next.footer) ? [...next.footer] : [];
+
+  const ensure = (item) => {
+    if (footer.some((link) => link?.href === item.href)) return;
+    footer.push(item);
+  };
+
+  ensure({ id: 'footer-privacy', label: 'Privacy Policy', href: '/privacy-policy', external: false, openInNewTab: false, enabled: true, order: 90, group: 'Resources' });
+  ensure({ id: 'footer-terms', label: 'Terms & Conditions', href: '/terms-and-conditions', external: false, openInNewTab: false, enabled: true, order: 91, group: 'Resources' });
+
+  next.footer = footer;
+  return next;
+}
 
 function buildDefaultPage(id, slug, title, sections = []) {
   return {
@@ -522,7 +540,8 @@ async function reorderTools(orderedSlugs = [], actor = 'admin') {
 async function getNavigation() {
   const prisma = getPrisma();
   const row = await prisma.navigationConfig.findUnique({ where: { id: 'default' } });
-  return row?.data || DEFAULT_NAVIGATION;
+  const base = row?.data || DEFAULT_NAVIGATION;
+  return ensureFooterLinks({ ...DEFAULT_NAVIGATION, ...base, footerBrand: base.footerBrand || DEFAULT_NAVIGATION.footerBrand, cta: base.cta || DEFAULT_NAVIGATION.cta, footer: base.footer || DEFAULT_NAVIGATION.footer, header: base.header || DEFAULT_NAVIGATION.header });
 }
 
 async function saveNavigation(payload, actor = 'admin') {
