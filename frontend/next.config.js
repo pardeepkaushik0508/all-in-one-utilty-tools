@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
-const PRODUCTION_BACKEND = 'https://aio-tools-backend-production.up.railway.app';
-const PRODUCTION_FRONTEND = 'https://utilitytools.in';
+const PRODUCTION_FRONTEND = process.env.NEXT_PUBLIC_SITE_URL || 'https://utilitytools.in';
+const PRODUCTION_BACKEND = (
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'https://aio-tools-backend.onrender.com'
+).replace(/\/$/, '');
 
 const nextConfig = {
   reactStrictMode: true,
@@ -8,7 +12,6 @@ const nextConfig = {
     NEXT_PUBLIC_BACKEND_URL: PRODUCTION_BACKEND,
     NEXT_PUBLIC_SITE_URL: PRODUCTION_FRONTEND
   },
-  // Browser calls Express directly (see utils/apiBase.js). Only /downloads is proxied here.
   async rewrites() {
     return {
       beforeFiles: [],

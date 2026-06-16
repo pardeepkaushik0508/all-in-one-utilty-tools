@@ -118,27 +118,11 @@ function run() {
     }
   }
   
-  // Custom SEO Tools mappings:
-  const seoSlugs = [
-    'keyword-density-checker',
-    'readability-checker',
-    'slug-generator',
-    'robots-txt-checker',
-    'malware-url-scanner',
-    'url-safety-checker',
-    'hashtag-generator',
-    'text-hashtag-generator'
-  ];
-  
-  allTools = allTools.map(tool => {
-    if (seoSlugs.includes(tool.slug)) {
-      return { ...tool, category: 'SEO Tools' };
-    }
-    return tool;
+  // Sort tools by category then name
+  allTools.sort((a, b) => {
+    const cat = a.category.localeCompare(b.category);
+    return cat !== 0 ? cat : a.name.localeCompare(b.name);
   });
-  
-  // Sort tools by name
-  allTools.sort((a, b) => a.name.localeCompare(b.name));
   
   // Ensure the chrome-extension directory exists
   const extDir = path.join(ROOT_DIR, 'chrome-extension');

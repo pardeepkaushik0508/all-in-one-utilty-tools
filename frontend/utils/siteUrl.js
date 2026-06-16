@@ -7,7 +7,7 @@ export function getSiteUrl(request) {
   }
 
   const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
-  if (envUrl && !envUrl.includes('railway.app') && !envUrl.includes('localhost')) {
+  if (envUrl && !envUrl.includes('localhost')) {
     return envUrl;
   }
 

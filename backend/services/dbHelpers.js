@@ -21,15 +21,29 @@ function slugify(value = '') {
 
 function isDbUnavailable(error) {
   const code = String(error?.code || '');
-  return ['P1001', 'P1002', 'P1003', 'P1008', 'P1017'].includes(code);
+  return ['P1001', 'P1002', 'P1003', 'P1008', 'P1017', 'P2024'].includes(code);
 }
 
 function wrapDbError(error, message = 'Database operation failed.') {
+  if (!process.env.DATABASE_URL) {
+    return Object.assign(
+      new Error('DATABASE_URL is not set on the server. Add your PostgreSQL connection string to the backend environment.'),
+      { status: 503 }
+    );
+  }
   if (isDbUnavailable(error)) {
-    return Object.assign(new Error('Database is temporarily unavailable. Please try again.'), { status: 503 });
+    return Object.assign(
+      new Error(
+        'Database connection failed. Check DATABASE_URL on the Render backend service (use the internal DB URL from the Render Postgres dashboard).'
+      ),
+      { status: 503 }
+    );
   }
   if (error?.status) return error;
-  return Object.assign(new Error(message), { status: 500, cause: error });
+  const detail = error?.message && !String(error.message).includes('prisma')
+    ? `: ${error.message}`
+    : '';
+  return Object.assign(new Error(`${message}${detail}`), { status: 500, cause: error });
 }
 
 async function getSiteMeta(key, fallback = null) {

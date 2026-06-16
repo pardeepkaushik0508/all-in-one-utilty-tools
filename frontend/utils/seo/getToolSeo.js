@@ -24,7 +24,7 @@ export async function fetchRemoteToolSeoOverride(slug) {
   const base =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     (process.env.NODE_ENV === 'production'
-      ? 'https://aio-tools-backend-production.up.railway.app'
+      ? 'https://aio-tools-backend.onrender.com'
       : 'http://127.0.0.1:5000');
 
   try {

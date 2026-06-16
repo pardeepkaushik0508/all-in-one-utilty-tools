@@ -281,7 +281,12 @@ export default function BlogManager({ token }) {
         setSelectedSlug(slug);
         setMode('edit');
         await loadCatalog();
-        await triggerRevalidate(token, ['/blog', `/blog/${slug}`]);
+        try {
+          await triggerRevalidate(token, ['/blog', `/blog/${slug}`]);
+        } catch {
+          setStatus(nextStatus === 'published' ? 'Blog published. Cache refresh pending (up to 60s).' : 'Blog created. Cache refresh pending.');
+          return;
+        }
         setStatus(nextStatus === 'published' ? 'Blog published.' : 'Blog created.');
         return;
       }
@@ -290,7 +295,12 @@ export default function BlogManager({ token }) {
       if (typeof window !== 'undefined') localStorage.removeItem(`${AUTOSAVE_KEY}_${selectedSlug}`);
       setHasDraft(false);
       await loadCatalog();
-      await triggerRevalidate(token, [`/blog/${selectedSlug}`, '/blog']);
+      try {
+        await triggerRevalidate(token, [`/blog/${selectedSlug}`, '/blog']);
+      } catch {
+        setStatus(nextStatus === 'published' ? 'Blog published. Cache refresh pending (up to 60s).' : 'Blog saved. Cache refresh pending.');
+        return;
+      }
       setStatus(nextStatus === 'published' ? 'Blog published.' : 'Blog saved.');
     } catch (err) {
       setError(err.message);

@@ -1,5 +1,5 @@
-# Render deployment — backend API service
-# Set Root Directory to repo root; use this as the Blueprint or configure manually.
+# Render Blueprint — database + backend API + frontend
+# https://render.com/docs/blueprint-spec
 
 services:
   - type: web
@@ -14,30 +14,33 @@ services:
           property: connectionString
       - key: NODE_ENV
         value: production
-      - key: APP_ROLE
-        value: backend
+      - key: FRONTEND_URL
+        value: https://utilitytools.in
+      - key: PORT
+        value: 10000
 
   - type: web
     name: aio-tools-frontend
     runtime: node
-    buildCommand: npm install && npm run build --workspace frontend
+    buildCommand: >-
+      npm install &&
+      BACKEND_URL=https://aio-tools-backend.onrender.com
+      NEXT_PUBLIC_BACKEND_URL=https://aio-tools-backend.onrender.com
+      NEXT_PUBLIC_SITE_URL=https://utilitytools.in
+      npm run build --workspace frontend
     startCommand: bash scripts/start-frontend.sh
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://utilitytools.in
       - key: BACKEND_URL
-        fromService:
-          name: aio-tools-backend
-          type: web
-          property: host
+        value: https://aio-tools-backend.onrender.com
       - key: NEXT_PUBLIC_BACKEND_URL
-        fromService:
-          name: aio-tools-backend
-          type: web
-          property: host
+        value: https://aio-tools-backend.onrender.com
 
 databases:
   - name: aio-tools-db
     plan: free
-    databaseName: utilitytools
-    user: utilitytools
+    databaseName: allinoneutilitytools
+    user: pardeepkaushik

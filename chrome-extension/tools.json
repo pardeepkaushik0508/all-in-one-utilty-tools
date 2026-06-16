@@ -1,169 +1,385 @@
 [
   {
-    "name": "Age Calculator",
-    "slug": "age-calculator",
-    "category": "Utility Tools",
-    "description": "Calculate age from date of birth."
+    "name": "API Request Tester",
+    "slug": "api-request-tester",
+    "category": "Developer Tools",
+    "description": "Send HTTP requests and inspect responses."
   },
   {
-    "name": "AI Background Remover",
-    "slug": "ai-background-remover",
-    "category": "Image Tools",
-    "description": "High-quality AI background removal with transparent PNG output."
+    "name": "Base64 Decoder",
+    "slug": "dev-url-encoder",
+    "category": "Developer Tools",
+    "description": "Decode Base64 strings."
   },
   {
-    "name": "AI Content Generator",
-    "slug": "ai-content-generator",
-    "category": "Text Tools",
-    "description": "Generate content with Gemini AI — optional image upload."
-  },
-  {
-    "name": "AI Image Generator",
-    "slug": "ai-image-generator",
-    "category": "Image Tools",
-    "description": "Create images from text prompts using Google Gemini AI."
-  },
-  {
-    "name": "Audio Cutter",
-    "slug": "audio-cutter",
-    "category": "Video/Audio Tools",
-    "description": "Trim audio clips quickly."
-  },
-  {
-    "name": "Black & White Converter",
-    "slug": "black-white-converter",
-    "category": "Image Tools",
-    "description": "Convert images to high-contrast black and white."
+    "name": "Base64 Encoder",
+    "slug": "dev-base64-decoder",
+    "category": "Developer Tools",
+    "description": "Encode text to Base64."
   },
   {
     "name": "Code Minifier",
-    "slug": "code-minifier",
+    "slug": "html-to-text",
     "category": "Developer Tools",
     "description": "Minify JS, CSS, HTML snippets."
   },
   {
-    "name": "Compress Image",
-    "slug": "compress-image",
-    "category": "Image Tools",
-    "description": "Optimize image size while retaining quality."
-  },
-  {
-    "name": "Compress PDF",
-    "slug": "compress-pdf",
-    "category": "PDF Tools",
-    "description": "Reduce PDF file size."
-  },
-  {
-    "name": "Convert JPG PNG",
-    "slug": "convert-jpg-png",
-    "category": "Image Tools",
-    "description": "Convert JPG to PNG and vice versa."
-  },
-  {
-    "name": "Countdown Timer",
-    "slug": "countdown-timer",
-    "category": "Utility Tools",
-    "description": "Set a countdown timer in minutes."
-  },
-  {
-    "name": "Create PDF",
-    "slug": "create-pdf",
-    "category": "PDF Tools",
-    "description": "Create PDF from images, text, or mixed files — reorder, rotate, compress, and download."
+    "name": "Cron Expression Generator",
+    "slug": "cron-expression-generator",
+    "category": "Developer Tools",
+    "description": "Generate common cron expressions."
   },
   {
     "name": "CSS Beautifier",
     "slug": "css-beautifier",
     "category": "Developer Tools",
+    "description": "Extract readable plain text from HTML."
+  },
+  {
+    "name": "CSS Formatter",
+    "slug": "javascript-formatter",
+    "category": "Developer Tools",
+    "description": "Format CSS stylesheets for readability."
+  },
+  {
+    "name": "CSS Minifier",
+    "slug": "dev-color-picker",
+    "category": "Developer Tools",
+    "description": "Minify CSS stylesheets."
+  },
+  {
+    "name": "Diff Checker",
+    "slug": "dev-diff-checker",
+    "category": "Developer Tools",
+    "description": "Parse browser user agent strings."
+  },
+  {
+    "name": "Diff Checker",
+    "slug": "dev-base64-encoder",
+    "category": "Developer Tools",
+    "description": "Compare two code or text blocks."
+  },
+  {
+    "name": "HEX to RGB Converter",
+    "slug": "rgb-to-hex",
+    "category": "Developer Tools",
+    "description": "Convert HEX color codes to RGB."
+  },
+  {
+    "name": "HTML Beautifier",
+    "slug": "unix-timestamp-converter",
+    "category": "Developer Tools",
+    "description": "Beautify HTML markup."
+  },
+  {
+    "name": "HTML Decoder",
+    "slug": "hex-to-rgb",
+    "category": "Developer Tools",
+    "description": "Decode HTML entities to plain text."
+  },
+  {
+    "name": "HTML Encoder",
+    "slug": "html-encoder",
+    "category": "Developer Tools",
+    "description": "Encode special characters to HTML entities."
+  },
+  {
+    "name": "HTML Encoder",
+    "slug": "html-decoder",
+    "category": "Developer Tools",
+    "description": "Encode special characters to HTML entities."
+  },
+  {
+    "name": "HTML Formatter",
+    "slug": "css-formatter",
+    "category": "Developer Tools",
+    "description": "Beautify and format HTML markup."
+  },
+  {
+    "name": "HTML Minifier",
+    "slug": "html-beautifier",
+    "category": "Developer Tools",
+    "description": "Minify HTML markup."
+  },
+  {
+    "name": "HTTP Header Checker",
+    "slug": "http-header-checker",
+    "category": "Developer Tools",
+    "description": "Fetch and display HTTP response headers."
+  },
+  {
+    "name": "Instagram Downloader",
+    "slug": "instagram-downloader",
+    "category": "Developer Tools",
     "description": "Beautify minified CSS."
   },
   {
-    "name": "Currency Converter",
-    "slug": "currency-converter",
-    "category": "Utility Tools",
-    "description": "Live rates via external API."
+    "name": "JavaScript Formatter",
+    "slug": "sql-formatter",
+    "category": "Developer Tools",
+    "description": "Format JavaScript code with proper line breaks."
   },
   {
-    "name": "Delete PDF Pages",
-    "slug": "delete-pdf-pages",
-    "category": "PDF Tools",
-    "description": "Delete, extract, reorder, and rotate PDF pages with live thumbnails."
+    "name": "JS Beautifier",
+    "slug": "html-minifier",
+    "category": "Developer Tools",
+    "description": "Beautify JavaScript code."
   },
   {
-    "name": "Edit PDF",
-    "slug": "edit-pdf",
-    "category": "PDF Tools",
-    "description": "Full PDF editor: text, signatures, images, shapes, highlights, draw, undo/redo."
+    "name": "JS Minifier",
+    "slug": "js-beautifier",
+    "category": "Developer Tools",
+    "description": "Minify JavaScript code."
   },
   {
-    "name": "EMI Calculator",
-    "slug": "emi-calculator",
-    "category": "Utility Tools",
-    "description": "Compute loan installments."
+    "name": "JSON Formatter",
+    "slug": "code-minifier",
+    "category": "Developer Tools",
+    "description": "Format and validate JSON."
+  },
+  {
+    "name": "JSON to XML Converter",
+    "slug": "xml-to-json",
+    "category": "Developer Tools",
+    "description": "Convert JSON objects to XML format."
+  },
+  {
+    "name": "JSON Validator",
+    "slug": "dev-json-validator",
+    "category": "Developer Tools",
+    "description": "Validate JSON syntax and structure."
+  },
+  {
+    "name": "JSON Validator",
+    "slug": "json-to-xml",
+    "category": "Developer Tools",
+    "description": "Validate JSON syntax and structure."
+  },
+  {
+    "name": "JWT Decoder",
+    "slug": "jwt-generator",
+    "category": "Developer Tools",
+    "description": "Decode JWT header and payload."
+  },
+  {
+    "name": "Lorem Ipsum Generator",
+    "slug": "dev-lorem-ipsum",
+    "category": "Developer Tools",
+    "description": "Generate placeholder text."
+  },
+  {
+    "name": "Regex Generator",
+    "slug": "regex-generator",
+    "category": "Developer Tools",
+    "description": "Generate common regex patterns."
+  },
+  {
+    "name": "Regex Generator",
+    "slug": "uuid-generator",
+    "category": "Developer Tools",
+    "description": "Generate common regex patterns."
+  },
+  {
+    "name": "Regex Tester",
+    "slug": "regex-tester",
+    "category": "Developer Tools",
+    "description": "Test regular expressions against text."
+  },
+  {
+    "name": "RGB to HEX Converter",
+    "slug": "js-minifier",
+    "category": "Developer Tools",
+    "description": "Convert RGB values to HEX color codes."
+  },
+  {
+    "name": "SQL Formatter",
+    "slug": "jwt-decoder",
+    "category": "Developer Tools",
+    "description": "Format SQL queries for readability."
+  },
+  {
+    "name": "URL Decoder",
+    "slug": "dev-case-converter",
+    "category": "Developer Tools",
+    "description": "URL-decode strings."
+  },
+  {
+    "name": "URL Encoder",
+    "slug": "dev-url-decoder",
+    "category": "Developer Tools",
+    "description": "URL-encode strings."
+  },
+  {
+    "name": "User Agent Parser",
+    "slug": "user-agent-parser",
+    "category": "Developer Tools",
+    "description": "Parse browser user agent strings."
+  },
+  {
+    "name": "UUID Generator",
+    "slug": "uuid-validator",
+    "category": "Developer Tools",
+    "description": "Generate random UUID v4 identifiers."
+  },
+  {
+    "name": "UUID Validator",
+    "slug": "dev-hash-generator",
+    "category": "Developer Tools",
+    "description": "Validate UUID format."
+  },
+  {
+    "name": "XML Formatter",
+    "slug": "dev-xml-formatter",
+    "category": "Developer Tools",
+    "description": "Beautify and format XML documents."
+  },
+  {
+    "name": "XML Formatter",
+    "slug": "css-minifier",
+    "category": "Developer Tools",
+    "description": "Beautify and format XML documents."
+  },
+  {
+    "name": "XML to JSON Converter",
+    "slug": "html-formatter",
+    "category": "Developer Tools",
+    "description": "Convert XML documents to JSON."
+  },
+  {
+    "name": "AI Image Generator",
+    "slug": "ai-image-generator",
+    "category": "Image Tools",
+    "description": "Extract text from image using OCR."
+  },
+  {
+    "name": "ai-no-bg.png",
+    "slug": "image-upscaler",
+    "category": "Image Tools",
+    "description": "Upscale images 2x using high-quality resampling."
+  },
+  {
+    "name": "Black & White Converter",
+    "slug": "image-color-picker",
+    "category": "Image Tools",
+    "description": "Convert images to high-contrast black and white."
+  },
+  {
+    "name": "blurred.png",
+    "slug": "sharpen-image",
+    "category": "Image Tools",
+    "description": "Sharpen image details for clearer output."
+  },
+  {
+    "name": "brightness.png",
+    "slug": "contrast-adjuster",
+    "category": "Image Tools",
+    "description": "Adjust image contrast levels."
+  },
+  {
+    "name": "collage.png",
+    "slug": "image-grid-maker",
+    "category": "Image Tools",
+    "description": "Create a grid layout from multiple images."
+  },
+  {
+    "name": "contrast.png",
+    "slug": "saturation-adjuster",
+    "category": "Image Tools",
+    "description": "Adjust color saturation in images."
+  },
+  {
+    "name": "Convert JPG PNG",
+    "slug": "convert-jpg-png",
+    "category": "Image Tools",
+    "description": "Resize images by width and height."
+  },
+  {
+    "name": "converted.jpg",
+    "slug": "image-format-converter",
+    "category": "Image Tools",
+    "description": "Convert SVG vector images to JPG raster."
+  },
+  {
+    "name": "converted.png",
+    "slug": "png-to-jpg",
+    "category": "Image Tools",
+    "description": "Convert JPG/JPEG images to PNG format."
+  },
+  {
+    "name": "converted.png",
+    "slug": "svg-to-jpg",
+    "category": "Image Tools",
+    "description": "Convert SVG vector images to PNG raster."
+  },
+  {
+    "name": "converted.png",
+    "slug": "passport-photo-maker",
+    "category": "Image Tools",
+    "description": "Create standard 600×600 passport-style photos."
+  },
+  {
+    "name": "cropped.png",
+    "slug": "image-rotator",
+    "category": "Image Tools",
+    "description": "Rotate images by 90, 180, or 270 degrees."
   },
   {
     "name": "EXIF Data Viewer",
-    "slug": "exif-data-viewer",
+    "slug": "jpg-to-png",
     "category": "Image Tools",
     "description": "View basic image file metadata and properties."
   },
   {
-    "name": "Facebook Cover Creator",
-    "slug": "facebook-cover-creator",
+    "name": "facebook-cover.png",
+    "slug": "image-collage-maker",
     "category": "Image Tools",
     "description": "Create 820×312 Facebook cover images."
   },
   {
+    "name": "flipped.png",
+    "slug": "background-remover",
+    "category": "Image Tools",
+    "description": "Remove backgrounds from portraits, products, logos, and more with smart edge detection."
+  },
+  {
     "name": "GIF to JPG",
-    "slug": "gif-to-jpg",
+    "slug": "gif-to-png",
     "category": "Image Tools",
     "description": "Convert GIF images to JPG format."
   },
   {
     "name": "GIF to PNG",
-    "slug": "gif-to-png",
+    "slug": "svg-to-png",
     "category": "Image Tools",
     "description": "Convert GIF images to PNG format."
   },
   {
-    "name": "Grammar Checker",
-    "slug": "grammar-checker",
-    "category": "Text Tools",
-    "description": "Check writing using LanguageTool API."
-  },
-  {
     "name": "Grayscale Converter",
-    "slug": "grayscale-converter",
+    "slug": "black-white-converter",
     "category": "Image Tools",
     "description": "Convert images to grayscale."
   },
   {
-    "name": "Hash Generator",
-    "slug": "hash-generator",
-    "category": "Security Tools",
-    "description": "Create MD5 and SHA256 hashes."
-  },
-  {
-    "name": "Hashtag Generator",
-    "slug": "hashtag-generator",
-    "category": "SEO Tools",
-    "description": "Generate hashtag sets for posts."
-  },
-  {
-    "name": "HTML To Text",
-    "slug": "html-to-text",
-    "category": "Developer Tools",
-    "description": "Extract readable plain text from HTML."
+    "name": "grid.png",
+    "slug": "screenshot-to-image",
+    "category": "Image Tools",
+    "description": "Convert and optimize screenshot uploads to PNG or JPG."
   },
   {
     "name": "Image Color Picker",
-    "slug": "image-color-picker",
+    "slug": "image-metadata-viewer",
     "category": "Image Tools",
     "description": "Pick colors from any point in your image."
   },
   {
+    "name": "Image Cropper",
+    "slug": "image-cropper",
+    "category": "Image Tools",
+    "description": "Crop images to custom dimensions."
+  },
+  {
     "name": "Image Metadata Viewer",
-    "slug": "image-metadata-viewer",
+    "slug": "exif-data-viewer",
     "category": "Image Tools",
     "description": "View file name, type, size, and modified date."
   },
@@ -171,37 +387,145 @@
     "name": "Image To Text OCR",
     "slug": "image-to-text",
     "category": "Image Tools",
-    "description": "Extract text from image using OCR."
+    "description": "Convert JPG to PNG and vice versa."
   },
   {
-    "name": "Instagram Downloader",
-    "slug": "instagram-downloader",
-    "category": "Social Media Tools",
-    "description": "Download public media links."
-  },
-  {
-    "name": "Instagram Post Resizer",
-    "slug": "instagram-post-resizer",
+    "name": "instagram-post.png",
+    "slug": "youtube-thumbnail-creator",
     "category": "Image Tools",
     "description": "Resize images to 1080×1080 for Instagram posts."
   },
   {
-    "name": "JPG to PNG",
-    "slug": "jpg-to-png",
-    "category": "Image Tools",
-    "description": "Convert JPG/JPEG images to PNG format."
-  },
-  {
     "name": "JPG to WEBP",
-    "slug": "jpg-to-webp",
+    "slug": "png-to-webp",
     "category": "Image Tools",
     "description": "Convert JPG images to WEBP format."
   },
   {
-    "name": "JSON Formatter",
-    "slug": "json-formatter",
-    "category": "Developer Tools",
-    "description": "Format and validate JSON."
+    "name": "meme.png",
+    "slug": "thumbnail-generator",
+    "category": "Image Tools",
+    "description": "Generate 300px thumbnails from any image."
+  },
+  {
+    "name": "no-bg.png",
+    "slug": "ai-background-remover",
+    "category": "Image Tools",
+    "description": "High-quality AI background removal with transparent PNG output."
+  },
+  {
+    "name": "passport-photo.png",
+    "slug": "meme-generator",
+    "category": "Image Tools",
+    "description": "Create standard 600×600 passport-style photos."
+  },
+  {
+    "name": "PNG to JPG",
+    "slug": "webp-to-jpg",
+    "category": "Image Tools",
+    "description": "Convert PNG images to JPG format."
+  },
+  {
+    "name": "PNG to WEBP",
+    "slug": "webp-to-png",
+    "category": "Image Tools",
+    "description": "Convert PNG images to WEBP format."
+  },
+  {
+    "name": "Resize Image",
+    "slug": "resize-image",
+    "category": "Image Tools",
+    "description": "Optimize image size while retaining quality."
+  },
+  {
+    "name": "rotated.png",
+    "slug": "image-flipper",
+    "category": "Image Tools",
+    "description": "Flip images horizontally or vertically."
+  },
+  {
+    "name": "saturation.png",
+    "slug": "grayscale-converter",
+    "category": "Image Tools",
+    "description": "Convert images to grayscale."
+  },
+  {
+    "name": "Sharpen Image",
+    "slug": "brightness-adjuster",
+    "category": "Image Tools",
+    "description": "Sharpen image details for clearer output."
+  },
+  {
+    "name": "social-image.png",
+    "slug": "instagram-post-resizer",
+    "category": "Image Tools",
+    "description": "Resize images for popular social media platforms."
+  },
+  {
+    "name": "thumbnail.png",
+    "slug": "social-media-image-resizer",
+    "category": "Image Tools",
+    "description": "Resize images for popular social media platforms."
+  },
+  {
+    "name": "upscaled.png",
+    "slug": "image-watermark",
+    "category": "Image Tools",
+    "description": "Add a text watermark to your image."
+  },
+  {
+    "name": "Video To MP3",
+    "slug": "video-to-mp3",
+    "category": "Image Tools",
+    "description": "Create images from text prompts using Google Gemini AI."
+  },
+  {
+    "name": "watermarked.png",
+    "slug": "blur-image",
+    "category": "Image Tools",
+    "description": "Apply blur effect to images."
+  },
+  {
+    "name": "WEBP to JPG",
+    "slug": "jpg-to-webp",
+    "category": "Image Tools",
+    "description": "Convert WEBP images to JPG format."
+  },
+  {
+    "name": "WEBP to PNG",
+    "slug": "gif-to-jpg",
+    "category": "Image Tools",
+    "description": "Convert WEBP images to PNG format."
+  },
+  {
+    "name": "youtube-thumbnail.png",
+    "slug": "facebook-cover-creator",
+    "category": "Image Tools",
+    "description": "Create 1280×720 YouTube thumbnail images."
+  },
+  {
+    "name": "Compress Image",
+    "slug": "compress-image",
+    "category": "PDF Tools",
+    "description": "Camera scan or upload documents — enhance, reorder, and export to PDF."
+  },
+  {
+    "name": "Compress PDF",
+    "slug": "create-pdf",
+    "category": "PDF Tools",
+    "description": "Reduce PDF file size."
+  },
+  {
+    "name": "Delete PDF Pages",
+    "slug": "delete-pdf-pages",
+    "category": "PDF Tools",
+    "description": "Full PDF editor: text, signatures, images, shapes, highlights, draw, undo/redo."
+  },
+  {
+    "name": "Edit PDF",
+    "slug": "edit-pdf",
+    "category": "PDF Tools",
+    "description": "Create PDF from images, text, or mixed files — reorder, rotate, compress, and download."
   },
   {
     "name": "Merge PDF",
@@ -210,118 +534,670 @@
     "description": "Combine multiple PDF files into one."
   },
   {
-    "name": "Paraphrasing Tool",
-    "slug": "paraphrasing-tool",
-    "category": "Text Tools",
-    "description": "Rephrase content with AI APIs."
-  },
-  {
-    "name": "Passport Photo Maker",
-    "slug": "passport-photo-maker",
-    "category": "Image Tools",
-    "description": "Create standard 600×600 passport-style photos."
-  },
-  {
-    "name": "Password Generator",
-    "slug": "password-generator",
-    "category": "Security Tools",
-    "description": "Create strong random passwords."
-  },
-  {
-    "name": "Password Strength Checker",
-    "slug": "password-strength-checker",
-    "category": "Security Tools",
-    "description": "Measure password complexity score."
-  },
-  {
-    "name": "Plagiarism Checker",
-    "slug": "plagiarism-checker",
-    "category": "Text Tools",
-    "description": "Basic duplicate-content detection."
-  },
-  {
-    "name": "PNG to JPG",
-    "slug": "png-to-jpg",
-    "category": "Image Tools",
-    "description": "Convert PNG images to JPG format."
-  },
-  {
-    "name": "PNG to WEBP",
-    "slug": "png-to-webp",
-    "category": "Image Tools",
-    "description": "Convert PNG images to WEBP format."
-  },
-  {
-    "name": "Resize Image",
-    "slug": "resize-image",
-    "category": "Image Tools",
-    "description": "Resize images by width and height."
+    "name": "Merge PDF",
+    "slug": "split-pdf",
+    "category": "PDF Tools",
+    "description": "Combine multiple PDF files into one."
   },
   {
     "name": "Scan to PDF",
     "slug": "scan-to-pdf",
     "category": "PDF Tools",
-    "description": "Camera scan or upload documents — enhance, reorder, and export to PDF."
-  },
-  {
-    "name": "Screenshot to Image Converter",
-    "slug": "screenshot-to-image",
-    "category": "Image Tools",
-    "description": "Convert and optimize screenshot uploads to PNG or JPG."
-  },
-  {
-    "name": "Sharpen Image",
-    "slug": "sharpen-image",
-    "category": "Image Tools",
-    "description": "Sharpen image details for clearer output."
-  },
-  {
-    "name": "Social Media Image Resizer",
-    "slug": "social-media-image-resizer",
-    "category": "Image Tools",
-    "description": "Resize images for popular social media platforms."
+    "description": "Delete, extract, reorder, and rotate PDF pages with live thumbnails."
   },
   {
     "name": "Split PDF",
-    "slug": "split-pdf",
+    "slug": "compress-pdf",
     "category": "PDF Tools",
     "description": "Extract selected pages from PDF."
   },
   {
-    "name": "Stopwatch",
-    "slug": "stopwatch",
-    "category": "Utility Tools",
-    "description": "Simple stopwatch with lap times."
+    "name": "CSP Header Checker",
+    "slug": "csp-header-checker",
+    "category": "Security Tools",
+    "description": "Analyze Content-Security-Policy directives from pasted headers."
   },
   {
-    "name": "SVG to JPG",
-    "slug": "svg-to-jpg",
-    "category": "Image Tools",
-    "description": "Convert SVG vector images to JPG raster."
+    "name": "DNS Lookup",
+    "slug": "dns-lookup",
+    "category": "Security Tools",
+    "description": "Resolve A, AAAA, MX, TXT, and NS records."
   },
   {
-    "name": "SVG to PNG",
-    "slug": "svg-to-png",
-    "category": "Image Tools",
-    "description": "Convert SVG vector images to PNG raster."
+    "name": "Domain WHOIS Lookup",
+    "slug": "domain-whois-lookup",
+    "category": "Security Tools",
+    "description": "Basic domain registration info via DNS NS records."
+  },
+  {
+    "name": "Email Header Analyzer",
+    "slug": "email-header-analyzer",
+    "category": "Security Tools",
+    "description": "Parse email headers for SPF, DKIM, and routing info."
+  },
+  {
+    "name": "Hash Generator",
+    "slug": "hash-generator",
+    "category": "Security Tools",
+    "description": "Measure password complexity score."
+  },
+  {
+    "name": "HTTP Headers Analyzer",
+    "slug": "http-headers-analyzer",
+    "category": "Security Tools",
+    "description": "Fetch and analyze HTTP response headers."
+  },
+  {
+    "name": "IP Geolocation Checker",
+    "slug": "ip-geolocation-checker",
+    "category": "Security Tools",
+    "description": "Lookup IP address details (via DNS resolution)."
+  },
+  {
+    "name": "IP Lookup",
+    "slug": "ip-lookup",
+    "category": "Security Tools",
+    "description": "Resolve domain to IP addresses."
+  },
+  {
+    "name": "JWT Inspector",
+    "slug": "jwt-inspector",
+    "category": "Security Tools",
+    "description": "Inspect JWT header, payload, and signature details."
+  },
+  {
+    "name": "JWT Inspector",
+    "slug": "sec-hash-verifier",
+    "category": "Security Tools",
+    "description": "Inspect JWT header, payload, and signature details."
+  },
+  {
+    "name": "Malware URL Scanner",
+    "slug": "malware-url-scanner",
+    "category": "Security Tools",
+    "description": "Basic heuristic scan for suspicious URL patterns."
+  },
+  {
+    "name": "Password Strength Analyzer",
+    "slug": "sec-password-strength",
+    "category": "Security Tools",
+    "description": "Analyze password complexity and strength score."
+  },
+  {
+    "name": "Password Strength Checker",
+    "slug": "password-strength-checker",
+    "category": "Security Tools",
+    "description": "Create strong random passwords."
+  },
+  {
+    "name": "Port Scanner",
+    "slug": "port-scanner",
+    "category": "Security Tools",
+    "description": "Safe port check limited to ports 80 and 443."
+  },
+  {
+    "name": "Random Password Generator",
+    "slug": "sec-password-generator",
+    "category": "Security Tools",
+    "description": "Generate cryptographically strong passwords."
+  },
+  {
+    "name": "Robots.txt Checker",
+    "slug": "robots-txt-checker",
+    "category": "Security Tools",
+    "description": "Fetch and display robots.txt for a website."
+  },
+  {
+    "name": "Security Hash Generator",
+    "slug": "sec-hash-generator",
+    "category": "Security Tools",
+    "description": "Generate MD5, SHA-1, SHA-256, and SHA-512 hashes."
+  },
+  {
+    "name": "Security Headers Checker",
+    "slug": "security-headers-checker",
+    "category": "Security Tools",
+    "description": "Check HSTS, CSP, X-Frame-Options, and more."
+  },
+  {
+    "name": "SSL Certificate Checker",
+    "slug": "ssl-certificate-checker",
+    "category": "Security Tools",
+    "description": "Check SSL/TLS certificate validity and expiration."
+  },
+  {
+    "name": "Subdomain Finder",
+    "slug": "subdomain-finder",
+    "category": "Security Tools",
+    "description": "Suggest common subdomains for a domain (educational lookup)."
+  },
+  {
+    "name": "Unit Converter",
+    "slug": "unit-converter",
+    "category": "Security Tools",
+    "description": "Create MD5 and SHA256 hashes."
+  },
+  {
+    "name": "URL Safety Checker",
+    "slug": "url-safety-checker",
+    "category": "Security Tools",
+    "description": "Check URLs for suspicious patterns."
+  },
+  {
+    "name": "Website Technology Detector",
+    "slug": "website-technology-detector",
+    "category": "Security Tools",
+    "description": "Detect technologies from pasted HTTP response headers."
+  },
+  {
+    "name": "Bio Generator",
+    "slug": "bio-generator",
+    "category": "Social Media Tools",
+    "description": "Create profile bios for social platforms."
+  },
+  {
+    "name": "Caption Generator",
+    "slug": "caption-generator",
+    "category": "Social Media Tools",
+    "description": "Generate social media captions for any topic."
+  },
+  {
+    "name": "Emoji Generator",
+    "slug": "emoji-generator",
+    "category": "Social Media Tools",
+    "description": "Suggest emojis based on keywords."
+  },
+  {
+    "name": "Emoji Generator",
+    "slug": "social-fancy-text",
+    "category": "Social Media Tools",
+    "description": "Suggest emojis based on keywords."
+  },
+  {
+    "name": "Engagement Calculator",
+    "slug": "engagement-calculator",
+    "category": "Social Media Tools",
+    "description": "Calculate social media engagement rate."
+  },
+  {
+    "name": "Fancy Text Generator",
+    "slug": "text-style-generator",
+    "category": "Social Media Tools",
+    "description": "Convert text to fancy Unicode styles."
+  },
+  {
+    "name": "Hashtag Generator",
+    "slug": "hashtag-generator",
+    "category": "Social Media Tools",
+    "description": "Fetch video thumbnail images."
+  },
+  {
+    "name": "Instagram Bio Generator",
+    "slug": "twitter-post-generator",
+    "category": "Social Media Tools",
+    "description": "Create short Instagram profile bios."
+  },
+  {
+    "name": "Instagram Caption Generator",
+    "slug": "instagram-caption-generator",
+    "category": "Social Media Tools",
+    "description": "Generate suggested tags for YouTube videos."
+  },
+  {
+    "name": "Instagram Caption Generator",
+    "slug": "instagram-hashtag-generator",
+    "category": "Social Media Tools",
+    "description": "Create Instagram-ready captions with hashtags."
+  },
+  {
+    "name": "Instagram Hashtag Generator",
+    "slug": "instagram-bio-generator",
+    "category": "Social Media Tools",
+    "description": "Generate Instagram hashtag sets."
+  },
+  {
+    "name": "LinkedIn Post Generator",
+    "slug": "social-media-post-generator",
+    "category": "Social Media Tools",
+    "description": "Generate professional LinkedIn posts."
+  },
+  {
+    "name": "Password Generator",
+    "slug": "password-generator",
+    "category": "Social Media Tools",
+    "description": "Generate hashtag sets for posts."
+  },
+  {
+    "name": "Social Share Preview",
+    "slug": "social-share-preview",
+    "category": "Social Media Tools",
+    "description": "Preview how a link title and description appear when shared."
   },
   {
     "name": "Thumbnail Downloader",
     "slug": "thumbnail-downloader",
     "category": "Social Media Tools",
-    "description": "Fetch video thumbnail images."
+    "description": "Download public media links."
   },
   {
-    "name": "Unit Converter",
-    "slug": "unit-converter",
+    "name": "Twitter Post Generator",
+    "slug": "linkedin-post-generator",
+    "category": "Social Media Tools",
+    "description": "Generate Twitter/X posts under 280 characters."
+  },
+  {
+    "name": "Username Generator",
+    "slug": "username-generator",
+    "category": "Social Media Tools",
+    "description": "Generate creative username ideas."
+  },
+  {
+    "name": "Username Generator",
+    "slug": "youtube-title-generator",
+    "category": "Social Media Tools",
+    "description": "Generate creative username ideas."
+  },
+  {
+    "name": "YouTube Channel ID Finder",
+    "slug": "youtube-tags-extractor",
+    "category": "Social Media Tools",
+    "description": "Extract video or channel ID from YouTube URLs."
+  },
+  {
+    "name": "YouTube Description Generator",
+    "slug": "youtube-channel-id-finder",
+    "category": "Social Media Tools",
+    "description": "Generate YouTube video descriptions with timestamps."
+  },
+  {
+    "name": "YouTube Title Generator",
+    "slug": "youtube-description-generator",
+    "category": "Social Media Tools",
+    "description": "Generate click-worthy YouTube video titles."
+  },
+  {
+    "name": "AI Content Generator",
+    "slug": "ai-content-generator",
+    "category": "Text Tools",
+    "description": "Basic duplicate-content detection."
+  },
+  {
+    "name": "Base64 Decoder",
+    "slug": "json-minifier",
+    "category": "Text Tools",
+    "description": "Decode Base64 strings to plain text."
+  },
+  {
+    "name": "Base64 Encoder",
+    "slug": "base64-decoder",
+    "category": "Text Tools",
+    "description": "Encode text to Base64 format."
+  },
+  {
+    "name": "Case Converter",
+    "slug": "case-converter",
+    "category": "Text Tools",
+    "description": "Convert text to UPPERCASE, lowercase, Title Case, and more."
+  },
+  {
+    "name": "Character Counter",
+    "slug": "character-counter",
+    "category": "Text Tools",
+    "description": "Count characters with and without spaces."
+  },
+  {
+    "name": "CSV to JSON",
+    "slug": "json-to-csv",
+    "category": "Text Tools",
+    "description": "Convert CSV data to JSON format."
+  },
+  {
+    "name": "Duplicate Line Remover",
+    "slug": "duplicate-line-remover",
+    "category": "Text Tools",
+    "description": "Remove duplicate lines from text instantly."
+  },
+  {
+    "name": "Duplicate Line Remover",
+    "slug": "line-break-remover",
+    "category": "Text Tools",
+    "description": "Remove duplicate lines from text instantly."
+  },
+  {
+    "name": "Email Extractor",
+    "slug": "email-extractor",
+    "category": "Text Tools",
+    "description": "Extract all email addresses from text."
+  },
+  {
+    "name": "Email Extractor",
+    "slug": "url-extractor",
+    "category": "Text Tools",
+    "description": "Extract all email addresses from text."
+  },
+  {
+    "name": "Fancy Text Generator",
+    "slug": "text-capitalizer",
+    "category": "Text Tools",
+    "description": "Convert text to stylized Unicode characters."
+  },
+  {
+    "name": "Find and Replace Tool",
+    "slug": "find-and-replace",
+    "category": "Text Tools",
+    "description": "Find and replace text patterns in bulk."
+  },
+  {
+    "name": "JSON Formatter",
+    "slug": "json-formatter",
+    "category": "Text Tools",
+    "description": "Generate content with Gemini AI — optional image upload."
+  },
+  {
+    "name": "JSON to CSV",
+    "slug": "text-encryptor",
+    "category": "Text Tools",
+    "description": "Convert JSON arrays to CSV format."
+  },
+  {
+    "name": "Keyword Density Checker",
+    "slug": "keyword-density-checker",
+    "category": "Text Tools",
+    "description": "Analyze keyword frequency and density for SEO."
+  },
+  {
+    "name": "Line Break Remover",
+    "slug": "whitespace-remover",
+    "category": "Text Tools",
+    "description": "Remove line breaks and merge text into one paragraph."
+  },
+  {
+    "name": "Lorem Ipsum Generator",
+    "slug": "lorem-ipsum-generator",
+    "category": "Text Tools",
+    "description": "Generate Lorem Ipsum placeholder paragraphs."
+  },
+  {
+    "name": "Markdown Editor",
+    "slug": "markdown-editor",
+    "category": "Text Tools",
+    "description": "Convert Markdown to HTML preview."
+  },
+  {
+    "name": "Markdown Editor",
+    "slug": "text-to-html",
+    "category": "Text Tools",
+    "description": "Convert Markdown to HTML preview."
+  },
+  {
+    "name": "output.html",
+    "slug": "url-decoder",
+    "category": "Text Tools",
+    "description": "Encode text for safe use in URLs."
+  },
+  {
+    "name": "Paraphrasing Tool",
+    "slug": "paraphrasing-tool",
+    "category": "Text Tools",
+    "description": "Check writing using LanguageTool API."
+  },
+  {
+    "name": "Password Generator",
+    "slug": "text-password-generator",
+    "category": "Text Tools",
+    "description": "Generate strong random passwords in your browser."
+  },
+  {
+    "name": "Plagiarism Checker",
+    "slug": "plagiarism-checker",
+    "category": "Text Tools",
+    "description": "Rephrase content with AI APIs."
+  },
+  {
+    "name": "Readability Checker",
+    "slug": "readability-checker",
+    "category": "Text Tools",
+    "description": "Estimate readability score using Flesch Reading Ease."
+  },
+  {
+    "name": "Remove Empty Lines",
+    "slug": "text-merger",
+    "category": "Text Tools",
+    "description": "Remove blank lines from text."
+  },
+  {
+    "name": "Slug Generator",
+    "slug": "slug-generator",
+    "category": "Text Tools",
+    "description": "Generate URL-friendly slugs from any text."
+  },
+  {
+    "name": "Slug Generator",
+    "slug": "fancy-text-generator",
+    "category": "Text Tools",
+    "description": "Generate URL-friendly slugs from any text."
+  },
+  {
+    "name": "Text Capitalizer",
+    "slug": "remove-empty-lines",
+    "category": "Text Tools",
+    "description": "Capitalize every word in your text."
+  },
+  {
+    "name": "Text Cleaner",
+    "slug": "random-text-generator",
+    "category": "Text Tools",
+    "description": "Clean messy text by normalizing spaces and line breaks."
+  },
+  {
+    "name": "Text Compare Tool",
+    "slug": "text-compare-tool",
+    "category": "Text Tools",
+    "description": "Compare two texts line by line and see differences."
+  },
+  {
+    "name": "Text Decryptor",
+    "slug": "text-decryptor",
+    "category": "Text Tools",
+    "description": "Decrypt AES-GCM encrypted text with your password."
+  },
+  {
+    "name": "Text Reverser",
+    "slug": "text-cleaner",
+    "category": "Text Tools",
+    "description": "Reverse characters in your text."
+  },
+  {
+    "name": "Text Sorter",
+    "slug": "text-sorter",
+    "category": "Text Tools",
+    "description": "Sort lines alphabetically, by length, or reverse order."
+  },
+  {
+    "name": "Text Splitter",
+    "slug": "text-splitter",
+    "category": "Text Tools",
+    "description": "Split text by delimiter into sections."
+  },
+  {
+    "name": "Text to HTML",
+    "slug": "url-encoder",
+    "category": "Text Tools",
+    "description": "Convert plain text to safe HTML."
+  },
+  {
+    "name": "URL Decoder",
+    "slug": "base64-encoder",
+    "category": "Text Tools",
+    "description": "Decode URL-encoded strings."
+  },
+  {
+    "name": "URL Extractor",
+    "slug": "text-hashtag-generator",
+    "category": "Text Tools",
+    "description": "Extract all URLs from text content."
+  },
+  {
+    "name": "Whitespace Remover",
+    "slug": "text-reverser",
+    "category": "Text Tools",
+    "description": "Remove all whitespace characters from text."
+  },
+  {
+    "name": "Word Counter",
+    "slug": "word-counter",
+    "category": "Text Tools",
+    "description": "Count words, characters, sentences, paragraphs, and reading time."
+  },
+  {
+    "name": "XML Formatter",
+    "slug": "xml-formatter",
+    "category": "Text Tools",
+    "description": "Beautify and format XML documents."
+  },
+  {
+    "name": "XML Formatter",
+    "slug": "xml-minifier",
+    "category": "Text Tools",
+    "description": "Beautify and format XML documents."
+  },
+  {
+    "name": "XML Minifier",
+    "slug": "csv-to-json",
+    "category": "Text Tools",
+    "description": "Minify XML by removing extra whitespace."
+  },
+  {
+    "name": "Age Calculator",
+    "slug": "age-calculator",
     "category": "Utility Tools",
     "description": "Convert length, mass and temperature."
   },
   {
-    "name": "UUID Generator",
-    "slug": "uuid-generator",
-    "category": "Developer Tools",
+    "name": "Barcode Generator",
+    "slug": "barcode-generator",
+    "category": "Utility Tools",
+    "description": "Calculate discount amount and final price."
+  },
+  {
+    "name": "Barcode Generator",
+    "slug": "util-random-password",
+    "category": "Utility Tools",
+    "description": "Generate Code 39 style barcode text representation."
+  },
+  {
+    "name": "Case Converter",
+    "slug": "util-case-converter",
+    "category": "Utility Tools",
+    "description": "Convert text between case formats."
+  },
+  {
+    "name": "Countdown Timer",
+    "slug": "countdown-timer",
+    "category": "Utility Tools",
+    "description": "Generate QR code data URL for any text or URL."
+  },
+  {
+    "name": "Countdown Timer",
+    "slug": "stopwatch",
+    "category": "Utility Tools",
+    "description": "Set a countdown timer in minutes."
+  },
+  {
+    "name": "Currency Converter",
+    "slug": "currency-converter",
+    "category": "Utility Tools",
+    "description": "Compute loan installments."
+  },
+  {
+    "name": "Decimal Converter",
+    "slug": "decimal-converter",
+    "category": "Utility Tools",
+    "description": "Convert between decimal and hexadecimal."
+  },
+  {
+    "name": "Discount Calculator",
+    "slug": "discount-calculator",
+    "category": "Utility Tools",
+    "description": "Calculate discount amount and final price."
+  },
+  {
+    "name": "EMI Calculator",
+    "slug": "emi-calculator",
+    "category": "Utility Tools",
+    "description": "Calculate age from date of birth."
+  },
+  {
+    "name": "GST Calculator",
+    "slug": "gst-calculator",
+    "category": "Utility Tools",
+    "description": "Calculate GST inclusive and exclusive amounts."
+  },
+  {
+    "name": "Number to Words",
+    "slug": "number-to-words",
+    "category": "Utility Tools",
+    "description": "Convert numbers to English words."
+  },
+  {
+    "name": "Number to Words",
+    "slug": "binary-converter",
+    "category": "Utility Tools",
+    "description": "Convert numbers to English words."
+  },
+  {
+    "name": "Percentage Calculator",
+    "slug": "percentage-calculator",
+    "category": "Utility Tools",
+    "description": "Calculate percentages, increases, and decreases."
+  },
+  {
+    "name": "QR Code Generator",
+    "slug": "qr-code-generator",
+    "category": "Utility Tools",
+    "description": "Generate QR code data URL for any text or URL."
+  },
+  {
+    "name": "Random Number Generator",
+    "slug": "random-number-generator",
+    "category": "Utility Tools",
+    "description": "Generate random numbers in a range."
+  },
+  {
+    "name": "Roman Numeral Converter",
+    "slug": "roman-numeral-converter",
+    "category": "Utility Tools",
+    "description": "Convert numbers to Roman numerals."
+  },
+  {
+    "name": "Roman Numeral Converter",
+    "slug": "loan-calculator",
+    "category": "Utility Tools",
+    "description": "Convert numbers to Roman numerals."
+  },
+  {
+    "name": "SIP Calculator",
+    "slug": "sip-calculator",
+    "category": "Utility Tools",
+    "description": "Estimate SIP investment returns."
+  },
+  {
+    "name": "Text Counter",
+    "slug": "text-counter",
+    "category": "Utility Tools",
     "description": "Generate random UUID v4 identifiers."
+  },
+  {
+    "name": "Time Zone Converter",
+    "slug": "timezone-converter",
+    "category": "Utility Tools",
+    "description": "Convert date/time between time zones."
+  },
+  {
+    "name": "Tip Calculator",
+    "slug": "tip-calculator",
+    "category": "Utility Tools",
+    "description": "Calculate tip and split bill per person."
   },
   {
     "name": "UUID Generator",
@@ -330,39 +1206,27 @@
     "description": "Generate random UUID v4 identifiers."
   },
   {
-    "name": "Video Compression",
-    "slug": "video-compression",
+    "name": "Audio Cutter",
+    "slug": "audio-cutter",
     "category": "Video/Audio Tools",
     "description": "Compress large video files."
   },
   {
-    "name": "Video Downloader",
+    "name": "Audio Cutter",
     "slug": "video-downloader",
+    "category": "Video/Audio Tools",
+    "description": "Trim audio clips quickly."
+  },
+  {
+    "name": "Grammar Checker",
+    "slug": "grammar-checker",
     "category": "Video/Audio Tools",
     "description": "Download YouTube videos or direct MP4/WebM links."
   },
   {
-    "name": "Video To MP3",
-    "slug": "video-to-mp3",
+    "name": "Video Compression",
+    "slug": "video-compression",
     "category": "Video/Audio Tools",
     "description": "Extract mp3 audio from video."
-  },
-  {
-    "name": "WEBP to JPG",
-    "slug": "webp-to-jpg",
-    "category": "Image Tools",
-    "description": "Convert WEBP images to JPG format."
-  },
-  {
-    "name": "WEBP to PNG",
-    "slug": "webp-to-png",
-    "category": "Image Tools",
-    "description": "Convert WEBP images to PNG format."
-  },
-  {
-    "name": "YouTube Thumbnail Creator",
-    "slug": "youtube-thumbnail-creator",
-    "category": "Image Tools",
-    "description": "Create 1280×720 YouTube thumbnail images."
   }
 ]

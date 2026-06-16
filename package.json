@@ -14,6 +14,9 @@
     "dev:clean": "CLEAN_NEXT=1 bash scripts/dev-all.sh",
     "dev:reset": "CLEAN_NEXT=1 bash scripts/dev-all.sh",
     "build": "npm run build --workspace frontend",
+    "extract:extension-tools": "node scripts/extract-tools-metadata.js",
+    "extension:icons": "node scripts/generate-extension-icons.js",
+    "extension:build": "npm run extract:extension-tools && npm run extension:icons",
     "start": "bash scripts/start-frontend.sh",
     "start:frontend": "bash scripts/start-frontend.sh",
     "start:backend": "bash scripts/start-backend.sh"

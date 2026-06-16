@@ -30,13 +30,14 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error);
 });
 
-// Railway / reverse-proxy — required for rate limiting and correct client IP
+// Reverse-proxy — required for rate limiting and correct client IP (Render, Cloudflare, etc.)
 app.set('trust proxy', 1);
 
 const corsOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'https://aio-tools-frontend-production.up.railway.app',
+  'https://utilitytools.in',
+  'https://www.utilitytools.in',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -107,6 +108,10 @@ app.use((err, _req, res, _next) => {
     return res.status(400).json({ error: 'File too large. Maximum upload size is 100MB.' });
   }
 
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request body too large. Try reducing blog content or images.' });
+  }
+
   return res.status(err.status || 500).json({
     error: err.message || 'Something went wrong on the server.'
   });
@@ -115,10 +120,19 @@ app.use((err, _req, res, _next) => {
 const server = app.listen(PORT, HOST, () => {
   console.log(`[aio-tools-backend] Express API listening on http://${HOST}:${PORT}`);
   console.log(`File storage: ${isCloudinaryEnabled() ? 'Cloudinary' : 'local (/downloads)'}`);
+  if (!process.env.DATABASE_URL) {
+    console.error(
+      '[aio-tools-backend] DATABASE_URL is NOT set — blog/CMS features will fail. ' +
+        'Add your PostgreSQL URL to the Render backend service environment (DATABASE_URL).'
+    );
+  } else {
+    const host = process.env.DATABASE_URL.replace(/^postgres(ql)?:\/\/[^@]+@([^/?:]+).*/, '$2');
+    console.log(`Database: configured (${host})`);
+  }
   if (!process.env.GEMINI_API_KEY) {
     console.warn(
       '[aio-tools-backend] GEMINI_API_KEY is not set — AI content/image tools will fail. ' +
-        'Add it to backend/.env (local) or Railway backend Variables (production).'
+        'Add it to backend/.env (local) or Render backend environment variables (production).'
     );
   } else {
     console.log(`Gemini: enabled (${process.env.GEMINI_MODEL || 'gemini-2.5-flash'})`);

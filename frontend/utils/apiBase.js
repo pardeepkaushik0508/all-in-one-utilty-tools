@@ -1,5 +1,11 @@
-const PRODUCTION_BACKEND = 'https://aio-tools-backend-production.up.railway.app';
 const LOCAL_BACKEND = 'http://127.0.0.1:5000';
+
+// Render backend — set via NEXT_PUBLIC_BACKEND_URL / BACKEND_URL at build time on Render
+const DEFAULT_PRODUCTION_BACKEND = 'https://aio-tools-backend.onrender.com';
+
+function normalizeBase(url = '') {
+  return String(url).trim().replace(/\/$/, '');
+}
 
 function isLocalhost() {
   if (typeof window === 'undefined') return false;
@@ -7,13 +13,18 @@ function isLocalhost() {
   return host === 'localhost' || host === '127.0.0.1';
 }
 
+function resolveConfiguredBackend() {
+  const fromEnv = normalizeBase(
+    process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || ''
+  );
+  return fromEnv || DEFAULT_PRODUCTION_BACKEND;
+}
+
 export function getApiBaseUrl() {
   if (typeof window !== 'undefined') {
-    // Always call Express directly — Next.js /api proxy breaks large multipart uploads on Railway.
-    return isLocalhost() ? LOCAL_BACKEND : PRODUCTION_BACKEND;
+    return isLocalhost() ? LOCAL_BACKEND : resolveConfiguredBackend();
   }
-
-  return process.env.NODE_ENV === 'production' ? PRODUCTION_BACKEND : LOCAL_BACKEND;
+  return process.env.NODE_ENV === 'production' ? resolveConfiguredBackend() : LOCAL_BACKEND;
 }
 
 export function resolveApiUrl(path) {
@@ -24,4 +35,5 @@ export function resolveApiUrl(path) {
   return `${base}${normalized}`;
 }
 
-export { PRODUCTION_BACKEND, LOCAL_BACKEND };
+export const PRODUCTION_BACKEND = DEFAULT_PRODUCTION_BACKEND;
+export const LOCAL_BACKEND_URL = LOCAL_BACKEND;

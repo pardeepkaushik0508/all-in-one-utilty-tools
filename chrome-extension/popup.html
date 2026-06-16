@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UtilityTools</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <img src="icons/icon-32.png" alt="" class="brand-icon" width="28" height="28" />
+      <div>
+        <h1 class="brand-title">UtilityTools</h1>
+        <p class="brand-sub" id="tool-count">Loading tools…</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+      <a href="#" id="open-site" class="icon-btn" title="Open website" aria-label="Open website">↗</a>
+    </div>
+  </header>
+
+  <div class="search-wrap">
+    <input
+      type="search"
+      id="search"
+      class="search-input"
+      placeholder="Search 200+ tools…"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </div>
+
+  <nav class="tabs" id="view-tabs" aria-label="Views">
+    <button type="button" class="tab active" data-view="all">All</button>
+    <button type="button" class="tab" data-view="favorites">★ Favorites</button>
+    <button type="button" class="tab" data-view="recent">Recent</button>
+  </nav>
+
+  <div class="categories" id="categories" aria-label="Categories"></div>
+
+  <section class="list-panel" aria-label="Tools">
+    <main class="tool-list" id="tool-list" role="list"></main>
+    <p class="empty hidden" id="empty-state">No tools match your search.</p>
+  </section>
+
+  <footer class="footer">
+    <a href="#" id="footer-site">utilitytools.in</a>
+    <button type="button" id="options-btn" class="footer-link">Settings</button>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "UtilityTools — All-in-One Tools",
+  "short_name": "UtilityTools",
+  "description": "Quick access to 200+ free online tools: PDF, image, video, AI, developer, security, and more.",
+  "version": "1.0.1",
+  "action": {
+    "default_title": "UtilityTools",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "permissions": ["storage", "contextMenus"],
+  "host_permissions": [
+    "https://utilitytools.in/*",
+    "https://www.utilitytools.in/*",
+    "https://*.onrender.com/*"
+  ]
+}

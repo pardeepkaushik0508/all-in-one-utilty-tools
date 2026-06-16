@@ -132,6 +132,16 @@ function normalizeContent(payload = {}) {
   return payload.contentHtml || payload.content || '';
 }
 
+function parseOptionalDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function omitUndefined(obj = {}) {
+  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined));
+}
+
 function buildBlogData(payload = {}, { isCreate = false } = {}) {
   const categories = Array.isArray(payload.categories) && payload.categories.length
     ? payload.categories
@@ -141,8 +151,8 @@ function buildBlogData(payload = {}, { isCreate = false } = {}) {
   const status = payload.status || 'draft';
   const now = new Date();
 
-  const data = {
-    title: payload.title?.trim(),
+  const data = omitUndefined({
+    title: payload.title?.trim() || undefined,
     content: normalizeContent(payload),
     excerpt: payload.excerpt || '',
     featuredImage: payload.featuredImage || null,
@@ -151,7 +161,7 @@ function buildBlogData(payload = {}, { isCreate = false } = {}) {
     relatedToolSlug: payload.relatedToolSlug || null,
     category: categoryName,
     status,
-    scheduledAt: payload.scheduledAt ? new Date(payload.scheduledAt) : null,
+    scheduledAt: parseOptionalDate(payload.scheduledAt),
     metaTitle: payload.metaTitle || payload.title?.trim() || undefined,
     metaDescription: payload.metaDescription || payload.excerpt || '',
     keywords: tagNames,
@@ -160,16 +170,16 @@ function buildBlogData(payload = {}, { isCreate = false } = {}) {
     ogDescription: payload.ogDescription || payload.metaDescription || payload.excerpt || '',
     robotsIndex: payload.robotsIndex !== false,
     updatedAt: now
-  };
+  });
 
   if (status === 'published') {
-    data.publishedAt = payload.publishedAt ? new Date(payload.publishedAt) : now;
+    data.publishedAt = parseOptionalDate(payload.publishedAt) || now;
   } else if (status === 'draft') {
     data.publishedAt = null;
   }
 
   if (isCreate) {
-    data.createdAt = payload.date ? new Date(payload.date) : now;
+    data.createdAt = parseOptionalDate(payload.date) || now;
   }
 
   return { data, categoryName, tagNames };
