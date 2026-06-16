@@ -4,6 +4,9 @@ const {
   logActivity
 } = require('./cmsService');
 
+const { getPrisma } = require('../prisma/client');
+
+
 function normalizeSlug(slug = '') {
   return String(slug)
     .trim()
@@ -40,54 +43,132 @@ async function saveToolContent(slug, payload) {
 }
 
 async function getBlogContent(slug) {
-  const store = await readContentStore();
-  return store.blogs?.[slug] || null;
+  try {
+    const prisma = getPrisma();
+    const blog = await prisma.blog.findUnique({ where: { slug } });
+
+    if (!blog) return null;
+
+    // Keep existing response shape expected by frontend/admin UI
+    return {
+      slug: blog.slug,
+      title: blog.title,
+      excerpt: blog.excerpt || '',
+      category: blog.category || 'Guides',
+      categories: blog.category ? [blog.category] : ['Guides'],
+      author: 'UtilityTools Team',
+      readTime: '5 min',
+      relatedToolSlug: '',
+      content: blog.content || '',
+      status: blog.status || 'draft',
+      scheduledAt: null,
+      date: blog.createdAt ? blog.createdAt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      // SEO-like extras (legacy UI stores these in form)
+      metaTitle: blog.title,
+      metaDescription: blog.excerpt || '',
+      keywords: Array.isArray(blog.tags) ? blog.tags : [],
+      canonicalUrl: '',
+      ogTitle: blog.title,
+      ogDescription: blog.excerpt || '',
+      featuredImage: blog.featuredImage || '',
+      robotsIndex: true,
+      createdAt: blog.createdAt,
+      updatedAt: blog.updatedAt,
+      publishedAt: blog.status === 'published' ? blog.updatedAt : null,
+      source: 'cms'
+    };
+  } catch (err) {
+    console.error('getBlogContent db error:', err);
+    throw err;
+  }
 }
 
 async function saveBlogContent(slug, payload) {
-  const store = await readContentStore();
-  store.blogs = store.blogs || {};
-  const existing = store.blogs[slug] || {};
-  const now = new Date().toISOString();
+  try {
+    const prisma = getPrisma();
 
-  // Normalise categories — keep both `category` (primary) and `categories` (array)
-  let categories = existing.categories || (existing.category ? [existing.category] : ['Guides']);
-  if (Array.isArray(payload.categories) && payload.categories.length) {
-    categories = payload.categories;
-  } else if (payload.category) {
-    categories = [payload.category];
-  }
+    const now = new Date().toISOString();
 
-  store.blogs[slug] = {
-    ...existing,
-    ...payload,
-    slug,
-    category: categories[0],
-    categories,
-    // Extra SEO fields — preserve existing if not in payload
-    canonicalUrl: payload.canonicalUrl !== undefined ? payload.canonicalUrl : (existing.canonicalUrl || ''),
-    ogTitle: payload.ogTitle !== undefined ? payload.ogTitle : (existing.ogTitle || ''),
-    ogDescription: payload.ogDescription !== undefined ? payload.ogDescription : (existing.ogDescription || ''),
-    featuredImage: payload.featuredImage !== undefined ? payload.featuredImage : (existing.featuredImage || ''),
-    updatedAt: now,
-    createdAt: existing.createdAt || now
-  };
-  if (payload.status === 'published' && !store.blogs[slug].publishedAt) {
-    store.blogs[slug].publishedAt = now;
+    const categories = Array.isArray(payload.categories) && payload.categories.length
+      ? payload.categories
+      : (payload.category ? [payload.category] : ['Guides']);
+
+    // Only category name/reference is stored; categories array stays implicit
+    const category = categories[0] || 'Guides';
+
+    const tags = payload.tags !== undefined
+      ? payload.tags
+      : (payload.keywords !== undefined ? payload.keywords : []);
+
+    const content = Array.isArray(payload.content)
+      ? payload.content.join('')
+      : (payload.contentHtml || payload.content || '');
+
+    const updated = await prisma.blog.update({
+      where: { slug },
+      data: {
+        title: payload.title?.trim() || undefined,
+        content,
+        excerpt: payload.excerpt || '',
+        featuredImage: payload.featuredImage || null,
+        category: category || null,
+        tags: tags || [],
+        status: payload.status || 'draft',
+        updatedAt: now
+      }
+    });
+
+    return getBlogContent(updated.slug);
+  } catch (err) {
+    console.error('saveBlogContent db error:', err);
+    // If record doesn't exist, surface a meaningful 404 to admin UI
+    if (String(err?.code || '').includes('P2025')) {
+      throw Object.assign(new Error('Blog not found.'), { status: 404 });
+    }
+    throw err;
   }
-  await writeContentStore(store);
-  await logActivity('seo.blog.save', { slug, status: store.blogs[slug].status });
-  return store.blogs[slug];
 }
 
-async function listBlogs({ includeDrafts = true } = {}) {
-  const store = await readContentStore();
-  const blogs = Object.entries(store.blogs || {}).map(([slug, record]) => ({
-    slug,
-    ...record
+async function listBlogs({ includeDrafts = true, page = 1, limit = 20 } = {}) {
+  const prisma = getPrisma();
+  const take = Math.max(1, Number(limit) || 20);
+  const skip = Math.max(0, (Number(page) - 1) * take);
+
+  const where = includeDrafts ? {} : { status: 'published' };
+
+  const blogs = await prisma.blog.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    skip,
+    take
+  });
+
+  return blogs.map((blog) => ({
+    slug: blog.slug,
+    title: blog.title,
+    excerpt: blog.excerpt || '',
+    category: blog.category || 'Guides',
+    categories: blog.category ? [blog.category] : ['Guides'],
+    author: 'UtilityTools Team',
+    readTime: '5 min',
+    relatedToolSlug: '',
+    content: blog.content || '',
+    status: blog.status || 'draft',
+    scheduledAt: null,
+    date: blog.createdAt ? blog.createdAt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+    metaTitle: blog.title,
+    metaDescription: blog.excerpt || '',
+    keywords: Array.isArray(blog.tags) ? blog.tags : [],
+    canonicalUrl: '',
+    ogTitle: blog.title,
+    ogDescription: blog.excerpt || '',
+    featuredImage: blog.featuredImage || '',
+    robotsIndex: true,
+    createdAt: blog.createdAt,
+    updatedAt: blog.updatedAt,
+    publishedAt: blog.status === 'published' ? blog.updatedAt : null,
+    source: 'cms'
   }));
-  if (includeDrafts) return blogs;
-  return blogs.filter(isBlogPublished);
 }
 
 async function createBlog(payload = {}) {
@@ -99,50 +180,49 @@ async function createBlog(payload = {}) {
     throw Object.assign(new Error('Blog title is required.'), { status: 400 });
   }
 
-  const store = await readContentStore();
-  store.blogs = store.blogs || {};
-  if (store.blogs[slug]) {
-    throw Object.assign(new Error('A blog with this slug already exists.'), { status: 409 });
-  }
+  try {
+    const prisma = getPrisma();
 
-  const now = new Date().toISOString();
-  const record = {
-    slug,
-    source: 'cms',
-    title: payload.title.trim(),
-    excerpt: payload.excerpt || '',
-    // Support both single string and array of categories
-    category: Array.isArray(payload.categories) && payload.categories.length
-      ? payload.categories[0]
-      : (payload.category || 'Guides'),
-    categories: Array.isArray(payload.categories) && payload.categories.length
+    const categories = Array.isArray(payload.categories) && payload.categories.length
       ? payload.categories
-      : [payload.category || 'Guides'],
-    author: payload.author || 'UtilityTools Team',
-    readTime: payload.readTime || '5 min',
-    relatedToolSlug: payload.relatedToolSlug || '',
-    content: Array.isArray(payload.content) ? payload.content : (payload.content || ''),
-    status: payload.status || 'draft',
-    scheduledAt: payload.scheduledAt || null,
-    date: payload.date || now.slice(0, 10),
-    // SEO
-    metaTitle: payload.metaTitle || payload.title.trim(),
-    metaDescription: payload.metaDescription || payload.excerpt || '',
-    keywords: payload.keywords || [],
-    canonicalUrl: payload.canonicalUrl || '',
-    ogTitle: payload.ogTitle || payload.metaTitle || payload.title.trim(),
-    ogDescription: payload.ogDescription || payload.metaDescription || payload.excerpt || '',
-    featuredImage: payload.featuredImage || '',
-    robotsIndex: payload.robotsIndex !== false,
-    createdAt: now,
-    updatedAt: now,
-    publishedAt: payload.status === 'published' ? now : null
-  };
+      : (payload.category ? [payload.category] : ['Guides']);
+    const category = categories[0] || 'Guides';
 
-  store.blogs[slug] = record;
-  await writeContentStore(store);
-  await logActivity('blog.create', { slug, status: record.status });
-  return record;
+    const tags = payload.tags !== undefined
+      ? payload.tags
+      : (payload.keywords !== undefined ? payload.keywords : []);
+
+    const content = Array.isArray(payload.content)
+      ? payload.content.join('')
+      : (payload.contentHtml || payload.content || '');
+
+    const now = new Date().toISOString();
+
+    const created = await prisma.blog.create({
+      data: {
+        title: payload.title.trim(),
+        slug,
+        content,
+        excerpt: payload.excerpt || '',
+        featuredImage: payload.featuredImage || null,
+        category: category || null,
+        tags: tags || [],
+        status: payload.status || 'draft',
+        createdAt: now,
+        updatedAt: now
+      }
+    });
+
+    await logActivity('blog.create', { slug, status: created.status });
+
+    return getBlogContent(created.slug);
+  } catch (err) {
+    console.error('createBlog db error:', err);
+    if (String(err?.code || '').includes('P2002')) {
+      throw Object.assign(new Error('A blog with this slug already exists.'), { status: 409 });
+    }
+    throw err;
+  }
 }
 
 // ── Blog categories ──────────────────────────────────────────────────────────
@@ -267,16 +347,19 @@ async function deleteBlogCategory(slug) {
 }
 
 async function deleteBlog(slug) {
-  const store = await readContentStore();
-  const existing = store.blogs?.[slug];
-  if (!existing) throw Object.assign(new Error('Blog not found.'), { status: 404 });
-  if (existing.source !== 'cms') {
-    throw Object.assign(new Error('Only custom CMS blogs can be deleted.'), { status: 400 });
+  try {
+    const prisma = getPrisma();
+    // Keep legacy behavior: only delete custom CMS records. Since DB now only stores CMS blogs,
+    // treat existing row as deletable.
+    const deleted = await prisma.blog.delete({ where: { slug } });
+    await logActivity('blog.delete', { slug: deleted.slug });
+    return { deleted: true, slug: deleted.slug };
+  } catch (err) {
+    if (String(err?.code || '').includes('P2025')) {
+      throw Object.assign(new Error('Blog not found.'), { status: 404 });
+    }
+    throw err;
   }
-  delete store.blogs[slug];
-  await writeContentStore(store);
-  await logActivity('blog.delete', { slug });
-  return { deleted: true, slug };
 }
 
 async function listContentSummary() {
