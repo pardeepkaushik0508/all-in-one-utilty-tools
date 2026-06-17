@@ -5,7 +5,8 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { isCloudinaryEnabled } = require('./utils/cloudinary');
 const { apiLimiter, uploadLimiter } = require('./middleware/rateLimit');
-const { getPrisma } = require('./prisma/client');
+const { connectDb, pingDb, getMongoUri } = require('./db/connection');
+require('./db/models');
 const pdfRoutes = require('./api/pdfRoutes');
 const imageRoutes = require('./api/imageRoutes');
 const mediaRoutes = require('./api/mediaRoutes');
@@ -61,10 +62,9 @@ app.use('/downloads', express.static(path.join(__dirname, 'processed')));
 
 app.get('/api/health', async (_req, res) => {
   let database = 'not_configured';
-  if (process.env.DATABASE_URL) {
+  if (getMongoUri()) {
     try {
-      const prisma = getPrisma();
-      await prisma.$queryRaw`SELECT 1`;
+      await pingDb();
       database = 'connected';
     } catch (error) {
       database = 'error';
@@ -117,18 +117,26 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-const server = app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, async () => {
   console.log(`[aio-tools-backend] Express API listening on http://${HOST}:${PORT}`);
   console.log(`File storage: ${isCloudinaryEnabled() ? 'Cloudinary' : 'local (/downloads)'}`);
-  if (!process.env.DATABASE_URL) {
+
+  const mongoUri = getMongoUri();
+  if (!mongoUri) {
     console.error(
       '[aio-tools-backend] DATABASE_URL is NOT set — blog/CMS features will fail. ' +
-        'Add your PostgreSQL URL to the Render backend service environment (DATABASE_URL).'
+        'Add your MongoDB connection string to the backend environment (DATABASE_URL).'
     );
   } else {
-    const host = process.env.DATABASE_URL.replace(/^postgres(ql)?:\/\/[^@]+@([^/?:]+).*/, '$2');
-    console.log(`Database: configured (${host})`);
+    try {
+      await connectDb();
+      const host = mongoUri.replace(/^mongodb(\+srv)?:\/\/[^@]+@([^/?:]+).*/, '$2');
+      console.log(`Database: MongoDB connected (${host})`);
+    } catch (error) {
+      console.error('[aio-tools-backend] MongoDB connection failed:', error.message);
+    }
   }
+
   if (!process.env.GEMINI_API_KEY) {
     console.warn(
       '[aio-tools-backend] GEMINI_API_KEY is not set — AI content/image tools will fail. ' +

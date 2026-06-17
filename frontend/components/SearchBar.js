@@ -1,4 +1,9 @@
-export default function SearchBar({ value, onChange, placeholder = 'Search by name or description...' }) {
+export default function SearchBar({
+  value,
+  onChange,
+  placeholder = 'Search by name or description...',
+  isLoading = false
+}) {
   const preserveScroll = () => {
     if (typeof window === 'undefined') return;
     const scrollY = window.scrollY;
@@ -22,8 +27,16 @@ export default function SearchBar({ value, onChange, placeholder = 'Search by na
         className="input-field pl-11 pr-10"
         autoComplete="off"
         enterKeyHint="search"
+        aria-busy={isLoading || undefined}
       />
-      {value && (
+      {isLoading ? (
+        <span
+          className="pointer-events-none absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center"
+          aria-hidden
+        >
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-500 border-t-transparent" />
+        </span>
+      ) : value ? (
         <button
           type="button"
           onClick={() => onChange('')}
@@ -34,7 +47,7 @@ export default function SearchBar({ value, onChange, placeholder = 'Search by na
             <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
           </svg>
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

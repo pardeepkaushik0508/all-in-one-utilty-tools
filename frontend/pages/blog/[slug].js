@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState } from 'react';
+import useDebouncedSearch from '../../hooks/useDebouncedSearch';
 import Layout from '../../components/Layout';
 import BlogSidebar from '../../components/blog/BlogSidebar';
 import BlogTableOfContents from '../../components/blog/BlogTableOfContents';
@@ -24,7 +24,7 @@ function AuthorAvatar({ name }) {
 }
 
 export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
-  const [search, setSearch] = useState('');
+  const { value: search, debouncedValue: debouncedSearch, setValue: setSearch, isSearching } = useDebouncedSearch();
 
   if (!post || !enhanced) {
     return (
@@ -188,7 +188,9 @@ export default function BlogDetailPage({ post, enhanced, allPosts = [] }) {
           <BlogSidebar
             posts={allPosts}
             search={search}
+            debouncedSearch={debouncedSearch}
             onSearchChange={setSearch}
+            isSearching={isSearching}
             currentSlug={post.slug}
             currentCategory={post.category}
             showSearch

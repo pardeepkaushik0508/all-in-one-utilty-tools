@@ -18,17 +18,20 @@ function searchInPosts(posts, query) {
 export default function BlogSidebar({
   posts = [],
   search = '',
+  debouncedSearch = '',
   onSearchChange,
+  isSearching = false,
   currentSlug,
   currentCategory,
   showSearch = true
 }) {
-  const filteredPosts = useMemo(() => searchInPosts(posts, search), [posts, search]);
+  const activeQuery = debouncedSearch || search;
+  const filteredPosts = useMemo(() => searchInPosts(posts, activeQuery), [posts, activeQuery]);
 
   const recentPosts = useMemo(() => {
-    const list = search ? filteredPosts : posts;
+    const list = activeQuery.trim() ? filteredPosts : posts;
     return list.filter((p) => p.slug !== currentSlug).slice(0, 6);
-  }, [search, filteredPosts, posts, currentSlug]);
+  }, [activeQuery, filteredPosts, posts, currentSlug]);
 
   // Derive categories from actual posts so they always match what's rendered
   const categories = useMemo(() => {
@@ -62,9 +65,10 @@ export default function BlogSidebar({
           <SearchBar
             value={search}
             onChange={onSearchChange}
+            isLoading={isSearching}
             placeholder="Search blog posts..."
           />
-          {search && (
+          {activeQuery.trim() && !isSearching && (
             <p className="mt-2 text-xs text-muted">{filteredPosts.length} result(s)</p>
           )}
         </div>
@@ -106,7 +110,7 @@ export default function BlogSidebar({
       )}
 
       <div className="card p-5">
-        <h3 className="sidebar-heading">{search ? 'Search results' : 'Recent articles'}</h3>
+        <h3 className="sidebar-heading">{activeQuery.trim() ? 'Search results' : 'Recent articles'}</h3>
         <ul className="space-y-3">
           {recentPosts.length === 0 ? (
             <li className="text-sm text-muted">No articles found.</li>

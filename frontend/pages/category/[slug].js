@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import useDebouncedValue from '../../hooks/useDebouncedValue';
+import { useMemo } from 'react';
+import useDebouncedSearch from '../../hooks/useDebouncedSearch';
 import Layout from '../../components/Layout';
 import SearchBar from '../../components/SearchBar';
 import ToolCard from '../../components/ToolCard';
@@ -65,8 +65,7 @@ const CATEGORY_PAGES = {
 };
 
 export default function CategoryPage({ slug, page }) {
-  const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search, 250);
+  const { value: search, debouncedValue: debouncedSearch, setValue: setSearch, isSearching } = useDebouncedSearch();
   const { toolSettingsMap } = useSiteConfig();
 
   const categoryTools = useMemo(
@@ -119,14 +118,25 @@ export default function CategoryPage({ slug, page }) {
       </header>
 
       <section className="home-tools-panel mb-6">
-        <SearchBar value={search} onChange={setSearch} placeholder={`Search ${page.title.toLowerCase()}...`} />
-        <p className="text-sm text-muted">{filtered.length} tool(s) available</p>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          isLoading={isSearching}
+          placeholder={`Search ${page.title.toLowerCase()}...`}
+        />
+        <p className="text-sm text-muted">
+          {isSearching ? 'Searching…' : `${filtered.length} tool(s) available`}
+        </p>
       </section>
 
-      <section className="home-tools-grid">
-        {filtered.map((tool) => (
-          <ToolCard key={tool.slug} tool={tool} />
-        ))}
+      <section className="home-tools-grid" aria-busy={isSearching || undefined}>
+        {isSearching ? (
+          <div className="col-span-full py-12 text-center text-sm text-muted">Searching tools…</div>
+        ) : (
+          filtered.map((tool) => (
+            <ToolCard key={tool.slug} tool={tool} searchQuery={debouncedSearch} />
+          ))
+        )}
       </section>
     </Layout>
   );

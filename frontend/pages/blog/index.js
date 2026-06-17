@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/router';
-import useDebouncedValue from '../../hooks/useDebouncedValue';
+import useDebouncedSearch from '../../hooks/useDebouncedSearch';
 import Layout from '../../components/Layout';
 import BlogCard from '../../components/blog/BlogCard';
 import BlogSidebar from '../../components/blog/BlogSidebar';
@@ -36,8 +36,7 @@ function filterPosts(posts, search, category) {
 
 export default function BlogIndexPage({ posts = [], loadError = false }) {
   const router = useRouter();
-  const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search, 250);
+  const { value: search, debouncedValue: debouncedSearch, setValue: setSearch, isSearching } = useDebouncedSearch();
   const category = typeof router.query.category === 'string' ? router.query.category : '';
 
   const visiblePosts = useMemo(
@@ -74,7 +73,7 @@ export default function BlogIndexPage({ posts = [], loadError = false }) {
       )}
 
       <div className="grid gap-8 lg:grid-cols-3">
-        <section className="lg:col-span-2" aria-label="Blog articles">
+        <section className="lg:col-span-2" aria-label="Blog articles" aria-busy={isSearching || undefined}>
           {category && (
             <p className="mb-4 text-sm text-muted">
               Showing <strong className="text-heading">{category}</strong> · {visiblePosts.length} article(s)
@@ -85,7 +84,12 @@ export default function BlogIndexPage({ posts = [], loadError = false }) {
             </p>
           )}
 
-          {visiblePosts.length === 0 ? (
+          {isSearching ? (
+            <div className="card py-16 text-center">
+              <span className="mx-auto mb-4 block h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+              <p className="font-display text-lg font-semibold text-heading">Searching articles…</p>
+            </div>
+          ) : visiblePosts.length === 0 ? (
             <div className="card py-16 text-center">
               <p className="font-display text-lg font-semibold text-heading">
                 {loadError ? 'Unable to load articles' : 'No articles found'}
@@ -108,7 +112,9 @@ export default function BlogIndexPage({ posts = [], loadError = false }) {
         <BlogSidebar
           posts={posts}
           search={search}
+          debouncedSearch={debouncedSearch}
           onSearchChange={setSearch}
+          isSearching={isSearching}
           currentCategory={category}
           showSearch
         />

@@ -38,7 +38,7 @@ const posts = sandbox.module.exports.blogPosts.map((post) => ({
   status: 'published'
 }));
 
-const outDir = path.join(__dirname, '../prisma/seed-data');
+const outDir = path.join(__dirname, '../db/seed-data');
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'static-blogs.json'), JSON.stringify(posts, null, 2));
-console.log(`Wrote ${posts.length} posts to prisma/seed-data/static-blogs.json`);
+console.log(`Wrote ${posts.length} posts to db/seed-data/static-blogs.json`);

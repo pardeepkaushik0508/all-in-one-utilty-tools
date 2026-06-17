@@ -3,7 +3,7 @@
 nixPkgs = ["nodejs_20", "ffmpeg", "python3"]
 
 [phases.install]
-cmds = ["npm install", "npm run prisma:generate --workspace backend"]
+cmds = ["npm install"]
 
 [start]
 cmd = "bash scripts/start-railway.sh"

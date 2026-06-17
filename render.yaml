@@ -1,5 +1,8 @@
-# Render Blueprint — database + backend API + frontend
+# Render Blueprint — backend API + frontend
 # https://render.com/docs/blueprint-spec
+#
+# MongoDB: set DATABASE_URL in the Render dashboard to your MongoDB Atlas connection string.
+# Example: mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/utilitytools?retryWrites=true&w=majority
 
 services:
   - type: web
@@ -9,9 +12,7 @@ services:
     startCommand: bash scripts/start-backend.sh
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: aio-tools-db
-          property: connectionString
+        sync: false
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
@@ -38,9 +39,3 @@ services:
         value: https://aio-tools-backend.onrender.com
       - key: NEXT_PUBLIC_BACKEND_URL
         value: https://aio-tools-backend.onrender.com
-
-databases:
-  - name: aio-tools-db
-    plan: free
-    databaseName: allinoneutilitytools
-    user: pardeepkaushik

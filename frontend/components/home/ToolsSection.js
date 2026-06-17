@@ -6,7 +6,9 @@ import { toolCategories, tools } from '../../utils/tools';
 
 export default function ToolsSection({
   search,
+  debouncedSearch = '',
   onSearchChange,
+  isSearching = false,
   selectedCategory,
   onCategoryChange,
   filteredTools,
@@ -49,6 +51,7 @@ export default function ToolsSection({
         <SearchBar
           value={search}
           onChange={onSearchChange}
+          isLoading={isSearching}
           placeholder="Search tools by name or description..."
         />
         <CategoryFilter
@@ -58,8 +61,16 @@ export default function ToolsSection({
         />
       </div>
 
-      <div className="home-tools-results">
-        {filteredTools.length === 0 ? (
+      <div className="home-tools-results" aria-busy={isSearching || undefined}>
+        {isSearching ? (
+          <div className="home-empty-state" aria-live="polite">
+            <div className="home-empty-icon">
+              <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+            </div>
+            <p className="home-empty-title">Searching tools…</p>
+            <p className="home-empty-desc">Finding matches for your query.</p>
+          </div>
+        ) : filteredTools.length === 0 ? (
           <div className="home-empty-state">
             <div className="home-empty-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8">
@@ -83,7 +94,7 @@ export default function ToolsSection({
           <div className="home-tools-grid">
             {filteredTools.map((tool) => (
               <div key={tool.slug}>
-                <ToolCard tool={tool} searchQuery={search} />
+                <ToolCard tool={tool} searchQuery={debouncedSearch} />
               </div>
             ))}
           </div>

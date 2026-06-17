@@ -1,6 +1,15 @@
 const path = require('path');
 const fs = require('fs/promises');
-const { getPrisma } = require('../prisma/client');
+const { connectDb } = require('../db/connection');
+const {
+  CmsPage,
+  ToolSeoContent,
+  ToolSetting,
+  NavigationConfig,
+  MediaAsset,
+  ActivityLog,
+  Blog
+} = require('../db/models');
 const {
   createId,
   nowIso,
@@ -111,16 +120,16 @@ function getDefaultPages() {
 function mapPageRow(row) {
   if (!row) return null;
   return {
-    id: row.id,
+    id: row._id || row.id,
     slug: row.slug,
     title: row.title,
     content: row.content || {},
     sections: row.sections || [],
     seo: row.seo || {},
     status: row.status || 'published',
-    scheduledAt: row.scheduledAt ? row.scheduledAt.toISOString() : null,
+    scheduledAt: row.scheduledAt ? new Date(row.scheduledAt).toISOString() : null,
     revisions: row.revisions || [],
-    updatedAt: row.updatedAt.toISOString()
+    updatedAt: new Date(row.updatedAt).toISOString()
   };
 }
 
@@ -129,47 +138,46 @@ async function ensureMediaDir() {
 }
 
 async function ensureDefaultPages() {
-  const prisma = getPrisma();
+  await connectDb();
   const defaults = getDefaultPages();
   for (const page of Object.values(defaults)) {
-    await prisma.cmsPage.upsert({
-      where: { id: page.id },
-      create: {
-        id: page.id,
-        slug: page.slug,
-        title: page.title,
-        content: page.content,
-        sections: page.sections,
-        seo: page.seo,
-        status: page.status,
-        revisions: page.revisions,
-        updatedAt: new Date(page.updatedAt)
+    await CmsPage.findOneAndUpdate(
+      { _id: page.id },
+      {
+        $setOnInsert: {
+          _id: page.id,
+          slug: page.slug,
+          title: page.title,
+          content: page.content,
+          sections: page.sections,
+          seo: page.seo,
+          status: page.status,
+          revisions: page.revisions
+        }
       },
-      update: {}
-    });
+      { upsert: true }
+    );
   }
 }
 
 async function logActivity(action, details = {}) {
   try {
-    const prisma = getPrisma();
-    await prisma.activityLog.create({
-      data: {
-        id: createId('log'),
-        action,
-        details,
-        createdAt: new Date()
-      }
+    await connectDb();
+    await ActivityLog.create({
+      _id: createId('log'),
+      action,
+      details,
+      createdAt: new Date()
     });
-    const count = await prisma.activityLog.count();
+    const count = await ActivityLog.countDocuments();
     if (count > MAX_ACTIVITY) {
-      const oldest = await prisma.activityLog.findMany({
-        orderBy: { createdAt: 'asc' },
-        take: count - MAX_ACTIVITY,
-        select: { id: true }
-      });
+      const oldest = await ActivityLog.find()
+        .sort({ createdAt: 1 })
+        .limit(count - MAX_ACTIVITY)
+        .select('_id')
+        .lean();
       if (oldest.length) {
-        await prisma.activityLog.deleteMany({ where: { id: { in: oldest.map((r) => r.id) } } });
+        await ActivityLog.deleteMany({ _id: { $in: oldest.map((r) => r._id) } });
       }
     }
   } catch (error) {
@@ -178,18 +186,18 @@ async function logActivity(action, details = {}) {
 }
 
 async function readContentStore() {
-  const prisma = getPrisma();
+  await connectDb();
   await ensureDefaultPages();
 
   const [pages, toolSeoRows, toolSettings, navigationRow, media, activityLog, cacheVersion, blogCount] = await Promise.all([
-    prisma.cmsPage.findMany(),
-    prisma.toolSeoContent.findMany(),
-    prisma.toolSetting.findMany(),
-    prisma.navigationConfig.findUnique({ where: { id: 'default' } }),
-    prisma.mediaAsset.findMany({ orderBy: { createdAt: 'desc' } }),
-    prisma.activityLog.findMany({ orderBy: { createdAt: 'desc' }, take: MAX_ACTIVITY }),
+    CmsPage.find().lean(),
+    ToolSeoContent.find().lean(),
+    ToolSetting.find().lean(),
+    NavigationConfig.findById('default').lean(),
+    MediaAsset.find().sort({ createdAt: -1 }).lean(),
+    ActivityLog.find().sort({ createdAt: -1 }).limit(MAX_ACTIVITY).lean(),
     getCacheVersionValue(),
-    prisma.blog.count()
+    Blog.countDocuments()
   ]);
 
   const tools = {};
@@ -204,7 +212,7 @@ async function readContentStore() {
 
   const pagesMap = {};
   pages.forEach((row) => {
-    pagesMap[row.id] = mapPageRow(row);
+    pagesMap[row._id] = mapPageRow(row);
   });
 
   return {
@@ -215,7 +223,7 @@ async function readContentStore() {
     navigation: navigationRow?.data || DEFAULT_NAVIGATION,
     media: media.map(mapMediaRow),
     activityLog: activityLog.map((row) => ({
-      id: row.id,
+      id: row._id,
       action: row.action,
       details: row.details || {},
       createdAt: row.createdAt.toISOString()
@@ -227,7 +235,7 @@ async function readContentStore() {
 
 function mapMediaRow(row) {
   return {
-    id: row.id,
+    id: row._id || row.id,
     filename: row.filename,
     storedName: row.storedName,
     mimeType: row.mimeType,
@@ -235,14 +243,14 @@ function mapMediaRow(row) {
     url: row.url,
     storage: row.storage,
     localPath: row.localPath,
-    createdAt: row.createdAt.toISOString()
+    createdAt: new Date(row.createdAt).toISOString()
   };
 }
 
 function mapToolSettingRow(row) {
   return {
-    id: row.slug,
-    slug: row.slug,
+    id: row.slug || row._id,
+    slug: row.slug || row._id,
     toolName: row.toolName,
     enabled: row.enabled,
     featured: row.featured,
@@ -251,10 +259,10 @@ function mapToolSettingRow(row) {
     hiddenFromHomepage: row.hiddenFromHomepage,
     hiddenFromNavigation: row.hiddenFromNavigation,
     order: row.order,
-    scheduledEnableAt: row.scheduledEnableAt ? row.scheduledEnableAt.toISOString() : null,
-    scheduledDisableAt: row.scheduledDisableAt ? row.scheduledDisableAt.toISOString() : null,
+    scheduledEnableAt: row.scheduledEnableAt ? new Date(row.scheduledEnableAt).toISOString() : null,
+    scheduledDisableAt: row.scheduledDisableAt ? new Date(row.scheduledDisableAt).toISOString() : null,
     maintenanceMessage: row.maintenanceMessage,
-    updatedAt: row.updatedAt.toISOString()
+    updatedAt: new Date(row.updatedAt).toISOString()
   };
 }
 
@@ -285,16 +293,16 @@ function pushRevision(page, actor = 'admin') {
 
 async function listPages({ includeDrafts = false } = {}) {
   await ensureDefaultPages();
-  const prisma = getPrisma();
-  const pages = await prisma.cmsPage.findMany();
+  await connectDb();
+  const pages = await CmsPage.find().lean();
   const mapped = pages.map(mapPageRow);
   return includeDrafts ? mapped : mapped.filter((p) => p.status === 'published' || !p.status);
 }
 
 async function getPageById(id) {
   await ensureDefaultPages();
-  const prisma = getPrisma();
-  const row = await prisma.cmsPage.findUnique({ where: { id } });
+  await connectDb();
+  const row = await CmsPage.findById(id).lean();
   return mapPageRow(row);
 }
 
@@ -305,12 +313,12 @@ async function getPageBySlug(slug) {
 
 async function createPage(payload, actor = 'admin') {
   validatePagePayload(payload);
-  const prisma = getPrisma();
+  await connectDb();
   const id = payload.id || createId('page');
-  const existing = await prisma.cmsPage.findUnique({ where: { id } });
+  const existing = await CmsPage.findById(id).lean();
   if (existing) throw Object.assign(new Error('Page already exists.'), { status: 409 });
 
-  const duplicate = await prisma.cmsPage.findUnique({ where: { slug: payload.slug } });
+  const duplicate = await CmsPage.findOne({ slug: payload.slug }).lean();
   if (duplicate) throw Object.assign(new Error('Page slug already in use.'), { status: 409 });
 
   const page = {
@@ -320,19 +328,16 @@ async function createPage(payload, actor = 'admin') {
     updatedAt: nowIso()
   };
 
-  await prisma.cmsPage.create({
-    data: {
-      id: page.id,
-      slug: page.slug,
-      title: page.title,
-      content: page.content,
-      sections: page.sections,
-      seo: page.seo,
-      status: page.status,
-      scheduledAt: page.scheduledAt ? new Date(page.scheduledAt) : null,
-      revisions: page.revisions,
-      updatedAt: new Date()
-    }
+  await CmsPage.create({
+    _id: page.id,
+    slug: page.slug,
+    title: page.title,
+    content: page.content,
+    sections: page.sections,
+    seo: page.seo,
+    status: page.status,
+    scheduledAt: page.scheduledAt ? new Date(page.scheduledAt) : null,
+    revisions: page.revisions
   });
 
   await bumpCacheVersion();
@@ -341,8 +346,8 @@ async function createPage(payload, actor = 'admin') {
 }
 
 async function updatePage(id, payload, actor = 'admin') {
-  const prisma = getPrisma();
-  const existing = await prisma.cmsPage.findUnique({ where: { id } });
+  await connectDb();
+  const existing = await CmsPage.findById(id).lean();
   if (!existing) throw Object.assign(new Error('Page not found.'), { status: 404 });
   validatePagePayload({ ...mapPageRow(existing), ...payload });
 
@@ -355,19 +360,15 @@ async function updatePage(id, payload, actor = 'admin') {
     updatedAt: nowIso()
   };
 
-  await prisma.cmsPage.update({
-    where: { id },
-    data: {
-      slug: updated.slug,
-      title: updated.title,
-      content: updated.content,
-      sections: updated.sections,
-      seo: updated.seo,
-      status: updated.status,
-      scheduledAt: updated.scheduledAt ? new Date(updated.scheduledAt) : null,
-      revisions: updated.revisions,
-      updatedAt: new Date()
-    }
+  await CmsPage.findByIdAndUpdate(id, {
+    slug: updated.slug,
+    title: updated.title,
+    content: updated.content,
+    sections: updated.sections,
+    seo: updated.seo,
+    status: updated.status,
+    scheduledAt: updated.scheduledAt ? new Date(updated.scheduledAt) : null,
+    revisions: updated.revisions
   });
 
   await bumpCacheVersion();
@@ -376,22 +377,22 @@ async function updatePage(id, payload, actor = 'admin') {
 }
 
 async function deletePage(id, actor = 'admin') {
-  const prisma = getPrisma();
-  const existing = await prisma.cmsPage.findUnique({ where: { id } });
+  await connectDb();
+  const existing = await CmsPage.findById(id).lean();
   if (!existing) throw Object.assign(new Error('Page not found.'), { status: 404 });
   const protectedIds = ['home', 'about', 'contact', 'footer', 'header'];
   if (protectedIds.includes(id)) {
     throw Object.assign(new Error('Built-in pages cannot be deleted.'), { status: 400 });
   }
-  await prisma.cmsPage.delete({ where: { id } });
+  await CmsPage.findByIdAndDelete(id);
   await bumpCacheVersion();
   await logActivity('page.delete', { id, slug: existing.slug, actor });
   return { deleted: true, id };
 }
 
 async function restorePageRevision(id, revisionId, actor = 'admin') {
-  const prisma = getPrisma();
-  const existing = await prisma.cmsPage.findUnique({ where: { id } });
+  await connectDb();
+  const existing = await CmsPage.findById(id).lean();
   if (!existing) throw Object.assign(new Error('Page not found.'), { status: 404 });
 
   const page = mapPageRow(existing);
@@ -401,17 +402,13 @@ async function restorePageRevision(id, revisionId, actor = 'admin') {
   pushRevision(page, actor);
   Object.assign(page, revision.page, { updatedAt: nowIso() });
 
-  await prisma.cmsPage.update({
-    where: { id },
-    data: {
-      title: page.title,
-      content: page.content,
-      sections: page.sections,
-      seo: page.seo,
-      status: page.status,
-      revisions: page.revisions,
-      updatedAt: new Date()
-    }
+  await CmsPage.findByIdAndUpdate(id, {
+    title: page.title,
+    content: page.content,
+    sections: page.sections,
+    seo: page.seo,
+    status: page.status,
+    revisions: page.revisions
   });
 
   await bumpCacheVersion();
@@ -451,8 +448,8 @@ function applyScheduledToolState(setting) {
 }
 
 async function listToolSettings(catalog = []) {
-  const prisma = getPrisma();
-  const rows = await prisma.toolSetting.findMany();
+  await connectDb();
+  const rows = await ToolSetting.find().lean();
   const map = {};
   rows.forEach((row) => {
     map[row.slug] = mapToolSettingRow(row);
@@ -466,14 +463,14 @@ async function listToolSettings(catalog = []) {
 }
 
 async function getToolSetting(slug) {
-  const prisma = getPrisma();
-  const row = await prisma.toolSetting.findUnique({ where: { slug } });
+  await connectDb();
+  const row = await ToolSetting.findById(slug).lean();
   return row ? applyScheduledToolState(mapToolSettingRow(row)) : null;
 }
 
 async function saveToolSetting(slug, payload, actor = 'admin') {
-  const prisma = getPrisma();
-  const existing = await prisma.toolSetting.findUnique({ where: { slug } });
+  await connectDb();
+  const existing = await ToolSetting.findById(slug).lean();
   const merged = {
     ...(existing ? mapToolSettingRow(existing) : { id: slug, slug, toolName: slug }),
     ...payload,
@@ -482,38 +479,27 @@ async function saveToolSetting(slug, payload, actor = 'admin') {
     updatedAt: nowIso()
   };
 
-  await prisma.toolSetting.upsert({
-    where: { slug },
-    create: {
-      slug,
-      toolName: merged.toolName,
-      enabled: merged.enabled !== false,
-      featured: merged.featured === true,
-      maintenanceMode: merged.maintenanceMode === true,
-      hiddenFromSearch: merged.hiddenFromSearch === true,
-      hiddenFromHomepage: merged.hiddenFromHomepage === true,
-      hiddenFromNavigation: merged.hiddenFromNavigation === true,
-      order: merged.order ?? 0,
-      scheduledEnableAt: merged.scheduledEnableAt ? new Date(merged.scheduledEnableAt) : null,
-      scheduledDisableAt: merged.scheduledDisableAt ? new Date(merged.scheduledDisableAt) : null,
-      maintenanceMessage: merged.maintenanceMessage,
-      updatedAt: new Date()
+  await ToolSetting.findOneAndUpdate(
+    { slug },
+    {
+      $set: {
+        _id: slug,
+        slug,
+        toolName: merged.toolName,
+        enabled: merged.enabled !== false,
+        featured: merged.featured === true,
+        maintenanceMode: merged.maintenanceMode === true,
+        hiddenFromSearch: merged.hiddenFromSearch === true,
+        hiddenFromHomepage: merged.hiddenFromHomepage === true,
+        hiddenFromNavigation: merged.hiddenFromNavigation === true,
+        order: merged.order ?? 0,
+        scheduledEnableAt: merged.scheduledEnableAt ? new Date(merged.scheduledEnableAt) : null,
+        scheduledDisableAt: merged.scheduledDisableAt ? new Date(merged.scheduledDisableAt) : null,
+        maintenanceMessage: merged.maintenanceMessage
+      }
     },
-    update: {
-      toolName: merged.toolName,
-      enabled: merged.enabled !== false,
-      featured: merged.featured === true,
-      maintenanceMode: merged.maintenanceMode === true,
-      hiddenFromSearch: merged.hiddenFromSearch === true,
-      hiddenFromHomepage: merged.hiddenFromHomepage === true,
-      hiddenFromNavigation: merged.hiddenFromNavigation === true,
-      order: merged.order ?? 0,
-      scheduledEnableAt: merged.scheduledEnableAt ? new Date(merged.scheduledEnableAt) : null,
-      scheduledDisableAt: merged.scheduledDisableAt ? new Date(merged.scheduledDisableAt) : null,
-      maintenanceMessage: merged.maintenanceMessage,
-      updatedAt: new Date()
-    }
-  });
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
 
   await bumpCacheVersion();
   await logActivity('tool.update', { slug, ...payload, actor });
@@ -538,22 +524,22 @@ async function reorderTools(orderedSlugs = [], actor = 'admin') {
 }
 
 async function getNavigation() {
-  const prisma = getPrisma();
-  const row = await prisma.navigationConfig.findUnique({ where: { id: 'default' } });
+  await connectDb();
+  const row = await NavigationConfig.findById('default').lean();
   const base = row?.data || DEFAULT_NAVIGATION;
   return ensureFooterLinks({ ...DEFAULT_NAVIGATION, ...base, footerBrand: base.footerBrand || DEFAULT_NAVIGATION.footerBrand, cta: base.cta || DEFAULT_NAVIGATION.cta, footer: base.footer || DEFAULT_NAVIGATION.footer, header: base.header || DEFAULT_NAVIGATION.header });
 }
 
 async function saveNavigation(payload, actor = 'admin') {
-  const prisma = getPrisma();
+  await connectDb();
   const current = await getNavigation();
   const next = { ...DEFAULT_NAVIGATION, ...current, ...payload };
 
-  await prisma.navigationConfig.upsert({
-    where: { id: 'default' },
-    create: { id: 'default', data: next, updatedAt: new Date() },
-    update: { data: next, updatedAt: new Date() }
-  });
+  await NavigationConfig.findOneAndUpdate(
+    { _id: 'default' },
+    { $set: { _id: 'default', data: next } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
 
   await bumpCacheVersion();
   await logActivity('navigation.update', { actor });
@@ -561,32 +547,30 @@ async function saveNavigation(payload, actor = 'admin') {
 }
 
 async function listMedia() {
-  const prisma = getPrisma();
-  const rows = await prisma.mediaAsset.findMany({ orderBy: { createdAt: 'desc' } });
+  await connectDb();
+  const rows = await MediaAsset.find().sort({ createdAt: -1 }).lean();
   return rows.map(mapMediaRow);
 }
 
 async function addMediaRecord(record, actor = 'admin') {
   await ensureMediaDir();
-  const prisma = getPrisma();
+  await connectDb();
   const item = {
     id: createId('media'),
     ...record,
     createdAt: nowIso()
   };
 
-  await prisma.mediaAsset.create({
-    data: {
-      id: item.id,
-      filename: item.filename,
-      storedName: item.storedName,
-      mimeType: item.mimeType,
-      size: item.size,
-      url: item.url,
-      storage: item.storage,
-      localPath: item.localPath,
-      createdAt: new Date()
-    }
+  await MediaAsset.create({
+    _id: item.id,
+    filename: item.filename,
+    storedName: item.storedName,
+    mimeType: item.mimeType,
+    size: item.size,
+    url: item.url,
+    storage: item.storage,
+    localPath: item.localPath,
+    createdAt: new Date()
   });
 
   await logActivity('media.upload', { id: item.id, filename: item.filename, actor });
@@ -594,11 +578,11 @@ async function addMediaRecord(record, actor = 'admin') {
 }
 
 async function deleteMedia(id, actor = 'admin') {
-  const prisma = getPrisma();
-  const item = await prisma.mediaAsset.findUnique({ where: { id } });
+  await connectDb();
+  const item = await MediaAsset.findById(id).lean();
   if (!item) throw Object.assign(new Error('Media not found.'), { status: 404 });
 
-  await prisma.mediaAsset.delete({ where: { id } });
+  await MediaAsset.findByIdAndDelete(id);
   if (item.localPath) {
     await fs.unlink(item.localPath).catch(() => {});
   }
@@ -607,13 +591,13 @@ async function deleteMedia(id, actor = 'admin') {
 }
 
 async function getActivityLog(limit = 50) {
-  const prisma = getPrisma();
-  const rows = await prisma.activityLog.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: limit
-  });
+  await connectDb();
+  const rows = await ActivityLog.find()
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
   return rows.map((row) => ({
-    id: row.id,
+    id: row._id,
     action: row.action,
     details: row.details || {},
     createdAt: row.createdAt.toISOString()
@@ -642,16 +626,16 @@ function lastNDays(count) {
 }
 
 async function getDashboardStats(catalogToolCount = 0) {
-  const prisma = getPrisma();
+  await connectDb();
   await ensureDefaultPages();
 
   const [pages, toolSettings, activityLog, seoToolCount, blogCount, mediaCount, cacheVersion] = await Promise.all([
-    prisma.cmsPage.findMany(),
-    prisma.toolSetting.findMany(),
-    prisma.activityLog.findMany({ orderBy: { createdAt: 'desc' }, take: MAX_ACTIVITY }),
-    prisma.toolSeoContent.count(),
-    prisma.blog.count(),
-    prisma.mediaAsset.count(),
+    CmsPage.find().lean(),
+    ToolSetting.find().lean(),
+    ActivityLog.find().sort({ createdAt: -1 }).limit(MAX_ACTIVITY).lean(),
+    ToolSeoContent.countDocuments(),
+    Blog.countDocuments(),
+    MediaAsset.countDocuments(),
     getCacheVersionValue()
   ]);
 
@@ -725,7 +709,7 @@ async function getDashboardStats(catalogToolCount = 0) {
       { name: 'Media', count: mediaCount }
     ],
     recentActivity: activityLog.slice(0, 12).map((row) => ({
-      id: row.id,
+      id: row._id,
       action: row.action,
       details: row.details || {},
       createdAt: row.createdAt.toISOString()

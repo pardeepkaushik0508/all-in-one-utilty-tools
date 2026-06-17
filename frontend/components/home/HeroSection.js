@@ -25,7 +25,7 @@ function StatIcon({ path }) {
   );
 }
 
-export default function HeroSection({ search, onSearchChange, pageContent = null }) {
+export default function HeroSection({ search, onSearchChange, isSearching = false, pageContent = null }) {
   const hero = getSectionContent(pageContent, 'hero', {
     badge: `${getToolCountLabel()} tools · Free forever · No sign-up`,
     title: 'Every tool you need.',
@@ -71,6 +71,7 @@ export default function HeroSection({ search, onSearchChange, pageContent = null
             <SearchBar
               value={search}
               onChange={onSearchChange}
+              isLoading={isSearching}
               placeholder={`Search ${getToolCountLabel()} tools...`}
             />
             <div className="home-hero-quick">

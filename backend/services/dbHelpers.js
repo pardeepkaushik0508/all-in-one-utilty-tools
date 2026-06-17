@@ -1,64 +1,63 @@
-const crypto = require('crypto');
-const { getPrisma } = require('../prisma/client');
-
-function createId(prefix = 'id') {
-  return `${prefix}-${crypto.randomBytes(8).toString('hex')}`;
-}
-
-function nowIso() {
-  return new Date().toISOString();
-}
-
-function slugify(value = '') {
-  return String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
+const { connectDb } = require('../db/connection');
+const { SiteMeta } = require('../db/models');
+const { createId, nowIso, slugify } = require('../utils/ids');
 
 function isDbUnavailable(error) {
+  const name = String(error?.name || '');
   const code = String(error?.code || '');
-  return ['P1001', 'P1002', 'P1003', 'P1008', 'P1017', 'P2024'].includes(code);
+  return (
+    ['MongoServerSelectionError', 'MongoNetworkError', 'MongooseServerSelectionError'].includes(name) ||
+    code === 'ECONNREFUSED' ||
+    code === 'ENOTFOUND'
+  );
+}
+
+function isDuplicateKeyError(error) {
+  return error?.code === 11000;
+}
+
+function isNotFoundError(error) {
+  return error?.status === 404;
 }
 
 function wrapDbError(error, message = 'Database operation failed.') {
-  if (!process.env.DATABASE_URL) {
+  const uri = process.env.DATABASE_URL || process.env.MONGODB_URI;
+  if (!uri) {
     return Object.assign(
-      new Error('DATABASE_URL is not set on the server. Add your PostgreSQL connection string to the backend environment.'),
+      new Error('DATABASE_URL is not set on the server. Add your MongoDB connection string to the backend environment.'),
       { status: 503 }
     );
   }
   if (isDbUnavailable(error)) {
     return Object.assign(
-      new Error(
-        'Database connection failed. Check DATABASE_URL on the Render backend service (use the internal DB URL from the Render Postgres dashboard).'
-      ),
+      new Error('Database connection failed. Check DATABASE_URL (MongoDB URI) in your backend environment variables.'),
       { status: 503 }
     );
   }
   if (error?.status) return error;
-  const detail = error?.message && !String(error.message).includes('prisma')
+  const detail = error?.message && !String(error.message).includes('mongoose')
     ? `: ${error.message}`
     : '';
   return Object.assign(new Error(`${message}${detail}`), { status: 500, cause: error });
 }
 
+async function ensureDb() {
+  await connectDb();
+}
+
 async function getSiteMeta(key, fallback = null) {
-  const prisma = getPrisma();
-  const row = await prisma.siteMeta.findUnique({ where: { key } });
+  await ensureDb();
+  const row = await SiteMeta.findOne({ key }).lean();
   return row ? row.value : fallback;
 }
 
 async function setSiteMeta(key, value) {
-  const prisma = getPrisma();
-  return prisma.siteMeta.upsert({
-    where: { key },
-    create: { key, value, updatedAt: new Date() },
-    update: { value, updatedAt: new Date() }
-  });
+  await ensureDb();
+  return SiteMeta.findOneAndUpdate(
+    { key },
+    { $set: { _id: key, key, value } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
 }
 
 async function bumpCacheVersion() {
@@ -77,7 +76,10 @@ module.exports = {
   nowIso,
   slugify,
   isDbUnavailable,
+  isDuplicateKeyError,
+  isNotFoundError,
   wrapDbError,
+  ensureDb,
   getSiteMeta,
   setSiteMeta,
   bumpCacheVersion,
